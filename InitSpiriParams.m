@@ -2,7 +2,7 @@ function []= InitSpiriParams()
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
 
-global g m I Jr prop_loc Kt A d_air Cd V Tv Kp Kq Kr Dt alpha beta Ixx Iyy Izz;
+global g m I Jr prop_loc Kt A d_air Cd V Tv Kp Kq Kr Dt alpha beta Ixx Iyy Izz CM;
 
 g = 9.81;
 
@@ -31,6 +31,7 @@ Jr = 0.02392; %Propeller moment of inertia about rotation axis, kg m^2
 load('locations');
 
 prop_loc = [dp1,dp2,dp3,dp4];
+CM = CoM;
 
 %Thrust coefficient
 Kt = 0.1;

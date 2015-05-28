@@ -3,8 +3,8 @@ function [ ] =SpiriVisualization( t,X )
 %   Detailed explanation goes here
 figure('units','normalized','outerposition',[0 0 1 1])
 % figure()
-% [sx,sy,sz] = sphere;
-% sr = 0.11 + 0.2;
+[sx,sy,sz] = sphere;
+sr = 0.11 + 0.2;
 
 p1 = [0.08;0.0115;0];
 p2 = [0;0.0575;0];
@@ -60,8 +60,11 @@ for i = 1:size(t,1)
    plotCircle3D(c1_p,normal,0.11);
    plotCircle3D(c2_p,normal,0.11);
    plotCircle3D(c3_p,normal,0.11);
-   plotCircle3D(c4_p,normal,0.11);   
-%    surf(sx*sr+T(1),sy*sr+T(2),sz*sr+T(3),'FaceColor','y','FaceAlpha',0.2,'EdgeAlpha',0.2);
+   plotCircle3D(c4_p,normal,0.11);
+   
+   surf(sx*sr+T(1),sy*sr+T(2),sz*sr+T(3),'FaceColor','y','FaceAlpha',0.2,'EdgeAlpha',0.2);
+   fill3([4 4 4 4]',[-3 8 8 -3]',[-3 -3 8 8]','r','FaceAlpha',0.4);
+   
    xpts = [po_p px_p];
    ypts = [po_p py_p];
    zpts = [po_p pz_p];
@@ -87,6 +90,7 @@ for i = 1:size(t,1)
    ylabel('Y');
    zlabel('Z');
    title(strcat('t = ',num2str(t(i),'%.2f'),' s'));
+   view([0 0]);
    grid on;
    drawnow;
 %    frame = getframe;

@@ -8,10 +8,8 @@ ref_z = pos(2,3);
 ref_head = head(2);
 
 for i = 2:size(t)
-    disp(t(i));
-    disp(t(i-1));
-    disp(dt);
-    steps = (t(i)-t(i-1))/dt
+
+    steps = (t(i)-t(i-1))/dt;
     deltax = (pos(i,1) - pos(i-1,1))/steps;
     deltay = (pos(i,2) - pos(i-1,2))/steps;
     deltaz = (pos(i,3) - pos(i-1,3))/steps;
@@ -49,9 +47,5 @@ for i = 2:size(t)
 
     
 end
-size(ref_x)
-size(ref_y)
-size(ref_z)
-size(ref_head)
 ref_posn = [ref_x ref_y ref_z];
 

@@ -43,7 +43,7 @@ flag_c = 0;
 index = 1;
 index_defl = 1;
 for i = t0:dt:tf-dt
-%     display(i)
+    display(i)
     %Determine if Contact has occured
     % determine contact pt from middle section of sphere
     % track penetration of contact pt
@@ -80,16 +80,14 @@ for i = t0:dt:tf-dt
         T = [Xtotal(end,7);Xtotal(end,8);-Xtotal(end,9)];
         
         pW_contact = R'*pB_contact + T;
-        defl_contact = sum((pW_contact - pW_wall).^2);
-        defl(index_defl) = defl_contact;
+        defl(index_defl) = sum((pW_contact - pW_wall).^2);
         defl_time(index_defl) = i;
         index_defl = index_defl + 1;
     else
         vB_normal = [];
         pB_contact = [];
-        defl_contact = [];
         if flag_c == 1 
-            flag_c = 0
+            flag_c = 0;
         end
     end
     
@@ -114,7 +112,7 @@ for i = t0:dt:tf-dt
     [signal_c3,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev);
     
     %Use Control Signal to propagate dynamics
-    [t,X] = ode45(@(t, X) SpiriMotion(t,X,signal_c3,flag_c,vB_normal,pB_contact,defl_contact),[i i+dt],x0_step);
+    [t,X] = ode45(@(t, X) SpiriMotion(t,X,signal_c3,flag_c,vB_normal,pB_contact),[i i+dt],x0_step);
 
     Xtotal = [Xtotal;X(end,:)];
     ttotal = [ttotal;t(end)];    
@@ -134,9 +132,6 @@ legend('x','y','-z','yaw');
 subplot(2,2,4);
 plot(ttotal,Xtotal(:,10),ttotal,Xtotal(:,11),ttotal,Xtotal(:,12),ttotal,Xtotal(:,13));
 legend('q_0','q_1','q_2','q_3');
-
-figure();
-plot(defl_time,defl);
 
 
 % SpiriVisualization(ttotal,Xtotal);
