@@ -2,6 +2,8 @@ clear all;
 % close all;
 clc;
 
+global CM
+
 %%Spiri System Parameters
 InitSpiriParams;
 r_ribbon = 0.31;
@@ -68,7 +70,7 @@ for i = t0:dt:tf-dt
             pB_contact = [xB_ribbon(min_idx);yB_ribbon(min_idx);zB_ribbon(min_idx)];
             pW_wall = [4;pW_ribbon(2,min_idx);pW_ribbon(3,min_idx)];
             
-            vB_normal = [0;0;0] - pB_contact;
+            vB_normal = CM - pB_contact;
             vB_normal = vB_normal/norm(vB_normal);
             
             flag_c = 1
@@ -87,8 +89,12 @@ for i = t0:dt:tf-dt
     else
         vB_normal = [];
         pB_contact = [];
-        defl_contact = [];
+        defl_contact = [];  
+        defl_time(index_defl) = i;
+        defl(index_defl) = 0;
+        index_defl = index_defl + 1;
         if flag_c == 1 
+            
             flag_c = 0
         end
     end

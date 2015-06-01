@@ -8,9 +8,6 @@ sx = sx(9:13,:);
 sy = sy(9:13,:);
 sz = sz(9:13,:);
 sr = 0.11 + 0.2;
-sxR = zeros(size(sx));
-syR = zeros(size(sy));
-szR = zeros(size(sz));
 
 p1 = [0.08;0.0115;0];
 p2 = [0;0.0575;0];
@@ -69,17 +66,16 @@ for i = 1:size(t,1)
    plotCircle3D(c3_p,normal,0.11);
    plotCircle3D(c4_p,normal,0.11);
    
-   
-   for j = 1:size(sx,1)
-       for k = 1:size(sx,2)
-           sxR(j,k) = R(:,1)'*[sx(j,k);sy(j,k);sz(j,k)];
-           syR(j,k) = R(:,2)'*[sx(j,k);sy(j,k);sz(j,k)];
-           szR(j,k) = R(:,3)'*[sx(j,k);sy(j,k);sz(j,k)];       
+   for j = size(sx,1)
+       for k = size(sx,2)
+           sxR(j,k = R(:,1)'*[sx(j,k)
+           T(:,3)'*x(1:3)
+           
        end
    end  
    
-   surf(sxR*sr+T(1),syR*sr+T(2),szR*sr+T(3),'FaceColor','y','FaceAlpha',0.2,'EdgeAlpha',0.2);
-%    surf(sx*sr+T(1),sy*sr+T(2),sz*sr+T(3),'FaceColor','y','FaceAlpha',0.2,'EdgeAlpha',0.2);
+   
+   surf(sx*sr+T(1),sy*sr+T(2),sz*sr+T(3),'FaceColor','y','FaceAlpha',0.2,'EdgeAlpha',0.2);
    fill3([4 4 4 4]',[-3 8 8 -3]',[-3 -3 8 8]','r','FaceAlpha',0.4);
    
    xpts = [po_p px_p];
