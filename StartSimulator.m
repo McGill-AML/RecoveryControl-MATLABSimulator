@@ -73,6 +73,8 @@ for i = t0:dt:tf-dt
             vB_normal = CM - pB_contact;
             vB_normal = vB_normal/norm(vB_normal);
             
+            vi_contact = sqrt(sum(Xtotal(end,1:3).^2));
+            
             flag_c = 1
         end             
        
@@ -85,14 +87,17 @@ for i = t0:dt:tf-dt
         defl_contact = sum((pW_contact - pW_wall).^2);
         defl(index_defl) = defl_contact;
         defl_time(index_defl) = i;
-        index_defl = index_defl + 1;
+%         index_defl = index_defl + 1;
+        defl_prev = defl(index_defl-1);
     else
         vB_normal = [];
         pB_contact = [];
         defl_contact = [];  
         defl_time(index_defl) = i;
         defl(index_defl) = 0;
-        index_defl = index_defl + 1;
+%         index_defl = index_defl + 1;
+        vi_contact = 0;
+        defl_prev = 0;
         if flag_c == 1 
             
             flag_c = 0
@@ -119,30 +124,26 @@ for i = t0:dt:tf-dt
     end
     [signal_c3,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev);
     
+    %Find contact Force using Hung & Crossley's contact model
+    e_ribbon = 0.5;
+    k_ribbon = 1*10^5; %[N/m]
+    n_ribbon = 1.5;
+    
+    %lambda from Herbert & McWhannell
+    lambda_ribbon = 6*(1-e_ribbon)/(((2*e_ribbon-1)^2+3)*vi_contact);
+    
+    Fc_mag = abs(defl_contact^n_ribbon*(lambda_ribbon*(defl_contact-defl_prev)/dt + k_ribbon));
+ 
+    
     %Use Control Signal to propagate dynamics
-    [t,X] = ode45(@(t, X) SpiriMotion(t,X,signal_c3,flag_c,vB_normal,pB_contact,defl_contact),[i i+dt],x0_step);
+    [t,X] = ode45(@(t, X) SpiriMotion(t,X,signal_c3,flag_c,vB_normal,pB_contact,Fc_mag),[i i+dt],x0_step);
 
     Xtotal = [Xtotal;X(end,:)];
     ttotal = [ttotal;t(end)];    
-
+    index_defl = index_defl + 1;
 end
 
-figure();
-subplot(2,2,1);
-plot(ttotal,Xtotal(:,1),ttotal,Xtotal(:,2),ttotal,Xtotal(:,3));
-legend('u','v','w');
-subplot(2,2,2);
-plot(ttotal,Xtotal(:,4),ttotal,Xtotal(:,5),ttotal,Xtotal(:,6));
-legend('p','q','r');
-subplot(2,2,3);
-plot(ttotal,Xtotal(:,7),ttotal,Xtotal(:,8),ttotal,-Xtotal(:,9),ttotal,Xtotal(:,16));
-legend('x','y','-z','yaw');
-subplot(2,2,4);
-plot(ttotal,Xtotal(:,10),ttotal,Xtotal(:,11),ttotal,Xtotal(:,12),ttotal,Xtotal(:,13));
-legend('q_0','q_1','q_2','q_3');
-
-figure();
-plot(defl_time,defl);
+Graphs( ttotal,Xtotal,defl_time,defl );
 
 
 % SpiriVisualization(ttotal,Xtotal);

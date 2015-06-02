@@ -1,4 +1,4 @@
-function [ dx ] = SpiriMotion(t,x,signal_c,flag_c,vB_normal,pB_contact,defl)
+function [ dx ] = SpiriMotion(t,x,signal_c,flag_c,vB_normal,pB_contact,Fc_mag)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -13,7 +13,8 @@ prop_speed = signal_c(1:4);
 prop_accel = signal_c(5:8);
 
 if flag_c == 1
-    Fc_mag = 10000*defl^1.5;
+
+%     Fc_mag = 10000*defl^1.5;
     Fc = [Fc_mag*(vB_normal'*[1;0;0]);Fc_mag*(vB_normal'*[0;1;0]);Fc_mag*(vB_normal'*[0;0;1])];
     rc = pB_contact - CM;
     Mc = cross(rc,Fc);
