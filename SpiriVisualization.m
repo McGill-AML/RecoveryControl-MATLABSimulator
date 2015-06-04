@@ -1,4 +1,4 @@
-function [ ] =SpiriVisualization( t,X,Pc )
+function [ ] =SpiriVisualization( t,X,Pc,Pc_wall )
 
 global prop_loc
 %UNTITLED6 Summary of this function goes here
@@ -66,6 +66,7 @@ for i = 1:size(t,1)-1
    hold on;
    plot3(T(1),T(2),T(3),'rx','MarkerSize',8);
    plot3(Pc(1,i),Pc(2,i),Pc(3,i),'rx','MarkerSize',8);
+   plot3(Pc_wall(1,i),Pc_wall(2,i),Pc_wall(3,i),'bx','MarkerSize',10);
    normal = cross(p1_p-p2_p,p2_p-p3_p);
    plotCircle3D(c1_p,normal,0.11);
    plotCircle3D(c2_p,normal,0.11);

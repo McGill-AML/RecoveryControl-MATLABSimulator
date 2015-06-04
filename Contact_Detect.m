@@ -1,4 +1,4 @@
-function [ pB_contact,pW_wall,vi_contact,ti_contact,numContacts,flag_c ] = DetectContact( i,X, r_ribbon, numContacts )
+function [ pB_contact,pW_wall,vi_contact,ti_contact,numContacts,flag_c ] = Contact_Detect( i,X, r_ribbon, numContacts )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 global prop_loc

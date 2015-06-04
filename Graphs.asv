@@ -21,18 +21,14 @@ subplot(1,2,1);
 plot(defl_time,defl*100,'LineWidth',2);
 xlabel('Time (s)');
 ylabel('Deflection (cm)');
-axis([2 4 0 0.2]);
+axis([2 5 0 0.18]);
 grid on;
-set(gca,'FontSize',14)
 subplot(1,2,2);
 plot(defl_time,Fc,'LineWidth',2);
 xlabel('Time (s)');
 ylabel('Contact Force (N)');
 grid on;
-axis([2 4 0 40]);
-set(gca,'FontSize',14)
-suptitle({'Bumper Deflection and Contact Force During Impact'});
-
+suptitle('Bumper Deflection and Contact Force During Impact');
 
 figure('position', [0, 200, 600, 500]) 
 plot(ttotal,Xtotal(:,7),ttotal,Xtotal(:,8),ttotal,-Xtotal(:,9),'LineWidth',2);

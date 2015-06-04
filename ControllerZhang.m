@@ -4,13 +4,13 @@ global m g Kt Kr prop_loc Kp Kq Jr Dt Ixx Iyy Izz
 q = [x(10);x(11);x(12);x(13)]/norm(x(10:13));
 T = quatRotMat(q);
 
-roll = atan2(q(1)*q(2)+q(3)*q(4),0.5-(q(2)^2+q(3)^2));
+% roll = atan2(q(1)*q(2)+q(3)*q(4),0.5-(q(2)^2+q(3)^2));
 % % disp('error_roll:');
 % % disp(x(14)-roll);
-pitch = asin(-2*(-q(1)*q(3)+q(4)*q(2)));
+% pitch = asin(-2*(-q(1)*q(3)+q(4)*q(2)));
 % % disp('error_pitch:');
 % % disp(x(15)-pitch);
-yaw = atan2(q(1)*q(4)+q(2)*q(3),0.5-(q(3)^2+q(4)^2));
+% yaw = atan2(q(1)*q(4)+q(2)*q(3),0.5-(q(3)^2+q(4)^2));
 % % disp('error_yaw:');
 % % disp(x(16)-yaw);
 % 
@@ -112,15 +112,15 @@ pitch_des = -(cos(yaw)*ax + sin(yaw)*ay)/g;
 roll_des = -(sin(yaw)*ax - cos(yaw)*ay)/g;
 
 if pitch_des < 0
-    pitch_des = max([-0.1,pitch_des]);
+    pitch_des = max([-0.2,pitch_des]);
 else
-    pitch_des = min([pitch_des,0.1]);
+    pitch_des = min([pitch_des,0.2]);
 end
 
 if roll_des < 0
-    roll_des = max([-0.1,roll_des]);
+    roll_des = max([-0.2,roll_des]);
 else
-    roll_des = min([roll_des,0.1]);
+    roll_des = min([roll_des,0.2]);
 end
 
 % Yaw
