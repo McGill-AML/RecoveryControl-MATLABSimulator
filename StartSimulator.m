@@ -2,7 +2,7 @@ clear all;
 % close all;
 clc;
 
-global CM
+global CM prop_loc
 
 %%Spiri System Parameters
 InitSpiriParams;
@@ -11,7 +11,7 @@ r_ribbon = 0.31;
 %%Simulation Parameters
 traj_posn = [0 2.5 -5;5 2.5 -5];
 traj_head = [0;0];
-traj_time = [0;10];
+traj_time = [0;5];
 t0 = traj_time(1);
 tf = traj_time(end);
 dt = 1/30;
@@ -41,11 +41,15 @@ Pc_x = 0.31;
 Pc_y = 0;
 Pc_z = 0;
 flag_c = 0;
+flag_dec = 0;
 
-index = 1;
+Fc = [];
+Pc = [];
+traj_index = 1;
 index_defl = 1;
+numContacts = 0;
 for i = t0:dt:tf-dt
-%     display(i)
+    display(i)
     %Determine if Contact has occured
     % determine contact pt from middle section of sphere
     % track penetration of contact pt
@@ -53,61 +57,119 @@ for i = t0:dt:tf-dt
     %Wall @ x = 4m
     if (4 - Xtotal(end,7)) <= r_ribbon
         if flag_c == 0 
+            [ pB_contact,pW_wall,vB_normal,vi_contact,ti_contact,numContacts,flag_c ] = DetectContact(i, Xtotal(end,:), r_ribbon, numContacts );
+            flag_c
+            flag_dec = 0;
+        end             
+        
+        if flag_c == 1
+        
             q = [Xtotal(end,10);Xtotal(end,11);Xtotal(end,12);Xtotal(end,13)];
             q = q/norm(q);
             R = quatRotMat(q);
             T = [Xtotal(end,7);Xtotal(end,8);-Xtotal(end,9)];
-            
-            ang=0:0.01:2*pi; 
-            xB_ribbon=r_ribbon*cos(ang);
-            yB_ribbon=r_ribbon*sin(ang);
-            zB_ribbon=zeros(size(ang));
-            
-            pW_ribbon = R'*[xB_ribbon;yB_ribbon;zB_ribbon] + repmat(T,size(ang));
-            pW_dist = abs(repmat(4,size(ang))-pW_ribbon(1,:));
-            [min_dist, min_idx] = min(pW_dist);
-          
-            pB_contact = [xB_ribbon(min_idx);yB_ribbon(min_idx);zB_ribbon(min_idx)];
-            pW_wall = [4;pW_ribbon(2,min_idx);pW_ribbon(3,min_idx)];
-            
-            vB_normal = CM - pB_contact;
-            vB_normal = vB_normal/norm(vB_normal);
-            
-            vi_contact = sqrt(sum(Xtotal(end,1:3).^2));
-            
-            flag_c = 1
-        end             
-       
-        q = [Xtotal(end,10);Xtotal(end,11);Xtotal(end,12);Xtotal(end,13)];
-        q = q/norm(q);
-        R = quatRotMat(q);
-        T = [Xtotal(end,7);Xtotal(end,8);-Xtotal(end,9)];
+
+            pW_contact = R'*pB_contact + T;
+            defl_contact = sum((pW_contact - pW_wall).^2);
+            defl(index_defl) = defl_contact;
+            defl_time(index_defl) = i;
+    %         index_defl = index_defl + 1;
+            defl_prev = defl(index_defl-1);
+
+            if flag_dec == 0
+                if defl_contact < defl_prev
+                    flag_dec = 1;
+                end
+            else
+                if defl_contact > defl_prev
+                      vf_contact = sqrt(sum(Xtotal(end,1:3).^2))
+                      t_contact(numContacts) = i - ti_contact;
+                      flag_c = 0
+                      [ pB_contact,pW_wall,vB_normal,vi_contact,ti_contact,numContacts,flag_c ] = DetectContact( i,Xtotal(end,:), r_ribbon, numContacts );
+                      flag_c
+                      
+                      if flag_c == 1
+                      pW_contact = R'*pB_contact + T;
+                      defl_contact = sum((pW_contact - pW_wall).^2);
+                      defl(index_defl) = defl_contact;
+                      defl_time(index_defl) = i;
+            %         index_defl = index_defl + 1;
+                      defl_prev = defl(index_defl-1);
+
+                      flag_dec = 0;  
+                      display(strcat('Rebound effect at t = ',num2str(i),' s'));
+                      end
+    %                 display('Spiri has crashed miserably into the wall :(');
+    %                 break;
+                end
+            end
         
-        pW_contact = R'*pB_contact + T;
-        defl_contact = sum((pW_contact - pW_wall).^2);
-        defl(index_defl) = defl_contact;
-        defl_time(index_defl) = i;
-%         index_defl = index_defl + 1;
-        defl_prev = defl(index_defl-1);
+       
+             %Find contact Force using Hunt & Crossley's contact model
+            e_ribbon = 0.7;
+            k_ribbon = 5000;%1*10^5; %[N/m]
+            n_ribbon = 1.5;
+
+            %lambda from Herbert & McWhannell
+            lambda_ribbon = 6*(1-e_ribbon)/(((2*e_ribbon-1)^2+3)*vi_contact);
+
+            Fc_mag = abs((defl_contact^n_ribbon)*(lambda_ribbon*((defl_contact-defl_prev)/dt) + k_ribbon));
+    %         Fc_mag = 150;
+            %Hertz's Model
+    %         Fc_mag = 30*defl_contact^1.5;
+    %         Fc_mag = 10000*defl_contact^1.5;
+        end
+        
+        if flag_c == 0
+            vB_normal = [];
+            pB_contact = [];
+            defl_contact = 0;  
+            defl_time(index_defl) = i;
+            defl(index_defl) = defl_contact;
+    %         index_defl = index_defl + 1;
+    %         vi_contact = 0;
+    %         defl_prev = 0;
+            Fc_mag = 0;
+            pW_contact = [Xtotal(end,7);Xtotal(end,8);-Xtotal(end,9)];
+         
+        end
+        
     else
         vB_normal = [];
         pB_contact = [];
-        defl_contact = [];  
+        defl_contact = 0;  
         defl_time(index_defl) = i;
-        defl(index_defl) = 0;
+        defl(index_defl) = defl_contact;
 %         index_defl = index_defl + 1;
-        vi_contact = 0;
-        defl_prev = 0;
+%         vi_contact = 0;
+%         defl_prev = 0;
+        Fc_mag = 0;
+        pW_contact = [Xtotal(end,7);Xtotal(end,8);-Xtotal(end,9)];;
         if flag_c == 1 
-            
+            vf_contact = sqrt(sum(Xtotal(end,1:3).^2))
+            t_contact(numContacts) = i - ti_contact;
             flag_c = 0
         end
     end
+    Fc(index_defl) = Fc_mag;
+    Pc(:,index_defl) = pW_contact;
+%     if flag_c == 1
+%     if flag_dec == 0
+%         if defl_contact < defl_prev
+%             flag_dec = 1;
+%         end
+%     else
+%         if defl_contact > defl_prev
+%             display('Spiri has crashed miserably into the wall :(');
+%             break;
+%         end
+%     end
+%     end
     
     %Trajectory Control Position
-    ref_r = posn(index,:)';
-    ref_head = head(index);
-    index = index + 1;
+    ref_r = posn(traj_index,:)';
+    ref_head = head(traj_index);
+    traj_index = traj_index + 1;
     
     %Find Control Signal based on ref_r, ref_head
     if i ~= t0
@@ -124,26 +186,26 @@ for i = t0:dt:tf-dt
     end
     [signal_c3,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev);
     
-    %Find contact Force using Hung & Crossley's contact model
-    e_ribbon = 0.5;
-    k_ribbon = 1*10^5; %[N/m]
-    n_ribbon = 1.5;
-    
-    %lambda from Herbert & McWhannell
-    lambda_ribbon = 6*(1-e_ribbon)/(((2*e_ribbon-1)^2+3)*vi_contact);
-    
-    Fc_mag = abs(defl_contact^n_ribbon*(lambda_ribbon*(defl_contact-defl_prev)/dt + k_ribbon));
- 
-    
+       
     %Use Control Signal to propagate dynamics
-    [t,X] = ode45(@(t, X) SpiriMotion(t,X,signal_c3,flag_c,vB_normal,pB_contact,Fc_mag),[i i+dt],x0_step);
-
+    [t,X] = ode113(@(t, X) SpiriMotion(t,X,signal_c3,flag_c,vB_normal,pB_contact,Fc_mag),[i i+dt],x0_step);
+    
     Xtotal = [Xtotal;X(end,:)];
-    ttotal = [ttotal;t(end)];    
+    ttotal = [ttotal;t(end)];  
+    
     index_defl = index_defl + 1;
+    
+   
+    if Xtotal(end,9) >= 0
+        display('Spiri has hit the floor :(');
+        break;
+    end
+    
+    
+    
 end
 
-Graphs( ttotal,Xtotal,defl_time,defl );
+Graphs( ttotal,Xtotal,defl_time,defl,Fc );
 
 
 % SpiriVisualization(ttotal,Xtotal);

@@ -38,7 +38,7 @@ Kpvz = 10;%10; %Zhang x4 value = 2.8
 Kivz = 10;%10; %Zhang x4 value = 4
 
 %% Horizontal Position Controller Gains
-Kps = 0.6; %Zhang x4 value = 0.6
+Kps = 0.6;%0.6; %Zhang x4 value = 0.6
 Kpvx = 2; %Zhang x4 value = 2
 Kpvy = 2; %Zhang x4 value = 2
 
@@ -90,9 +90,9 @@ end
 
 vpos_des = Kps*es;
 if vpos_des < 0
-    vpos_des = max([-1,vpos_des]);
+    vpos_des = max([-2.5,vpos_des]);
 else
-    vpos_des = min([vpos_des,1]);
+    vpos_des = min([vpos_des,2.5]);
 end
 
 vx_des = vpos_des*cos(atan2(ey,ex));

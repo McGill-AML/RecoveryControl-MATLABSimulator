@@ -16,8 +16,9 @@ if flag_c == 1
 
 %     Fc_mag = 10000*defl^1.5;
     Fc = [Fc_mag*(vB_normal'*[1;0;0]);Fc_mag*(vB_normal'*[0;1;0]);Fc_mag*(vB_normal'*[0;0;1])];
-    rc = pB_contact - CM;
+    rc = pB_contact;
     Mc = cross(rc,Fc);
+%     Mc = [0;0;0];
 else
     Fc = [0;0;0];
     Mc = [0;0;0];

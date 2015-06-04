@@ -1,4 +1,6 @@
-function [ ] =SpiriVisualization( t,X )
+function [ ] =SpiriVisualization( t,X,Pc )
+
+global prop_loc
 %UNTITLED6 Summary of this function goes here
 %   Detailed explanation goes here
 figure('units','normalized','outerposition',[0 0 1 1])
@@ -6,7 +8,7 @@ figure('units','normalized','outerposition',[0 0 1 1])
 [sx,sy,sz] = sphere;
 sx = sx(9:13,:);
 sy = sy(9:13,:);
-sz = sz(9:13,:);
+sz = sz(9:13,:)-prop_loc(3,1);
 sr = 0.11 + 0.2;
 sxR = zeros(size(sx));
 syR = zeros(size(sy));
@@ -17,23 +19,23 @@ p2 = [0;0.0575;0];
 p3 = [-0.1;0;0];
 p4 = [0;-0.0575;0];
 p5 = [0.08;-0.0115;0];
-c1 = [0.2*cos(pi/4);0.2*cos(pi/4);0];
-c2 = [-0.2*cos(pi/4);0.2*cos(pi/4);0];
-c3 = [-0.2*cos(pi/4);-0.2*cos(pi/4);0];
-c4 = [0.2*cos(pi/4);-0.2*cos(pi/4);0];
+c1 = [0.2*cos(pi/4);0.2*cos(pi/4);-prop_loc(3,1)];
+c2 = [-0.2*cos(pi/4);0.2*cos(pi/4);-prop_loc(3,2)];
+c3 = [-0.2*cos(pi/4);-0.2*cos(pi/4);-prop_loc(3,3)];
+c4 = [0.2*cos(pi/4);-0.2*cos(pi/4);-prop_loc(3,4)];
 po = [0;0;0];
-px = [1;0;0];
-py = [0;1;0];
-pz = [0;0;-1];
+px = [0.5;0;0];
+py = [0;-0.5;0];
+pz = [0;0;-0.5];
 
-writerObj = VideoWriter('badcontrol.avi');
-writerObj.FrameRate = 30;
-open(writerObj);
+% writerObj = VideoWriter('simulation.avi');
+% writerObj.FrameRate = 30;
+% open(writerObj);
 axis_min = min([min(X(:,7))-0.4,min(X(:,8))-0.4,-max(X(:,9))-0.4]);
 axis_max = max([max(X(:,7))+0.4,max(X(:,8))+0.4,-min(X(:,9))+0.4]);
 
-for i = 1:size(t,1)
-% for i = 181:181
+for i = 1:size(t,1)-1
+% for i = 130
 %     if i>1
 %         break;
 %     end
@@ -63,6 +65,7 @@ for i = 1:size(t,1)
    plot3(pts(1,:),pts(2,:),pts(3,:),'Color',[154 215 227]/255,'LineWidth',2);
    hold on;
    plot3(T(1),T(2),T(3),'rx','MarkerSize',8);
+   plot3(Pc(1,i),Pc(2,i),Pc(3,i),'rx','MarkerSize',8);
    normal = cross(p1_p-p2_p,p2_p-p3_p);
    plotCircle3D(c1_p,normal,0.11);
    plotCircle3D(c2_p,normal,0.11);
@@ -78,7 +81,7 @@ for i = 1:size(t,1)
        end
    end  
    
-   surf(sxR*sr+T(1),syR*sr+T(2),szR*sr+T(3),'FaceColor','y','FaceAlpha',0.2,'EdgeAlpha',0.2);
+   surf(sxR*sr+T(1),syR*sr+T(2),szR*sr+T(3),'FaceColor','y','FaceAlpha',0.2,'EdgeAlpha',0.5);
 %    surf(sx*sr+T(1),sy*sr+T(2),sz*sr+T(3),'FaceColor','y','FaceAlpha',0.2,'EdgeAlpha',0.2);
    fill3([4 4 4 4]',[-3 8 8 -3]',[-3 -3 8 8]','r','FaceAlpha',0.4);
    
@@ -109,11 +112,12 @@ for i = 1:size(t,1)
    title(strcat('t = ',num2str(t(i),'%.2f'),' s'));
    view([0 0]);
    grid on;
+   axis square;
    drawnow;
 %    frame = getframe;
 %    writeVideo(writerObj,frame);
    hold off;
 end
-close(writerObj);
+% close(writerObj);
 end
 
