@@ -2,7 +2,7 @@ function []= InitSpiriParams()
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
 
-global g m I Jr prop_loc Kt A d_air Cd V Tv Kp Kq Kr Dt alpha beta Ixx Iyy Izz CM Rb;
+global g m I Jr prop_loc Kt A d_air Cd V Tv Kp Kq Kr Dt alpha beta Ixx Iyy Izz CM;
 
 g = 9.81;
 
@@ -34,7 +34,6 @@ load('locations');
 
 prop_loc = [dp1,dp2,dp3,dp4];
 CM = CoM;
-Rb = 0.31;
 
 %Thrust coefficient
 Kt = 0.1;

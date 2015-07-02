@@ -3,14 +3,14 @@ function [ pB_contact,pW_wall,vi_contact,ti_contact,numContacts,flag_c ] = Conta
 %   Detailed explanation goes here
 global prop_loc
 
-dist_contact = 0;%0.5*1e-3;
+dist_contact = 0.5*1e-3;
 
 q = [X(10);X(11);X(12);X(13)];
-q = q/norm(q); 
+q = q/norm(q);
 R = quatRotMat(q);
 T = [X(7);X(8);-X(9)];
 
-ang = 0:0.01:2*pi;  
+ang = 0:0.01:2*pi; 
 xB_ribbon=r_ribbon*cos(ang);
 yB_ribbon=r_ribbon*sin(ang);
 zB_ribbon= prop_loc(3,1)*ones(size(ang));

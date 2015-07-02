@@ -1,4 +1,4 @@
-function [ ] =SpiriVisualization( t,X,Pc,Pc_wall,sideview )
+function [ ] =SpiriVisualization( t,X,Pc,Pc_wall )
 
 global prop_loc
 %UNTITLED6 Summary of this function goes here
@@ -8,7 +8,7 @@ figure('units','normalized','outerposition',[0 0 1 1])
 [sx,sy,sz] = sphere;
 sx = sx(9:13,:);
 sy = sy(9:13,:);
-sz = sz(9:13,:) + prop_loc(3,1);
+sz = sz(9:13,:)-prop_loc(3,1);
 sr = 0.11 + 0.2;
 sxR = zeros(size(sx));
 syR = zeros(size(sy));
@@ -19,14 +19,14 @@ p2 = [0;0.0575;0];
 p3 = [-0.1;0;0];
 p4 = [0;-0.0575;0];
 p5 = [0.08;-0.0115;0];
-c1 = [0.2*cos(pi/4);0.2*cos(pi/4);prop_loc(3,1)];
-c2 = [-0.2*cos(pi/4);0.2*cos(pi/4);prop_loc(3,2)];
-c3 = [-0.2*cos(pi/4);-0.2*cos(pi/4);prop_loc(3,3)];
-c4 = [0.2*cos(pi/4);-0.2*cos(pi/4);prop_loc(3,4)];
+c1 = [0.2*cos(pi/4);0.2*cos(pi/4);-prop_loc(3,1)];
+c2 = [-0.2*cos(pi/4);0.2*cos(pi/4);-prop_loc(3,2)];
+c3 = [-0.2*cos(pi/4);-0.2*cos(pi/4);-prop_loc(3,3)];
+c4 = [0.2*cos(pi/4);-0.2*cos(pi/4);-prop_loc(3,4)];
 po = [0;0;0];
 px = [0.5;0;0];
-py = [0;0.5;0];
-pz = [0;0;0.5];
+py = [0;-0.5;0];
+pz = [0;0;-0.5];
 
 % writerObj = VideoWriter('simulation.avi');
 % writerObj.FrameRate = 30;
@@ -35,17 +35,16 @@ axis_min = min([min(X(:,7))-0.4,min(X(:,8))-0.4,-max(X(:,9))-0.4]);
 axis_max = max([max(X(:,7))+0.4,max(X(:,8))+0.4,-min(X(:,9))+0.4]);
 
 for i = 1:size(t,1)-1
-% for i = 91
+% for i = 130
 %     if i>1
 %         break;
 %     end
     %figure()
-%    R = RotMat('X',X(i,14))*RotMat('Y',-X(i,15))*RotMat('Z',X(i,16));
+%    R = RotMat('X',X(i,14))*RotMat('Y',X(i,15))*RotMat('Z',X(i,16));
    q = [X(i,10);X(i,11);X(i,12);X(i,13)];
    q = q/norm(q);
    R = quatRotMat(q);
-   T = [X(i,7);X(i,8);X(i,9)];
-   
+   T = [X(i,7);X(i,8);-X(i,9)];
    p1_p = R'*p1 + T;
    p2_p = R'*p2 + T;
    p3_p = R'*p3 + T;
@@ -63,13 +62,11 @@ for i = 1:size(t,1)-1
    pz_p = R'*pz + T;
    
    pts = [p1_p p2_p p3_p p4_p p5_p p1_p];
-   
    plot3(pts(1,:),pts(2,:),pts(3,:),'Color',[154 215 227]/255,'LineWidth',2);
    hold on;
    plot3(T(1),T(2),T(3),'rx','MarkerSize',8);
    plot3(Pc(1,i),Pc(2,i),Pc(3,i),'rx','MarkerSize',8);
    plot3(Pc_wall(1,i),Pc_wall(2,i),Pc_wall(3,i),'bx','MarkerSize',10);
-   
    normal = cross(p1_p-p2_p,p2_p-p3_p);
    plotCircle3D(c1_p,normal,0.11);
    plotCircle3D(c2_p,normal,0.11);
@@ -77,21 +74,18 @@ for i = 1:size(t,1)-1
    plotCircle3D(c4_p,normal,0.11);
    
    
-   for j = 1:size(sx,1) %Plot bumper sphere
+   for j = 1:size(sx,1)
        for k = 1:size(sx,2)
            sxR(j,k) = R(:,1)'*[sx(j,k);sy(j,k);sz(j,k)];
            syR(j,k) = R(:,2)'*[sx(j,k);sy(j,k);sz(j,k)];
            szR(j,k) = R(:,3)'*[sx(j,k);sy(j,k);sz(j,k)];       
        end
-   end     
-   surf(sxR*sr+T(1),syR*sr+T(2),szR*sr+T(3),'FaceColor','y','FaceAlpha',0.2,'EdgeAlpha',0.5);
-
-   %    surf(sx*sr+T(1),sy*sr+T(2),sz*sr+T(3),'FaceColor','y','FaceAlpha',0.2,'EdgeAlpha',0.2);
+   end  
    
-   %Plot Wall
+   surf(sxR*sr+T(1),syR*sr+T(2),szR*sr+T(3),'FaceColor','y','FaceAlpha',0.2,'EdgeAlpha',0.5);
+%    surf(sx*sr+T(1),sy*sr+T(2),sz*sr+T(3),'FaceColor','y','FaceAlpha',0.2,'EdgeAlpha',0.2);
    fill3([4 4 4 4]',[-3 8 8 -3]',[-3 -3 8 8]','r','FaceAlpha',0.4);
    
-   %Plot body axes
    xpts = [po_p px_p];
    ypts = [po_p py_p];
    zpts = [po_p pz_p];
@@ -117,10 +111,8 @@ for i = 1:size(t,1)-1
    ylabel('Y');
    zlabel('Z');
    title(strcat('t = ',num2str(t(i),'%.2f'),' s'));
-   if sideview == 1
-    view([0 0]);
-   end
-    grid on;
+   view([0 0]);
+   grid on;
    axis square;
    drawnow;
 %    frame = getframe;

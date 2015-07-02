@@ -9,15 +9,11 @@ subplot(2,2,2);
 plot(ttotal,Xtotal(:,4),ttotal,Xtotal(:,5),ttotal,Xtotal(:,6));
 legend('p','q','r');
 subplot(2,2,3);
-ax=gca;
 plot(ttotal,Xtotal(:,7),ttotal,Xtotal(:,8),ttotal,Xtotal(:,9));
 legend('X^w','Y^w','Z^w');
-ax.XTick = [0 1 2 3 4 5 6 7 8 9 10];
-% plot(ttotal,Xtotal(:,7),ttotal,Xtotal(:,9));
-% legend('X^w','Z^w');
 subplot(2,2,4);
-plot(ttotal,Xtotal(:,10),ttotal,Xtotal(:,11),ttotal,Xtotal(:,12),ttotal,Xtotal(:,13));
-legend('q_0','q_1','q_2','q_3');
+plot(ttotal,Xtotal(:,10),ttotal,Xtotal(:,11),ttotal,Xtotal(:,12),ttotal,Xtotal(:,13),ttotal,sqrt(Xtotal(:,10).^2+Xtotal(:,11).^2+Xtotal(:,12).^2+Xtotal(:,13).^2));
+legend('q_0','q_1','q_2','q_3','|q|');
 % 
 % figure('position', [600, 300, 800, 500]) 
 % set(gca,'FontSize',14)
