@@ -4,6 +4,8 @@ function [ dx,defl_contact, Fc_mag, pt1, Pc_w ] = SpiriMotion(t,x,signal_c,wall_
 
 global g m I Jr prop_loc Kt A d_air Cd V Tv Kp Kq Kr Dt Rb;
 
+% persistent pt1_p Pc_w_p;
+
 
 % T2 = RotMat('X',x(14))*RotMat('Y',x(15))*RotMat('Z',x(16));
 q = [x(10);x(11);x(12);x(13)]/norm(x(10:13));
@@ -16,9 +18,10 @@ prop_speed = signal_c(1:4);
 prop_accel = signal_c(5:8);
 
 
-pt1 = [0;0;0];
-pt2 = [0;0;0];
-Pc_w = [0;0;0];
+% pt1 = [0;0;0];
+% pt2 = [0;0;0];
+% Pc_w = [0;0;0];
+
 
 if (wall_loc - x(7)) <= Rb
     if (sum(wall_plane == 'YZ')==2 || sum(wall_plane == 'ZY')==2)
@@ -28,35 +31,60 @@ if (wall_loc - x(7)) <= Rb
         
         syms theta
         bumper_cross = cross(bumper_n,bumper_u);
+        
+        Cx = bumper_C(1);
+        alpha = bumper_u(1); 
+        beta = bumper_cross(1);
+        theta1 = -log((wall_loc - Cx + (Cx^2 - 2*Cx*wall_loc - Rb^2*alpha^2 - Rb^2*beta^2 + wall_loc^2)^(1/2))/(Rb*(alpha - beta*i)))*i;
+        theta2 = -log(-(Cx - wall_loc + (Cx^2 - 2*Cx*wall_loc - Rb^2*alpha^2 - Rb^2*beta^2 + wall_loc^2)^(1/2))/(Rb*(alpha - beta*i)))*i;
+        theta1_s = theta1;
+        assignin('base','theta1_s',theta1_s);
 %         disp('before solve');
-        S = solve (bumper_u(1)*Rb*cos(theta)+bumper_cross(1)*Rb*sin(theta)==wall_loc - bumper_C(1),theta);
+%         S = solve (bumper_u(1)*Rb*cos(theta)+bumper_cross(1)*Rb*sin(theta)==wall_loc - bumper_C(1),theta);
 %         disp('after solve');
-        S = eval(S);
-
-        if isreal(S) == 1
-            if size(S,1) == 1 %1 pt of intersection
-                disp('1 pt of intersection');
-            elseif size(S,1) == 2 %2 pts of intersection
+%         S = eval(S);
+%         disp(theta1)
+%         if abs(imag(theta1)) <= eps(1)*2%isreal(S) == 1
+            theta1 = real(theta1);
+            theta2 = real(theta2);
+            if theta1 == theta2%size(S,1) == 1 %1 pt of intersection
+%                 disp('1 pt of intersection');
+                  defl = 0;
+            else %if size(S,1) == 2 %2 pts of intersection
 %                 disp('2 pt of intersection');
-                pt1 = Rb*cos(S(1))*bumper_u + Rb*sin(S(1))*bumper_cross + bumper_C;
-                pt2 = Rb*cos(S(2))*bumper_u + Rb*sin(S(2))*bumper_cross + bumper_C;
+%                 pt1 = Rb*cos(S(1))*bumper_u + Rb*sin(S(1))*bumper_cross + bumper_C;
+%                 pt2 = Rb*cos(S(2))*bumper_u + Rb*sin(S(2))*bumper_cross + bumper_C;
+                
+                pt1 = Rb*cos(theta1)*bumper_u + Rb*sin(theta1)*bumper_cross + bumper_C;
+                pt2 = Rb*cos(theta2)*bumper_u + Rb*sin(theta2)*bumper_cross + bumper_C;
                 
                 axis_c = pt1 - bumper_C;
                 axis_c(2) = 0;
                 axis_c = axis_c/norm(axis_c);
                 
-                Pc_b = Rb*R*axis_c;
-                Pc_w = R'*Pc_b + bumper_C;
-                defl = Pc_w(1)
+                if bumper_C(1) <= wall_loc
+                    Pc_w = bumper_C + Rb*axis_c;
+                else
+                    Pc_w = bumper_C - Rb*axis_c;
+                end
+%                 axis_c_b = R*axis_c;
+%                 axis_c_b = axis_c_b/norm(axis_c_b);
+%                 
+%                 Pc_b = Rb*axis_c_b;
+%                 Pc_w = R'*Pc_b + bumper_C;
+                defl = Pc_w(1) - wall_loc;
+     
+                
+                if defl <= 0
+                    disp(defl);
+                end
 %     
 %                 pt1_b = R*pt1;
 %                 pt2_b = R*pt2;
-                
-            else
-                error('Error in calculating intersection between bumper circle and wall');
-            end
+%             end
 
-        end %else no contact
+        end %else no contact        
+        assignin('base','defl',defl);
     end
 end
 

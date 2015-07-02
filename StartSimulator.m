@@ -2,19 +2,19 @@ clear all;
 % close all;
 clc;
 
-global CM prop_loc m
+global CM prop_loc m Rb
 
 %%Spiri System Parameters
 InitSpiriParams;
 r_ribbon = 0.31;
 
 %%Simulation Parameters
-traj_posn = [0 0 5;5 0 5];
+traj_posn = [0 0 5;100 0 5];
 traj_head = [0;0];
 traj_time = [0;10];
 t0 = traj_time(1);
 tf = traj_time(end);
-dt = 1/60;
+dt = 1/200;
 % ref_r = [2 2 -5]';
 % ref_head = pi/4;
 q0 = quatmultiply([0;-1;0;0],[cos(traj_head(1)/2);0;0;sin(traj_head(1)/2)]);
@@ -24,7 +24,7 @@ omega0 = zeros(4,1);
 
 [posn,head] = CreateTrajectory(traj_posn,traj_head,traj_time,dt);
 
-wall_loc = 4;
+wall_loc = 1;
 wall_plane = 'YZ';
 
 %%Initial Variable Values
@@ -70,6 +70,8 @@ rdes_hist = [];
 pt1_hist = [0;0;0];
 pt2_hist = [0;0;0];
 Pc_w_hist = [0;0;0];
+defl_hist = 0;
+theta_hist = 0;
 
 Fc = [];
 Pc = [];
@@ -190,9 +192,16 @@ for i = t0:dt:tf-dt
     
        
     %Use Control Signal to propagate dynamics
-    [ pt1,pt2,Pc_w] = DetectContact1(Xtotal(end,:),wall_loc,wall_plane);
+    pt1 = [0;0;0];
+    pt2 = [0;0;0];
+    Pc_w = [0;0;0];
+    defl = 0;
+    theta1_s = 0;
+%     [ pt1,pt2,Pc_w] = DetectContact1(Xtotal(end,:),wall_loc,wall_plane);
     [t,X] = ode45(@(t, X) SpiriMotion(t,X,signal_c3,wall_loc,wall_plane,flag_c,vB_normal,pB_contact,Fc_mag,pW_wall),[i i+dt],x0_step);
-%     [dX, ~, ~, pt1, pt2] = SpiriMotion(t,X(end,:)',signal_c3,wall_loc,wall_plane,flag_c,vB_normal,pB_contact,Fc_mag,pW_wall);
+%     [~, ~, ~, pt1, Pc_w] = SpiriMotion([],[],signal_c3,wall_loc,wall_plane,flag_c,vB_normal,pB_contact,Fc_mag,pW_wall);
+
+    %     [dx, ~, ~, pt1, Pc_w] = SpiriMotion(t,X(end,:)',signal_c3,wall_loc,wall_plane,flag_c,vB_normal,pB_contact,Fc_mag,pW_wall);
 %         disp(defl_contact)
     
     q = [X(end,10);X(end,11);X(end,12);X(end,13)]/norm(X(end,10:13));
@@ -206,6 +215,8 @@ for i = t0:dt:tf-dt
     pt1_hist = [pt1_hist,pt1];
     pt2_hist = [pt2_hist,pt2];
     Pc_w_hist = [Pc_w_hist,Pc_w];
+    defl_hist = [defl_hist;defl];
+    theta_hist = [theta_hist;theta1_s];
     
     roll_hist = [roll_hist;roll];
 %     roll2_hist = [roll2_hist;roll2];
@@ -229,10 +240,10 @@ for i = t0:dt:tf-dt
 %     Fc2 = [Fc2;Fc_mag2];
        
    
-%     if Xtotal(end,9) <= 0
-%         display('Spiri has hit the floor :(');
-%         break;
-%     end  
+    if Xtotal(end,9) <= 0
+        display('Spiri has hit the floor :(');
+        break;
+    end  
 %     
     
 end
@@ -249,6 +260,11 @@ legend('roll','pitch','yaw');
 figure();
 plot(ttotal(1:end-1),rolldes_hist,ttotal(1:end-1),pitchdes_hist,ttotal(1:end-1),rdes_hist);
 legend('roll_des','pitch_des','r_des');
+
+figure()
+plot(ttotal,defl_hist)
+hold on
+plot(ttotal,Xtotal(:,7)+Rb-wall_loc)
 % 
 % figure();
 % plotyy(ttotal(1:end-1),u1_hist,ttotal(1:end-1),ez_hist);
@@ -257,7 +273,7 @@ legend('roll_des','pitch_des','r_des');
 % plot(ttotal,ag_hist(:,1),ttotal,ag_hist(:,2),ttotal,ag_hist(:,3));
 % SpiriVisualization(ttotal,Xtotal);
 
-SpiriVisualization1(ttotal,Xtotal,'XZ',wall_loc,wall_plane)
+% SpiriVisualization1(ttotal,Xtotal,'XZ',wall_loc,wall_plane)
 
 
 

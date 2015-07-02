@@ -46,8 +46,8 @@ Kivyaw = 4; %Zhang x4 value = 4;
 Kdvyaw = 0; %Zhang x4 value = 0;
 
 sat_vpos_des = 2.5; %Zhang x4 value = 1
-sat_roll_des = 0.1;%0.2 %Zhang x4 value = 0.1
-sat_pitch_des = 0.1;%0.2; %Zhang x4 value = 0.1
+sat_roll_des = 1;%0.2 %Zhang x4 value = 0.1
+sat_pitch_des = 1;%0.2; %Zhang x4 value = 0.1
 sat_r_des = 0.3; %Zhang x4 value = 0.3
 
 %% PID Altitude Controller
