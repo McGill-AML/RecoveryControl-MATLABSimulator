@@ -3,27 +3,19 @@ function [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll
 global m g Kt Kr prop_loc Kp Kq Jr Dt Ixx Iyy Izz
 
 % Add noise to state estimates
-% x(1) = x(1) + (0.01).*randn(1);
-% x(2) = x(2) + (0.01).*randn(1);
-% x(3) = x(3) + (0.01).*randn(1);
-% x(4) = x(4) + (1*pi/180).*randn(1);
-% x(5) = x(5) + (1*pi/180).*randn(1);
-% x(6) = x(6) + (1*pi/180).*randn(1);
-% x(7) = x(7) + (0.01).*randn(1);
-% x(8) = x(8) + (0.01).*randn(1);
-% x(9) = x(9) + (0.01).*randn(1);
+x(1) = x(1) + (0.01).*randn(1);
+x(2) = x(2) + (0.01).*randn(1);
+x(3) = x(3) + (0.01).*randn(1);
+x(4) = x(4) + (1*pi/180).*randn(1);
+x(5) = x(5) + (1*pi/180).*randn(1);
+x(4) = x(6) + (1*pi/180).*randn(1);
 
-% x(10) = x(10) + (1*pi/180).*randn(1);
-% x(11) = x(11) + (1*pi/180).*randn(1);
-% x(12) = x(12) + (1*pi/180).*randn(1);
-% x(13) = x(13) + (1*pi/180).*randn(1);
 
 
 q = [x(10);x(11);x(12);x(13)]/norm(x(10:13));
 R = quatRotMat(q);
 
 [roll, pitch, yaw] = quat2angle(q,'xyz');
-
 
 roll2 = x(14);
 pitch2 = x(15);
@@ -36,7 +28,7 @@ yaw_w = sec(pitch)*(x(5)*sin(roll)+x(6)*cos(roll));
 
 %% Zhang 2014
 %% Altitude Controller Parameters
-Kpz = 40;%20; %Zhang x4 value = 1
+Kpz = 20;%20; %Zhang x4 value = 1
 Kiz = 40;%40;
 Kdz = 0;
 Kpvz = 10;%10; %Zhang x4 value = 2.8
@@ -45,7 +37,7 @@ Kivz = 10;%10; %Zhang x4 value = 4
 sat_v_des = 5; %Zhang x4 value = 0.6
 
 %% Horizontal Position Controller Parameters
-Kps = 1;%0.6; %Zhang x4 value = 0.6
+Kps = 0.6;%0.6; %Zhang x4 value = 0.6
 Kpvx = 5; %Zhang x4 value = 2
 Kpvy = 5; %Zhang x4 value = 2
 
