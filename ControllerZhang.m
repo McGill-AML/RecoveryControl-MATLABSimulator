@@ -37,17 +37,17 @@ yaw_w = sec(pitch)*(x(5)*sin(roll)+x(6)*cos(roll));
 %% Zhang 2014
 %% Altitude Controller Parameters
 Kpz = 40;%20; %Zhang x4 value = 1
-Kiz = 40;%40;
+Kiz = 0;%40;
 Kdz = 0;
-Kpvz = 10;%10; %Zhang x4 value = 2.8
-Kivz = 10;%10; %Zhang x4 value = 4
+Kpvz = 2.8*Kpz;%10; %Zhang x4 value = 2.8
+Kivz = 4*Kpz;%10; %Zhang x4 value = 4
 
-sat_v_des = 5; %Zhang x4 value = 0.6
+sat_v_des = 3; %Zhang x4 value = 0.6
 
 %% Horizontal Position Controller Parameters
 Kps = 1;%0.6; %Zhang x4 value = 0.6
-Kpvx = 5; %Zhang x4 value = 2
-Kpvy = 5; %Zhang x4 value = 2
+Kpvx = 3.33; %Zhang x4 value = 2
+Kpvy = 3.33; %Zhang x4 value = 2
 
 Kpyaw = 0.7; %Zhang x4 value = 0.7
 

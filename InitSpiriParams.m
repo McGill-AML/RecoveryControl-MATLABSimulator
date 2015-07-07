@@ -37,7 +37,9 @@ CM = CoM;
 Rbumper = 0.31;
 
 %Thrust coefficient
-Kt = 0.000000054; %From Pleiades primitives.c 07-03-2015
+% Kt = 0.000000054; %From Pleiades primitives.c 07-03-2015
+% Kt = 3.721e-5 * 2; %from x4data_stock.m
+Kt = 0.1;
 
 %Aerodynamic Drag
 A = 0; %Area seen by relative velocity vector
@@ -49,6 +51,7 @@ Kp = 0; %Aerodynamic drag constant
 Kq = 0; %Aerodynamic drag constant
 Kr = 0; %Aerodynamic drag constant
 Dt = 0.1; %Drag torque factor of coaxial rotor pairs
+% Dt = 2.2056e-6 * (2); %from x4data_stock.m
 alpha = 0;
 beta = 0;
 

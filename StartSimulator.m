@@ -1,6 +1,8 @@
-clear all;
+function [Ts, PO] = StartSimulator(traj_posn,traj_head,traj_time,sim_idx)
+
+% clear all;
 % close all;
-clc;
+% clc;
 
 global Rbumper
 
@@ -8,9 +10,9 @@ global Rbumper
 InitSpiriParams;
 
 %% Simulation Parameters
-traj_posn = [0 0 5;0 0 6];
-traj_head = [0;0];
-traj_time = [0;5];
+% traj_posn = [0 0 5;5 5 5];
+% traj_head = [0;0];
+% traj_time = [0;5];
 t0 = traj_time(1);
 tf = traj_time(end);
 dt = 1/100;
@@ -67,11 +69,12 @@ theta_hist = 0;
 %% Controller Response Params
 Se = 0.05;
 
+display(sim_idx)
 %% Simulation Loop
 for i = t0:dt:tf-dt
 %     display(size(ttotal))
-    display(i)
-
+%     display(i)
+    
     %Trajectory Control Position
     ref_r = posn(traj_index,:)';
     ref_head = head(traj_index);
@@ -87,6 +90,7 @@ for i = t0:dt:tf-dt
         er_prev = er;
         omega_prev = omega;  
     end
+    
     [signal_c3,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev);
     
     %Initialize Contact Dynamics Variables
@@ -102,7 +106,7 @@ for i = t0:dt:tf-dt
 
     q = [X(end,10);X(end,11);X(end,12);X(end,13)]/norm(X(end,10:13));
     R = quatRotMat(q);
-
+   
     %Record Data
     pint1_hist = [pint1_hist,pint1];
     pint2_hist = [pint2_hist,pint2];
@@ -122,7 +126,7 @@ for i = t0:dt:tf-dt
     ttotal = [ttotal;t(end)];
    
     %End loop if Spiri has crashed
-    if Xtotal(end,9) <= 0
+    if Xtotal(end,9) <= -1
         display('Spiri has hit the floor :(');
         break;
     end  
@@ -132,6 +136,10 @@ end
 [Ts, PO] = ControllerStats(ttotal,Xtotal,Se,traj_posn,traj_head);
 
 Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,rdes_hist);
+savestring = strcat('BatchSim_',num2str(sim_idx,'%03i'));
+print(savestring,'-dpng');
+savefig(savestring);
+close;
 
 % figure();
 % plot(ttotal,roll_hist,ttotal,pitch_hist,ttotal,yaw_hist);
@@ -141,15 +149,16 @@ Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,r
 % plot(ttotal,rolldes_hist,ttotal,pitchdes_hist,ttotal,rdes_hist);
 % legend('roll_des','pitch_des','r_des');
 
-figure();
-plot(ttotal,defl_hist)
-hold on
-plot(ttotal,Xtotal(:,7)+Rbumper-wall_loc)
-title('Deflection and Unrotated Deflection');
-legend('Calculated Defl','Defl if not rotated');
+if sum(defl_hist) > 0
+    figure();
+    plot(ttotal,defl_hist)
+    hold on
+    plot(ttotal,Xtotal(:,7)+Rbumper-wall_loc)
+    title('Deflection and Unrotated Deflection');
+    legend('Calculated Defl','Defl if not rotated');
+end
 
 % SpiriVisualization1(record,ttotal,Xtotal,'XZ',wall_loc,'YZ',pint1_hist,pint2_hist,pc_w_hist)
 
-
-
-
+end
+% 
