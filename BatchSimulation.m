@@ -14,9 +14,14 @@ traj_posns4 = [0 0 0;0 0 0;0 0 0;0 0 0;0 0 0;0 0 0;0 0 0;0 0 0];
 traj_heads4 = [0;pi/3;0;-pi/3;0;pi/6;0;-pi/6];
 traj_times4 = [0;5;0;5;0;5;0;5];
 
-traj_posns = [traj_posns1;traj_posns2;traj_posns3;traj_posns4];
-traj_heads = [traj_heads1;traj_heads2;traj_heads3;traj_heads4];
-traj_times = [traj_times1;traj_times2;traj_times3;traj_times4];
+traj_posns5 = [0 0 0;1 1 0;0 0 0;5 5 0;0 0 0;5 1 0;0 0 0;1 5 0;0 0 0;1 1 1;0 0 0;5 5 5;0 0 0;5 1 5;0 0 0;1 5 1];
+traj_heads5 = zeros(16,1);
+traj_times5 = repmat([0;10],8,1);
+
+traj_posns = [traj_posns1;traj_posns2;traj_posns3;traj_posns4;traj_posns5];
+traj_heads = [traj_heads1;traj_heads2;traj_heads3;traj_heads4;traj_heads5];
+traj_times = [traj_times1;traj_times2;traj_times3;traj_times4;traj_times5];
+
 
 start_idx = 1;
 idx = start_idx;

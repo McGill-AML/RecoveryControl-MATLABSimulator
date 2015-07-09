@@ -52,7 +52,7 @@ if record == 1
 end
 
 for i = 1:disprate_idx:size(t,1)
-% for i = 313    
+% for i = 59 
    
    %% Rotate body-fixed points to world-frame points
    q = [X(i,10);X(i,11);X(i,12);X(i,13)];
@@ -134,6 +134,8 @@ for i = 1:disprate_idx:size(t,1)
         view([0 0]); %view XZ plane
    elseif sideview == 'YZ'
         view(90, 0); %view YZ plane
+   else
+       view(3);
    end
    
    grid on;

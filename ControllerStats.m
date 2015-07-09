@@ -2,10 +2,10 @@ function [Ts,PO] = ControllerStats(ttotal,Xtotal,Se,traj_posn,traj_head)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
-Se_x = (traj_posn(end,1) - traj_posn(1,1))*Se;
-Se_y = (traj_posn(end,2) - traj_posn(1,2))*Se;
-Se_z = (traj_posn(end,3) - traj_posn(1,3))*Se;
-Se_head = (traj_head(end) - traj_head(1))*Se;
+Se_x = abs((traj_posn(end,1) - traj_posn(1,1))*Se);
+Se_y = abs((traj_posn(end,2) - traj_posn(1,2))*Se);
+Se_z = abs((traj_posn(end,3) - traj_posn(1,3))*Se);
+Se_head = abs((traj_head(end) - traj_head(1))*Se);
 
 
 
@@ -94,7 +94,11 @@ for i = size(Xtotal,1):-1:1
             Ts(4) = ttotal(i);
         elseif abs(yaw-traj_head(end)) > Se_head
             if i == size(Xtotal,1)
+                display(yaw)
+                display(traj_head(end))
+                display (Se_head)
                 display('heading does not settle');
+                Ts(4)=0;
             else
                 Ts(4) = ttotal(i+1);
             end

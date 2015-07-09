@@ -29,7 +29,7 @@ traj_index = 1;
 
 q0 = quatmultiply([0;-1;0;0],[cos(traj_head(1)/2);0;0;sin(traj_head(1)/2)]);
 q0 = q0/norm(q0);
-x0 = [zeros(6,1);traj_posn(1,:)';q0];
+x0 = [zeros(6,1);traj_posn(1,:)';q0;];
 omega0 = zeros(4,1);
 
 Xtotal = x0';
