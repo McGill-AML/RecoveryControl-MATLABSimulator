@@ -1,4 +1,4 @@
-function [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des] = ControllerZhang(x,i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev)
+function [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,icomp] = ControllerZhang(x,i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev,ez_i)
 
 global m g Kt Kr prop_loc Kp Kq Jr Dt Ixx Iyy Izz
 
@@ -72,6 +72,9 @@ if i == t0
 end
 
 v_des = Kpz*ez + Kiz*dt*(ez_prev + ez)*0.5 + Kdz*(ez - ez_prev)/dt;
+% v_des = Kpz*ez + Kiz*ez_i + Kdz*(ez - ez_prev)/dt;
+
+icomp = dt*(ez_prev+ez)*0.5;
 % if v_des < 0
 %     v_des = max([-sat_v_des,v_des]);
 % else

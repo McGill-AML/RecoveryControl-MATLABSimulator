@@ -10,7 +10,7 @@ global Rbumper
 InitSpiriParams;
 
 %% Simulation Parameters
-traj_posn = [0 0 5;0 5 5];
+traj_posn = [0 0 5;0 0 6];
 traj_head = [0;0];
 traj_time = [0;5];
 wall_loc = 10000;
@@ -29,7 +29,7 @@ traj_index = 1;
 
 q0 = quatmultiply([0;-1;0;0],[cos(traj_head(1)/2);0;0;sin(traj_head(1)/2)]);
 q0 = q0/norm(q0);
-x0 = [zeros(6,1);traj_posn(1,:)';q0];
+x0 = [zeros(6,1);traj_posn(1,:)';q0;0];
 omega0 = zeros(4,1);
 
 Xtotal = x0';
@@ -47,6 +47,8 @@ eroll_prev = 0;
 epitch_prev = 0;
 er_prev = 0;
 omega_prev = omega0;
+
+ez_i = 0;
 
 %% Initialize History Arrays
 
@@ -76,7 +78,7 @@ display(sim_idx)
 %% Simulation Loop
 for i = t0:dt:tf-dt
 %     display(size(ttotal))
-    display(i)
+%     display(i)
     
     %Trajectory Control Position
     ref_r = posn(traj_index,:)';
@@ -91,10 +93,12 @@ for i = t0:dt:tf-dt
         eroll_prev = eroll;
         epitch_prev = epitch;
         er_prev = er;
-        omega_prev = omega;  
+        omega_prev = omega; 
+        
+        ez_i = X(end,14);
     end
     
-    [signal_c3,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev);
+    [signal_c3,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,icomp] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev,ez_i);
     
     %Initialize Contact Dynamics Variables
     pint1 = [0;0;0];
@@ -105,11 +109,12 @@ for i = t0:dt:tf-dt
     
     %Propagate Dynamics
 %     [ pt1,pt2,Pc_w] = DetectContact1(Xtotal(end,:),wall_loc,wall_plane);    
-    [t,X] = ode45(@(t, X) SpiriMotion(t,X,signal_c3,wall_loc,wall_plane),[i i+dt],x0_step);
+    [t,X] = ode45(@(t, X) SpiriMotion(t,X,signal_c3,wall_loc,wall_plane,ref_r),[i i+dt],x0_step);
 
     q = [X(end,10);X(end,11);X(end,12);X(end,13)]/norm(X(end,10:13));
     R = quatRotMat(q);
    
+    disp(strcat('controller: ',num2str(icomp),'   ode: ',num2str(X(end,14))));
     %Record Data
     pint1_hist = [pint1_hist,pint1];
     pint2_hist = [pint2_hist,pint2];
