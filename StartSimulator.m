@@ -1,4 +1,4 @@
-% function [Ts, PO,ttotal,Xtotal,pint1_hist,pint2_hist,pc_w_hist,defl_hist] = StartSimulator(traj_posn,traj_head,traj_time,wall_loc,sim_idx)
+function [Ts, PO] = StartSimulator(traj_posn,traj_head,traj_time,sim_idx)
 
 % clear all;
 % close all;
@@ -10,15 +10,22 @@ global Rbumper
 InitSpiriParams;
 
 %% Simulation Parameters
+<<<<<<< HEAD
 traj_posn = [0 0 5;0 0 6];
 traj_head = [0;0];
 traj_time = [0;5];
 wall_loc = 10000;
 sim_idx = 40;
 
+=======
+% traj_posn = [0 0 5;5 5 5];
+% traj_head = [0;0];
+% traj_time = [0;5];
+>>>>>>> parent of fc3d37d... Controller working
 t0 = traj_time(1);
 tf = traj_time(end);
 dt = 1/100;
+wall_loc = 10000;
 wall_plane = 'YZ';
 
 %% Create Trajectory
@@ -29,7 +36,11 @@ traj_index = 1;
 
 q0 = quatmultiply([0;-1;0;0],[cos(traj_head(1)/2);0;0;sin(traj_head(1)/2)]);
 q0 = q0/norm(q0);
+<<<<<<< HEAD
 x0 = [zeros(6,1);traj_posn(1,:)';q0;0];
+=======
+x0 = [zeros(6,1);traj_posn(1,:)';q0;zeros(3,1)];
+>>>>>>> parent of fc3d37d... Controller working
 omega0 = zeros(4,1);
 
 Xtotal = x0';
@@ -69,7 +80,6 @@ pint2_hist = [0;0;0];
 pc_w_hist = [0;0;0];
 defl_hist = 0;
 theta_hist = 0;
-Fc_hist = 0;
 
 %% Controller Response Params
 Se = 0.05;
@@ -121,7 +131,6 @@ for i = t0:dt:tf-dt
     pc_w_hist = [pc_w_hist,pc_w];
     defl_hist = [defl_hist;defl];
     theta_hist = [theta_hist;theta1];
-    Fc_hist = [Fc_hist;Fc_mag];
     
     roll_hist = [roll_hist;roll];
     pitch_hist = [pitch_hist;pitch];
@@ -145,11 +154,18 @@ end
 [Ts, PO] = ControllerStats(ttotal,Xtotal,Se,traj_posn,traj_head);
 
 Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,rdes_hist);
-% savestring = strcat('BatchSim_',num2str(sim_idx,'%03i'));
-% print(savestring,'-dpng');
-% savefig(savestring);
-% close;
+savestring = strcat('BatchSim_',num2str(sim_idx,'%03i'));
+print(savestring,'-dpng');
+savefig(savestring);
+close;
 
+% figure();
+% plot(ttotal,roll_hist,ttotal,pitch_hist,ttotal,yaw_hist);
+% legend('roll','pitch','yaw');
+% 
+% figure();
+% plot(ttotal,rolldes_hist,ttotal,pitchdes_hist,ttotal,rdes_hist);
+% legend('roll_des','pitch_des','r_des');
 
 if sum(defl_hist) > 0
     figure();
@@ -160,7 +176,7 @@ if sum(defl_hist) > 0
     legend('Calculated Defl','Defl if not rotated');
 end
 
-% SpiriVisualization1(0,ttotal,Xtotal,'XZ',wall_loc,'YZ',pint1_hist,pint2_hist,pc_w_hist)
+% SpiriVisualization1(record,ttotal,Xtotal,'XZ',wall_loc,'YZ',pint1_hist,pint2_hist,pc_w_hist)
 
-% end
+end
 % 

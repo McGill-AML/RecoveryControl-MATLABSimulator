@@ -24,10 +24,10 @@ R = quatRotMat(q);
 
 [roll, pitch, yaw] = quat2angle(q,'xyz');
 
-% 
-% roll2 = x(14);
-% pitch2 = x(15);
-% yaw2 = x(16);
+
+roll2 = x(14);
+pitch2 = x(15);
+yaw2 = x(16);
 
 %% Tait-Bryan Euler Angle rates
 roll_w = x(4) + tan(pitch)*(x(5)*sin(roll)+x(6)*cos(roll));
@@ -72,6 +72,7 @@ if i == t0
 end
 
 v_des = Kpz*ez + Kiz*dt*(ez_prev + ez)*0.5 + Kdz*(ez - ez_prev)/dt;
+<<<<<<< HEAD
 % v_des = Kpz*ez + Kiz*ez_i + Kdz*(ez - ez_prev)/dt;
 
 icomp = dt*(ez_prev+ez)*0.5;
@@ -80,6 +81,13 @@ icomp = dt*(ez_prev+ez)*0.5;
 % else
 %     v_des = min([v_des,sat_v_des]);
 % end
+=======
+if v_des < 0
+    v_des = max([-sat_v_des,v_des]);
+else
+    v_des = min([v_des,sat_v_des]);
+end
+>>>>>>> parent of fc3d37d... Controller working
 
 evz = v_des - R(:,3)'*x(1:3)';
 if i == t0
@@ -100,11 +108,11 @@ if i == t0
 end
 
 vpos_des = Kps*es;
-% if vpos_des < 0
-%     vpos_des = max([-sat_vpos_des,vpos_des]);
-% else
-%     vpos_des = min([vpos_des,sat_vpos_des]);
-% end
+if vpos_des < 0
+    vpos_des = max([-sat_vpos_des,vpos_des]);
+else
+    vpos_des = min([vpos_des,sat_vpos_des]);
+end
 
 vx_des = vpos_des*cos(atan2(ey,ex));
 vy_des = vpos_des*sin(atan2(ey,ex));
@@ -132,27 +140,27 @@ u1 = m*(az+az2);
 roll_des = ay/g;
 pitch_des = -ax/g;
 
-% if pitch_des < 0
-%     pitch_des = max([-sat_pitch_des,pitch_des]);
-% else
-%     pitch_des = min([pitch_des,sat_pitch_des]);
-% end
-% 
-% if roll_des < 0
-%     roll_des = max([-sat_roll_des,roll_des]);
-% else
-%     roll_des = min([roll_des,sat_roll_des]);
-% end
+if pitch_des < 0
+    pitch_des = max([-sat_pitch_des,pitch_des]);
+else
+    pitch_des = min([pitch_des,sat_pitch_des]);
+end
+
+if roll_des < 0
+    roll_des = max([-sat_roll_des,roll_des]);
+else
+    roll_des = min([roll_des,sat_roll_des]);
+end
 
 
 % Yaw
 eyaw = ref_head - yaw;
 r_des = Kpyaw*eyaw;
-% if r_des < 0
-%     r_des = max([-sat_r_des,r_des]);
-% else
-%     r_des = min([r_des,sat_r_des]);
-% end
+if r_des < 0
+    r_des = max([-sat_r_des,r_des]);
+else
+    r_des = min([r_des,sat_r_des]);
+end
 
 
 %% Attitude Controller
@@ -163,7 +171,6 @@ eroll = roll_des - roll;
 epitch = pitch_des - pitch;
 er = r_des - x(6);
 
-%calculate integral and derivative intermediate terms
 if i == t0
     i_roll = 0;
     i_pitch = 0;
