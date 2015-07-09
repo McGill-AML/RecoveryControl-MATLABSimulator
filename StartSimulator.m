@@ -1,4 +1,4 @@
-function [Ts, PO] = StartSimulator(traj_posn,traj_head,traj_time,sim_idx)
+% function [Ts, PO] = StartSimulator(traj_posn,traj_head,traj_time,sim_idx)
 
 % clear all;
 % close all;
@@ -10,18 +10,17 @@ global Rbumper
 InitSpiriParams;
 
 %% Simulation Parameters
-<<<<<<< HEAD
-traj_posn = [0 0 5;0 0 6];
+
+traj_posn = [0 0 5;5 5 5];
 traj_head = [0;0];
 traj_time = [0;5];
 wall_loc = 10000;
 sim_idx = 40;
 
-=======
 % traj_posn = [0 0 5;5 5 5];
 % traj_head = [0;0];
 % traj_time = [0;5];
->>>>>>> parent of fc3d37d... Controller working
+
 t0 = traj_time(1);
 tf = traj_time(end);
 dt = 1/100;
@@ -36,11 +35,7 @@ traj_index = 1;
 
 q0 = quatmultiply([0;-1;0;0],[cos(traj_head(1)/2);0;0;sin(traj_head(1)/2)]);
 q0 = q0/norm(q0);
-<<<<<<< HEAD
-x0 = [zeros(6,1);traj_posn(1,:)';q0;0];
-=======
-x0 = [zeros(6,1);traj_posn(1,:)';q0;zeros(3,1)];
->>>>>>> parent of fc3d37d... Controller working
+x0 = [zeros(6,1);traj_posn(1,:)';q0];
 omega0 = zeros(4,1);
 
 Xtotal = x0';
@@ -58,8 +53,6 @@ eroll_prev = 0;
 epitch_prev = 0;
 er_prev = 0;
 omega_prev = omega0;
-
-ez_i = 0;
 
 %% Initialize History Arrays
 
@@ -104,11 +97,10 @@ for i = t0:dt:tf-dt
         epitch_prev = epitch;
         er_prev = er;
         omega_prev = omega; 
-        
-        ez_i = X(end,14);
+
     end
     
-    [signal_c3,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,icomp] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev,ez_i);
+    [signal_c3,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev);
     
     %Initialize Contact Dynamics Variables
     pint1 = [0;0;0];
@@ -119,12 +111,12 @@ for i = t0:dt:tf-dt
     
     %Propagate Dynamics
 %     [ pt1,pt2,Pc_w] = DetectContact1(Xtotal(end,:),wall_loc,wall_plane);    
-    [t,X] = ode45(@(t, X) SpiriMotion(t,X,signal_c3,wall_loc,wall_plane,ref_r),[i i+dt],x0_step);
+    [t,X] = ode45(@(t, X) SpiriMotion(t,X,signal_c3,wall_loc,wall_plane),[i i+dt],x0_step);
 
     q = [X(end,10);X(end,11);X(end,12);X(end,13)]/norm(X(end,10:13));
     R = quatRotMat(q);
    
-    disp(strcat('controller: ',num2str(icomp),'   ode: ',num2str(X(end,14))));
+%     disp(strcat('controller: ',num2str(icomp),'   ode: ',num2str(X(end,14))));
     %Record Data
     pint1_hist = [pint1_hist,pint1];
     pint2_hist = [pint2_hist,pint2];
@@ -154,10 +146,10 @@ end
 [Ts, PO] = ControllerStats(ttotal,Xtotal,Se,traj_posn,traj_head);
 
 Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,rdes_hist);
-savestring = strcat('BatchSim_',num2str(sim_idx,'%03i'));
-print(savestring,'-dpng');
-savefig(savestring);
-close;
+% savestring = strcat('BatchSim_',num2str(sim_idx,'%03i'));
+% print(savestring,'-dpng');
+% savefig(savestring);
+% close;
 
 % figure();
 % plot(ttotal,roll_hist,ttotal,pitch_hist,ttotal,yaw_hist);
@@ -178,5 +170,5 @@ end
 
 % SpiriVisualization1(record,ttotal,Xtotal,'XZ',wall_loc,'YZ',pint1_hist,pint2_hist,pc_w_hist)
 
-end
+% end
 % 

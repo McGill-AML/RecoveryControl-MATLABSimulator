@@ -1,4 +1,4 @@
-function [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,icomp] = ControllerZhang(x,i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev,ez_i)
+function [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des] = ControllerZhang(x,i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev)
 
 global m g Kt Kr prop_loc Kp Kq Jr Dt Ixx Iyy Izz
 
@@ -25,9 +25,9 @@ R = quatRotMat(q);
 [roll, pitch, yaw] = quat2angle(q,'xyz');
 
 
-roll2 = x(14);
-pitch2 = x(15);
-yaw2 = x(16);
+% roll2 = x(14);
+% pitch2 = x(15);
+% yaw2 = x(16);
 
 %% Tait-Bryan Euler Angle rates
 roll_w = x(4) + tan(pitch)*(x(5)*sin(roll)+x(6)*cos(roll));
@@ -67,27 +67,17 @@ sat_r_des = 0.3; %Zhang x4 value = 0.3
 %% PID Altitude Controller
 ez = ref_r(3) - x(9);
 if i == t0
-    ez_prev = -ez;
+    Kiz = 0;
     Kdz = 0;
 end
 
 v_des = Kpz*ez + Kiz*dt*(ez_prev + ez)*0.5 + Kdz*(ez - ez_prev)/dt;
-<<<<<<< HEAD
-% v_des = Kpz*ez + Kiz*ez_i + Kdz*(ez - ez_prev)/dt;
 
-icomp = dt*(ez_prev+ez)*0.5;
 % if v_des < 0
 %     v_des = max([-sat_v_des,v_des]);
 % else
 %     v_des = min([v_des,sat_v_des]);
 % end
-=======
-if v_des < 0
-    v_des = max([-sat_v_des,v_des]);
-else
-    v_des = min([v_des,sat_v_des]);
-end
->>>>>>> parent of fc3d37d... Controller working
 
 evz = v_des - R(:,3)'*x(1:3)';
 if i == t0

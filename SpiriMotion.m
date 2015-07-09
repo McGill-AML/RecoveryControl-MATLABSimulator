@@ -1,4 +1,4 @@
-function dx = SpiriMotion(t,x,signal_c,wall_loc,wall_plane,ref_r)
+function dx = SpiriMotion(t,x,signal_c,wall_loc,wall_plane)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -9,11 +9,7 @@ R = quatRotMat(q);
 
 x = reshape(x,[max(size(x)),1]);
 
-<<<<<<< HEAD
-dx = zeros(14,1);
-=======
-dx = zeros(16,1);
->>>>>>> parent of fc3d37d... Controller working
+dx = zeros(13,1);
 
 %% Controller Signal
 prop_speed = signal_c(1:4);
@@ -116,17 +112,11 @@ dx(4:6) = inv(I)*([Mx;My;Mz]-cross(x(4:6),I*x(4:6)));
 dx(7:9) = R'*x(1:3);
 dx(10:13) = -0.5*quatmultiply([0;x(4:6)],q);
 
-<<<<<<< HEAD
-dx(14) = ref_r(3) - x(9);
 
 % dx(14) = [1 sin(x(14))*tan(x(15)) cos(x(14))*tan(x(15))]*x(4:6);
 % dx(15) = [0 cos(x(14)) -sin(x(14))]*x(4:6);
 % dx(16) = [0 sin(x(14))/cos(x(15)) cos(x(14))/cos(x(15))]*x(4:6); 
-=======
-dx(14) = [1 sin(x(14))*tan(x(15)) cos(x(14))*tan(x(15))]*x(4:6);
-dx(15) = [0 cos(x(14)) -sin(x(14))]*x(4:6);
-dx(16) = [0 sin(x(14))/cos(x(15)) cos(x(14))/cos(x(15))]*x(4:6); 
->>>>>>> parent of fc3d37d... Controller working
+
 
 end
 
