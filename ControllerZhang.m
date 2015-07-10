@@ -36,16 +36,16 @@ yaw_w = sec(pitch)*(x(5)*sin(roll)+x(6)*cos(roll));
 
 %% Zhang 2014
 %% Altitude Controller Parameters
-Kpz = 40;%20; %Zhang x4 value = 1
-Kiz = 0;%40;
-Kdz = 0;
-Kpvz = 2.8*Kpz;%10; %Zhang x4 value = 2.8
-Kivz = 4*Kpz;%10; %Zhang x4 value = 4
+Kpz = 20;%20; %Zhang x4 value = 1
+Kiz = 6;%40;
+Kdz = 15;
+Kpvz = 10;%10; %Zhang x4 value = 2.8
+Kivz = 10;%10; %Zhang x4 value = 4
 
 sat_v_des = 3; %Zhang x4 value = 0.6
 
 %% Horizontal Position Controller Parameters
-Kps = 1;%0.6; %Zhang x4 value = 0.6
+Kps = 1.2;%0.6; %Zhang x4 value = 0.6
 Kpvx = 3.33; %Zhang x4 value = 2
 Kpvy = 3.33; %Zhang x4 value = 2
 
@@ -67,11 +67,14 @@ sat_r_des = 0.3; %Zhang x4 value = 0.3
 %% PID Altitude Controller
 ez = ref_r(3) - x(9);
 if i == t0
-    Kiz = 0;
-    Kdz = 0;
+    i_z = 0;
+    d_z = 0;    
+else
+    i_z = ez + ez_prev;
+    d_z = ez - ez_prev;
 end
 
-v_des = Kpz*ez + Kiz*dt*(ez_prev + ez)*0.5 + Kdz*(ez - ez_prev)/dt;
+v_des = Kpz*ez + Kiz*dt*(i_z)*0.5 + Kdz*(d_z)/dt;
 
 % if v_des < 0
 %     v_des = max([-sat_v_des,v_des]);
@@ -98,11 +101,11 @@ if i == t0
 end
 
 vpos_des = Kps*es;
-if vpos_des < 0
-    vpos_des = max([-sat_vpos_des,vpos_des]);
-else
-    vpos_des = min([vpos_des,sat_vpos_des]);
-end
+% if vpos_des < 0
+%     vpos_des = max([-sat_vpos_des,vpos_des]);
+% else
+%     vpos_des = min([vpos_des,sat_vpos_des]);
+% end
 
 vx_des = vpos_des*cos(atan2(ey,ex));
 vy_des = vpos_des*sin(atan2(ey,ex));
@@ -130,27 +133,27 @@ u1 = m*(az+az2);
 roll_des = ay/g;
 pitch_des = -ax/g;
 
-if pitch_des < 0
-    pitch_des = max([-sat_pitch_des,pitch_des]);
-else
-    pitch_des = min([pitch_des,sat_pitch_des]);
-end
-
-if roll_des < 0
-    roll_des = max([-sat_roll_des,roll_des]);
-else
-    roll_des = min([roll_des,sat_roll_des]);
-end
+% if pitch_des < 0
+%     pitch_des = max([-sat_pitch_des,pitch_des]);
+% else
+%     pitch_des = min([pitch_des,sat_pitch_des]);
+% end
+% 
+% if roll_des < 0
+%     roll_des = max([-sat_roll_des,roll_des]);
+% else
+%     roll_des = min([roll_des,sat_roll_des]);
+% end
 
 
 % Yaw
 eyaw = ref_head - yaw;
 r_des = Kpyaw*eyaw;
-if r_des < 0
-    r_des = max([-sat_r_des,r_des]);
-else
-    r_des = min([r_des,sat_r_des]);
-end
+% if r_des < 0
+%     r_des = max([-sat_r_des,r_des]);
+% else
+%     r_des = min([r_des,sat_r_des]);
+% end
 
 
 %% Attitude Controller
