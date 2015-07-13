@@ -3,6 +3,7 @@
 % clear all;
 % close all;
 % clc;
+clear X
 
 global Rbumper
 
@@ -11,17 +12,17 @@ InitSpiriParams;
 
 %% Simulation Parameters
 
-traj_posn = zeros(6,3);
-traj_head = [0;pi/2;pi;-pi/2;0;-pi/2];
+traj_posn = [0 0 0;0 0 1];
+traj_head = [0;0];
 
-traj_time = [0;5;10;15;20;25];
+traj_time = [0;8];
 wall_loc = 10000;
-sim_idx = 8;
+% sim_idx = 40;
 
 t0 = traj_time(1);
 tf = traj_time(end);
-dt = 1/100;
-wall_loc = 10000;
+dt = 1/200;
+% wall_loc = 10000;
 wall_plane = 'YZ';
 
 %% Create Trajectory
@@ -54,8 +55,11 @@ omega_prev = omega0;
 %% Initialize History Arrays
 
 u1_hist = 0;
-ez_hist = 0;
-evz_hist = 0;
+u2_hist = 0;
+u3_hist = 0;
+u4_hist = 0;
+Ft_hist = 0;
+prop_speed_hist = [0;0;0;0];
 
 roll_hist = roll;
 pitch_hist = pitch;
@@ -74,7 +78,7 @@ theta_hist = 0;
 %% Controller Response Params
 Se = 0.05;
 
-display(sim_idx)
+% display(sim_idx)
 %% Simulation Loop
 for i = t0:dt:tf-dt
 %     display(size(ttotal))
@@ -94,9 +98,10 @@ for i = t0:dt:tf-dt
         epitch_prev = epitch;
         er_prev = er;
         omega_prev = omega; 
+        
     end
     
-    [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev);
+    [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev);
     
     %Initialize Contact Dynamics Variables
     pint1 = [0;0;0];
@@ -105,15 +110,25 @@ for i = t0:dt:tf-dt
     defl = 0;
     theta1 = 0;
     
+   
     %Propagate Dynamics
 %     [ pt1,pt2,Pc_w] = DetectContact1(Xtotal(end,:),wall_loc,wall_plane);    
     [t,X] = ode45(@(t, X) SpiriMotion(t,X,signal_c,wall_loc,wall_plane),[i i+dt],x0_step);
-
+  
     q = [X(end,10);X(end,11);X(end,12);X(end,13)]/norm(X(end,10:13));
     R = quatRotMat(q);
    
 %     disp(strcat('controller: ',num2str(icomp),'   ode: ',num2str(X(end,14))));
     %Record Data
+    
+    u1_hist = [u1_hist,u1];
+    u2_hist = [u2_hist,u2];
+    u3_hist = [u3_hist,u3];
+    u4_hist = [u4_hist,u4];
+    
+    Ft_hist = [Ft_hist,Ft];
+    prop_speed_hist = [prop_speed_hist,prop_speed];
+    
     pint1_hist = [pint1_hist,pint1];
     pint2_hist = [pint2_hist,pint2];
     pc_w_hist = [pc_w_hist,pc_w];
@@ -132,16 +147,16 @@ for i = t0:dt:tf-dt
     ttotal = [ttotal;t(end)];
    
     %End loop if Spiri has crashed
-    if Xtotal(end,9) <= -1
+    if Xtotal(end,9) <= -5
         display('Spiri has hit the floor :(');
         break;
     end  
     
 end
 
-[Ts, PO] = ControllerStats(ttotal,Xtotal,Se,traj_posn,traj_head);
+% [Ts, PO] = ControllerStats(ttotal,Xtotal,Se,traj_posn,traj_head);
 
-% Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,rdes_hist);
+Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,rdes_hist,u1_hist,u2_hist,u3_hist,u4_hist);
 % savestring = strcat('BatchSim_',num2str(sim_idx,'%03i'));
 % print(savestring,'-dpng');
 % savefig(savestring);
@@ -166,5 +181,5 @@ end
 
 % SpiriVisualization1(record,ttotal,Xtotal,'XZ',wall_loc,'YZ',pint1_hist,pint2_hist,pc_w_hist)
 
-% end
+% % end
 % 

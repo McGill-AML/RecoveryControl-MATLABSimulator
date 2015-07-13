@@ -1,4 +1,4 @@
-function [  ] = Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,rdes_hist)
+function [  ] = Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,rdes_hist,u1,u2,u3,u4)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -68,6 +68,15 @@ xlabel('Time (s)');
 ylabel('Angle (rad)');
 title('Des. & Act. r');
 grid on;
+
+subplot(2,4,8)
+plot(ttotal,u1);
+legend('U1','Location','southoutside','Orientation','horizontal');
+xlabel('Time (s)');
+ylabel('Thrust (N)');
+title('Controller U1');
+grid on;
+
 % 
 % subplot(2,3,5);
 % plot(ttotal,rolldes_hist,ttotal,pitchdes_hist,ttotal,rdes_hist);

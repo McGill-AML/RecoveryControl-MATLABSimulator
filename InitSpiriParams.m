@@ -2,12 +2,12 @@ function []= InitSpiriParams()
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
 
-global g m I Jr prop_loc Kt A d_air Cd V Tv Kp Kq Kr Dt alpha beta Ixx Iyy Izz CM Rbumper;
+global g m I Jr prop_loc Kt A d_air Cd V Tv Kp Kq Kr Dt alpha beta Ixx Iyy Izz CM Rbumper Cbumper;
 
 g = 9.81;
 
 %Mass Properties
-m = 1.06; %kg
+m = 1.06; %kg 926g
 
 %Inertia Properties in body fixed frame
 Ixx = 0.00503;
@@ -32,9 +32,12 @@ Jr = 2.3917*10^-5; %Propeller moment of inertia about rotation axis, kg m^2
 
 load('locations');
 
-prop_loc = [dp1,dp2,dp3,dp4];
+% prop_loc = [dp1,dp2,dp3,dp4];
+prop_loc = [0.13 -0.13 -0.13 0.13;0.13 0.13 -0.13 -0.13;-0.0373 -0.0373 -0.373 -0.373];
 CM = CoM;
 Rbumper = 0.31;
+% Cbumper = [-CM(1);-CM(2);prop_loc(3,1)];
+Cbumper = sum(prop_loc,2)/4;
 
 %Thrust coefficient
 % Kt = 0.000000054; %From Pleiades primitives.c 07-03-2015

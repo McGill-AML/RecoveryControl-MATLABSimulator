@@ -1,4 +1,4 @@
-function [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des] = ControllerZhang(x,i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev)
+function [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerZhang(x,i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev)
 
 global m g Kt Kr prop_loc Kp Kq Jr Dt Ixx Iyy Izz
 
@@ -18,7 +18,6 @@ global m g Kt Kr prop_loc Kp Kq Jr Dt Ixx Iyy Izz
 % x(12) = x(12) + (1*pi/180).*randn(1);
 % x(13) = x(13) + (1*pi/180).*randn(1);
 
-
 q = [x(10);x(11);x(12);x(13)]/norm(x(10:13));
 R = quatRotMat(q);
 
@@ -36,11 +35,11 @@ yaw_w = sec(pitch)*(x(5)*sin(roll)+x(6)*cos(roll));
 
 %% Zhang 2014
 %% Altitude Controller Parameters
-Kpz = 20;%20; %Zhang x4 value = 1
-Kiz = 6;%40;
-Kdz = 15;
-Kpvz = 10;%10; %Zhang x4 value = 2.8
-Kivz = 10;%10; %Zhang x4 value = 4
+Kpz = 2;%20; %Zhang x4 value = 1
+Kiz = 0;%40;
+Kdz = 0;
+Kpvz = 1.6;%10; %Zhang x4 value = 2.8
+Kivz = 60;%10; %Zhang x4 value = 4
 
 sat_v_des = 3; %Zhang x4 value = 0.6
 
@@ -51,6 +50,12 @@ Kpvy = 3.33; %Zhang x4 value = 2
 
 Kpyaw = 0.7; %Zhang x4 value = 0.7
 
+sat_vpos_des = 2.5; %Zhang x4 value = 1
+sat_roll_des = 1;%0.2 %Zhang x4 value = 0.1
+sat_pitch_des = 1;%0.2; %Zhang x4 value = 0.1
+sat_r_des = 0.3; %Zhang x4 value = 0.3
+
+%% Attitude Controller Parameters
 Kprp = 10; %Zhang x4 value = 7.2
 Kirp = 4; %Zhang x4 value = 4
 Kdrp = 4.2; %Zhang x4 value = 4.2
@@ -58,11 +63,6 @@ Kdrp = 4.2; %Zhang x4 value = 4.2
 Kpvyaw = 2.8; %Zhang x4 value = 2.8
 Kivyaw = 4; %Zhang x4 value = 4;
 Kdvyaw = 0; %Zhang x4 value = 0;
-
-sat_vpos_des = 2.5; %Zhang x4 value = 1
-sat_roll_des = 1;%0.2 %Zhang x4 value = 0.1
-sat_pitch_des = 1;%0.2; %Zhang x4 value = 0.1
-sat_r_des = 0.3; %Zhang x4 value = 0.3
 
 %% PID Altitude Controller
 ez = ref_r(3) - x(9);
@@ -88,7 +88,7 @@ if i == t0
 end
 
 az = Kpvz*evz + Kivz*dt*(evz_prev+evz)*0.5;
-az = R(3,3)*(az-g);
+az = R(3,3)*(az+g);
 
 %% PI Horizontal Position Controller
 
@@ -155,6 +155,10 @@ r_des = Kpyaw*eyaw;
 %     r_des = min([r_des,sat_r_des]);
 % end
 
+%% For Gareth testing Attitude Controller only:
+% roll_des = 0.1;
+% pitch_des = 0.1;
+% r_des = 0.1;
 
 %% Attitude Controller
 %inputs: roll_des, pitch_des, r_des

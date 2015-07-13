@@ -1,7 +1,7 @@
 function [ ] =SpiriVisualization1( record,t,X,sideview,wall_loc,wall_plane, pint1_hist,pint2_hist,pc_w_hist )
 %UNTITLED6 Summary of this function goes here
 %   Detailed explanation goes here
-global prop_loc Rbumper
+global prop_loc Rbumper Cbumper
 
 disprate = 30; %Hz
 disprate_idx = round((size(t,1)/(t(end)-t(1)))/disprate);
@@ -30,7 +30,7 @@ c1 = [0.2*cos(pi/4);0.2*cos(pi/4);prop_loc(3,1)];
 c2 = [-0.2*cos(pi/4);0.2*cos(pi/4);prop_loc(3,2)];
 c3 = [-0.2*cos(pi/4);-0.2*cos(pi/4);prop_loc(3,3)];
 c4 = [0.2*cos(pi/4);-0.2*cos(pi/4);prop_loc(3,4)];
-cR = [0;0;prop_loc(3,1)];
+cR = Cbumper;
 
 %% Create body-fixed axes
 po = [0;0;0];
@@ -46,7 +46,7 @@ axis_max = max([max(X(:,7))+0.4,max(X(:,8))+0.4,max(X(:,9))+0.4]);
 [wall_pts, wall_ln] = WallPts(wall_loc,wall_plane,10,15);
 
 if record == 1
-    writerObj = VideoWriter('simulation.avi');
+    writerObj = VideoWriter('simulation_nosat.avi');
     writerObj.FrameRate = disprate;
     open(writerObj);
 end
