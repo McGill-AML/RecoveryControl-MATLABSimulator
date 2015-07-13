@@ -32,8 +32,8 @@ Jr = 2.3917*10^-5; %Propeller moment of inertia about rotation axis, kg m^2
 
 load('locations');
 
-% prop_loc = [dp1,dp2,dp3,dp4];
-prop_loc = [0.13 -0.13 -0.13 0.13;0.13 0.13 -0.13 -0.13;-0.0373 -0.0373 -0.373 -0.373];
+prop_loc = [dp1,dp2,dp3,dp4];
+% prop_loc = [0.13 -0.13 -0.13 0.13;0.13 0.13 -0.13 -0.13;-0.0373 -0.0373 -0.373 -0.373];
 CM = CoM;
 Rbumper = 0.31;
 % Cbumper = [-CM(1);-CM(2);prop_loc(3,1)];
@@ -42,7 +42,7 @@ Cbumper = sum(prop_loc,2)/4;
 %Thrust coefficient
 % Kt = 0.000000054; %From Pleiades primitives.c 07-03-2015
 % Kt = 3.721e-5 * 2; %from x4data_stock.m
-Kt = 0.1;
+Kt = 0.1204; %0.1;
 
 %Aerodynamic Drag
 A = 0; %Area seen by relative velocity vector
@@ -53,7 +53,7 @@ Tv = zeros(3); %Wind to body rotation matrix
 Kp = 0; %Aerodynamic drag constant
 Kq = 0; %Aerodynamic drag constant
 Kr = 0; %Aerodynamic drag constant
-Dt = 0.1; %Drag torque factor of coaxial rotor pairs
+Dt = 0.0518; %0.1; %Drag torque factor of coaxial rotor pairs
 % Dt = 2.2056e-6 * (2); %from x4data_stock.m
 alpha = 0;
 beta = 0;

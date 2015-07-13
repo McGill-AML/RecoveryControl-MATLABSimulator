@@ -15,7 +15,7 @@ InitSpiriParams;
 traj_posn = [0 0 0;0 0 1];
 traj_head = [0;0];
 
-traj_time = [0;8];
+traj_time = [0;5];
 wall_loc = 10000;
 % sim_idx = 40;
 
