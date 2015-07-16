@@ -5,17 +5,17 @@
 % clc;
 clear X
 
-global m g
+global m g Kt
 
 %% Spiri System Parameters
 InitSpiriParams;
 
 %% Simulation Parameters
 
-traj_posn = [0 0 0;0 0 1];
-traj_head = [-pi/4;-pi/4];
+traj_posn = [0 0 0;1 1 1];
+traj_head = [0;pi/2];
 
-traj_time = [0;5];
+traj_time = [0;8];
 % % wall_loc = 10000;
 % sim_idx = 40;
 
@@ -34,7 +34,7 @@ traj_index = 1;
 q0 = quatmultiply([0;-1;0;0],[cos(traj_head(1)/2);0;0;sin(traj_head(1)/2)]);
 q0 = q0/norm(q0);
 x0 = [zeros(6,1);traj_posn(1,:)';q0];
-omega0 = zeros(4,1);
+omega0 = [-1;1;-1;1].*repmat(sqrt(m*g/(4*Kt)),4,1);  %zeros(4,1);
 prop_speed = omega0;
 
 Xtotal = x0';
@@ -52,6 +52,7 @@ ez_prev = 0;
 evz_prev = 0;
 eroll_prev = 0;
 epitch_prev = 0;
+eyaw_prev = 0;
 er_prev = 0;
 omega_prev = omega0;
 
@@ -107,12 +108,13 @@ for i = t0:dt:tf-dt
         evz_prev = evz;
         eroll_prev = eroll;
         epitch_prev = epitch;
+        eyaw_prev = eyaw;
         er_prev = er;
         omega_prev = omega; 
         
     end
     
-    [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev);
+    [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev);
     
     %Initialize Contact Dynamics Variables
     pint1 = [0;0;0];
@@ -177,7 +179,7 @@ for i = t0:dt:tf-dt
     ttotal = [ttotal;t(end)];
    
     %End loop if Spiri has crashed
-    if Xtotal(end,9) <= 0
+    if Xtotal(end,9) <= -1
         display('Spiri has hit the floor :(');
         break;
     end  

@@ -1,4 +1,4 @@
-function [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerZhang(x,i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,er_prev,omega_prev)
+function [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerZhang(x,i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev)
 
 global m g Kt Kr prop_loc Kp Kq Jr Dt Ixx Iyy Izz
 
@@ -48,7 +48,9 @@ Kps = 1;%0.6; %Zhang x4 value = 0.6
 Kpvx = 2; %Zhang x4 value = 2
 Kpvy = 2; %Zhang x4 value = 2
 
-Kpyaw = 0.7; %Zhang x4 value = 0.7
+Kpyaw = 0.9; %Zhang x4 value = 0.7
+Kiyaw = 1;
+Kdyaw = 0.4;
 
 sat_vpos_des = 2.5; %Zhang x4 value = 1
 sat_roll_des = 1;%0.2 %Zhang x4 value = 0.1
@@ -60,8 +62,8 @@ Kprp = 7.2; %Zhang x4 value = 7.2
 Kirp = 4; %Zhang x4 value = 4
 Kdrp = 4.2; %Zhang x4 value = 4.2
 
-Kpvyaw = 2.8; %Zhang x4 value = 2.8
-Kivyaw = 4; %Zhang x4 value = 4;
+Kpvyaw = 1.8; %Zhang x4 value = 2.8
+Kivyaw = 2; %Zhang x4 value = 4;
 Kdvyaw = 0; %Zhang x4 value = 0;
 
 %% PID Altitude Controller
@@ -148,7 +150,16 @@ pitch_des = -ax/g;
 
 % Yaw
 eyaw = ref_head - yaw;
-r_des = Kpyaw*eyaw;
+
+if i == t0
+    i_yaw = 0;
+    d_yaw = 0;
+else
+    i_yaw = eyaw + eyaw_prev;
+    d_yaw = eyaw - eyaw_prev;
+end
+
+r_des = Kpyaw*eyaw + Kiyaw*dt*(i_yaw) + Kdyaw*(d_yaw)/dt;
 % if r_des < 0
 %     r_des = max([-sat_r_des,r_des]);
 % else
@@ -206,8 +217,15 @@ A = [-Kt -Kt -Kt -Kt;...
 temp = inv(A)*signal_c;
 omegasquare = temp.*(temp>0);
 omega = sqrt(omegasquare);
-omega = [-omega(1);omega(2);-omega(3);omega(4)];
-omegadot = (omega - omega_prev)/dt;
+omega = [-omega(1);omega(2);-omega(3);omega(4)]; %in RPM
+
+omega_rad = omega * (2*pi/60);
+omega_prev_rad = omega_prev * (2*pi/60);
+
+omegadot = (omega_rad - omega_prev_rad)/dt; %in rad/s^2
+% disp(omega_rad)
+% disp(omega_prev_rad);
+% disp(omegadot);
 signal_c = [omega;omegadot];
 
 

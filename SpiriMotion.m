@@ -2,7 +2,7 @@ function [dx, defl, Fc_mag, pc_w] = SpiriMotion(t,x,signal_c,wall_loc,wall_plane
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
-global g m I Jr prop_loc Kt A d_air Cd V Tv Kp Kq Kr Dt Rbumper Cbumper;
+global g m I Jr prop_loc Kt A d_air Cd V Tv Kp Kq Kr Dt Rbumper Cbumper Ixx Iyy Izz;
 
 % persistent defl_fine;
 % disp(size(defl_fine));
@@ -15,8 +15,10 @@ x = reshape(x,[max(size(x)),1]);
 dx = zeros(13,1);
 
 %% Controller Signal
-prop_speed = signal_c(1:4);
-prop_accel = signal_c(5:8);
+prop_speed = signal_c(1:4); %in RPM
+prop_accel = signal_c(5:8); %in rad/s^2
+
+prop_speed_rad = prop_speed * (2*pi/60);
 
 %% Contact Detection
 pc_w = [0;0;0];
@@ -120,9 +122,11 @@ assignin('base','prop_speed',prop_speed);
 % My = signal_c(3)-Kq*x(5)^2;%+x(4)*Jr*sum(prop_speed);
 % Mz = signal_c(4)-Kr*x(6)^2; %;-Jr*sum(prop_accel);
 
-Mx = -Kt*prop_loc(2,:)*(prop_speed.^2)-Kp*x(4)^2-x(5)*Jr*sum(prop_speed) + Mc(1);
-My = Kt*prop_loc(1,:)*(prop_speed.^2)-Kq*x(5)^2+x(4)*Jr*sum(prop_speed) + Mc(2);
-Mz =  [-Dt Dt -Dt Dt]*(prop_speed.^2)-Kr*x(6)^2-Jr*sum(prop_accel) + Mc(3);
+Mx = -Kt*prop_loc(2,:)*(prop_speed.^2)-Kp*x(4)^2-x(5)*Jr*sum(prop_speed_rad) + Mc(1);
+My = Kt*prop_loc(1,:)*(prop_speed.^2)-Kq*x(5)^2+x(4)*Jr*sum(prop_speed_rad) + Mc(2);
+Mz =  [-Dt Dt -Dt Dt]*(prop_speed.^2)-Kr*x(6)^2 -Jr*sum(prop_accel) + Mc(3);
+
+
 
 dx(1:3) = (Fg + Fa + Ft + Fc_b - m*cross(x(4:6),x(1:3)))/m;
 dx(4:6) = inv(I)*([Mx;My;Mz]-cross(x(4:6),I*x(4:6)));

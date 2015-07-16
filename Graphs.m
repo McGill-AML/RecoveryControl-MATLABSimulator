@@ -12,7 +12,7 @@ ylabel('Velocity (m/s)');
 title('Body linear velocities');
 grid on;
 ax = gca;
-axis([ttotal(1) ttotal(end) ax.YLim]);
+% axis([ttotal(1) ttotal(end) ax.YLim]);
 
 subplot(2,4,2);
 plot(ttotal,Xtotal(:,4),ttotal,Xtotal(:,5),ttotal,Xtotal(:,6));
@@ -22,7 +22,7 @@ ylabel('Angular Rate (rad/s)');
 title('Body angular velocities');
 grid on;
 ax = gca;
-axis([ttotal(1) ttotal(end) ax.YLim]);
+% axis([ttotal(1) ttotal(end) ax.YLim]);
 
 subplot(2,4,3);
 ax=gca;
@@ -34,7 +34,7 @@ ylabel('World Position (m)');
 title('World positions');
 grid on;
 ax = gca;
-axis([ttotal(1) ttotal(end) ax.YLim]);
+% axis([ttotal(1) ttotal(end) ax.YLim]);
 
 % subplot(2,3,4);
 % plot(ttotal,Xtotal(:,10),ttotal,Xtotal(:,11),ttotal,Xtotal(:,12),ttotal,Xtotal(:,13));
@@ -51,7 +51,7 @@ ylabel('Angle (rad');
 title('Actual Yaw');
 grid on;
 ax = gca;
-axis([ttotal(1) ttotal(end) ax.YLim]);
+% axis([ttotal(1) ttotal(end) ax.YLim]);
 
 subplot(2,4,5)
 plot(ttotal,rolldes_hist,ttotal,roll_hist);
@@ -61,7 +61,7 @@ ylabel('Angle (rad)');
 title('Des. & Act. \phi');
 grid on;
 ax = gca;
-axis([ttotal(1) ttotal(end) ax.YLim]);
+% axis([ttotal(1) ttotal(end) ax.YLim]);
 
 subplot(2,4,6)
 plot(ttotal,pitchdes_hist,ttotal,pitch_hist);
@@ -71,7 +71,7 @@ ylabel('Angle (rad)');
 title('Des. & Act. \theta');
 grid on;
 ax = gca;
-axis([ttotal(1) ttotal(end) ax.YLim]);
+% axis([ttotal(1) ttotal(end) ax.YLim]);
 
 subplot(2,4,7)
 plot(ttotal,rdes_hist,ttotal,Xtotal(:,6));
@@ -81,7 +81,7 @@ ylabel('Angle (rad)');
 title('Des. & Act. r');
 grid on;
 ax = gca;
-axis([ttotal(1) ttotal(end) ax.YLim]);
+% axis([ttotal(1) ttotal(end) ax.YLim]);
 
 subplot(2,4,8)
 plot(ttotal,u1,ttotal,u2,ttotal,u3,ttotal,u4);
@@ -91,7 +91,7 @@ ylabel('Thrust (N)/ Moment (Nm)');
 title('F & T Signals');
 grid on;
 ax = gca;
-axis([ttotal(1) ttotal(end) ax.YLim]);
+% axis([ttotal(1) ttotal(end) ax.YLim]);
 
 % 
 % subplot(2,3,5);
