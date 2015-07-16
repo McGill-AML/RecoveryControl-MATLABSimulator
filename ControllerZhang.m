@@ -44,9 +44,9 @@ Kivz = 60;%10; %Zhang x4 value = 4
 sat_v_des = 3; %Zhang x4 value = 0.6
 
 %% Horizontal Position Controller Parameters
-Kps = 1.2;%0.6; %Zhang x4 value = 0.6
-Kpvx = 3.33; %Zhang x4 value = 2
-Kpvy = 3.33; %Zhang x4 value = 2
+Kps = 1;%0.6; %Zhang x4 value = 0.6
+Kpvx = 2; %Zhang x4 value = 2
+Kpvy = 2; %Zhang x4 value = 2
 
 Kpyaw = 0.7; %Zhang x4 value = 0.7
 
@@ -56,7 +56,7 @@ sat_pitch_des = 1;%0.2; %Zhang x4 value = 0.1
 sat_r_des = 0.3; %Zhang x4 value = 0.3
 
 %% Attitude Controller Parameters
-Kprp = 10; %Zhang x4 value = 7.2
+Kprp = 7.2; %Zhang x4 value = 7.2
 Kirp = 4; %Zhang x4 value = 4
 Kdrp = 4.2; %Zhang x4 value = 4.2
 

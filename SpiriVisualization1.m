@@ -5,6 +5,7 @@ global prop_loc Rbumper Cbumper
 
 disprate = 30; %Hz
 disprate_idx = round((size(t,1)/(t(end)-t(1)))/disprate);
+% disprate_idx = 1;
 
 figure('units','normalized','outerposition',[0 0 1 1])
 
@@ -46,14 +47,13 @@ axis_max = max([max(X(:,7))+0.4,max(X(:,8))+0.4,max(X(:,9))+0.4]);
 [wall_pts, wall_ln] = WallPts(wall_loc,wall_plane,10,15);
 
 if record == 1
-    writerObj = VideoWriter('simulation_nosat.avi');
+    writerObj = VideoWriter('simulation.avi');
     writerObj.FrameRate = disprate;
     open(writerObj);
 end
 
-for i = 1:disprate_idx:size(t,1)
-% for i = 313    
-   
+% for i = 1:disprate_idx:size(t,1)
+for i = 133   
    %% Rotate body-fixed points to world-frame points
    q = [X(i,10);X(i,11);X(i,12);X(i,13)];
    q = q/norm(q);
@@ -90,7 +90,9 @@ for i = 1:disprate_idx:size(t,1)
    plotCircle3D(c2_p,normal,0.11);
    plotCircle3D(c3_p,normal,0.11);
    plotCircle3D(c4_p,normal,0.11);
-   plotCircle3D(cR_p,normal,Rbumper); %Virtual bumper
+   
+   normal2 = cross(c1_p-c3_p,c2_p-c4_p);
+   plotCircle3D(cR_p,normal2,Rbumper); %Virtual bumper
    
    %% Plot Spiri spherical bumper
    for j = 1:size(sx,1)

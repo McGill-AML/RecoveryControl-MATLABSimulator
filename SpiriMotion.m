@@ -1,8 +1,11 @@
-function dx = SpiriMotion(t,x,signal_c,wall_loc,wall_plane)
+function [dx, defl, Fc_mag, pc_w] = SpiriMotion(t,x,signal_c,wall_loc,wall_plane)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
 global g m I Jr prop_loc Kt A d_air Cd V Tv Kp Kq Kr Dt Rbumper Cbumper;
+
+% persistent defl_fine;
+% disp(size(defl_fine));
 
 q = [x(10);x(11);x(12);x(13)]/norm(x(10:13));
 R = quatRotMat(q);
@@ -16,8 +19,8 @@ prop_speed = signal_c(1:4);
 prop_accel = signal_c(5:8);
 
 %% Contact Detection
+pc_w = [0;0;0];
 defl = 0;
-
 if abs(wall_loc - x(7)) <= Rbumper
     if (sum(wall_plane == 'YZ')==2 || sum(wall_plane == 'ZY')==2)
         
@@ -36,7 +39,7 @@ if abs(wall_loc - x(7)) <= Rbumper
         assignin('base','theta1',theta1);
 %         disp(theta1)
 %         disp(theta1)
-%         if abs(imag(theta1)) <= 1e-5
+        if abs(imag(theta1)) <= 1e-5
             theta1 = real(theta1);
             theta2 = real(theta2);
         
@@ -80,21 +83,26 @@ if abs(wall_loc - x(7)) <= Rbumper
 
             end %else no contact
             
-%         end
+        end
 
     end
 end
+% defl_fine(end+1) = defl;
+% assignin('base','defl_fine',defl_fine);
 assignin('base','defl',defl);
 
 %% Calculate contact force and moment
 if defl > 0
-    Fc_mag = 500*defl^2;
+%     Fc_mag = 5*10^2*defl^1.5;
+    Fc_mag = 1000*defl^1.5;
+
 
     Fc_w = [-Fc_mag;0;0];
     Fc_b = R*Fc_w;
         
     Mc = cross(pc_b,Fc_b);
 else
+    Fc_mag = 0;
     Fc_b = [0;0;0];
     Mc = [0;0;0];
 end
@@ -104,6 +112,7 @@ Fa = Tv*[-0.5*d_air*V^2*A*Cd;0;0];
 Ft = [0;0;-Kt*sum(prop_speed.^2)];
 % Ft = [0;0;-signal_c(1)];
 
+% assignin('base','Fc',Fc_mag);
 assignin('base','Ft',-Kt*sum(prop_speed.^2));
 assignin('base','prop_speed',prop_speed);
 

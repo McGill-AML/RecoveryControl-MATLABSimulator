@@ -5,7 +5,7 @@
 % clc;
 clear X
 
-global Rbumper
+global m g
 
 %% Spiri System Parameters
 InitSpiriParams;
@@ -13,16 +13,16 @@ InitSpiriParams;
 %% Simulation Parameters
 
 traj_posn = [0 0 0;0 0 1];
-traj_head = [0;0];
+traj_head = [-pi/4;-pi/4];
 
 traj_time = [0;5];
-wall_loc = 10000;
+% % wall_loc = 10000;
 % sim_idx = 40;
 
 t0 = traj_time(1);
 tf = traj_time(end);
 dt = 1/200;
-% wall_loc = 10000;
+wall_loc = 10000; %0.6;
 wall_plane = 'YZ';
 
 %% Create Trajectory
@@ -35,9 +35,12 @@ q0 = quatmultiply([0;-1;0;0],[cos(traj_head(1)/2);0;0;sin(traj_head(1)/2)]);
 q0 = q0/norm(q0);
 x0 = [zeros(6,1);traj_posn(1,:)';q0];
 omega0 = zeros(4,1);
+prop_speed = omega0;
 
 Xtotal = x0';
 ttotal = t0;
+
+
 
 q = [Xtotal(end,10);Xtotal(end,11);Xtotal(end,12);Xtotal(end,13)]/norm(Xtotal(end,10:13));
 R = quatRotMat(q);
@@ -54,7 +57,7 @@ omega_prev = omega0;
 
 %% Initialize History Arrays
 
-u1_hist = 0;
+u1_hist = -m*g; %thrust required for hover
 u2_hist = 0;
 u3_hist = 0;
 u4_hist = 0;
@@ -74,6 +77,14 @@ pint2_hist = [0;0;0];
 pc_w_hist = [0;0;0];
 defl_hist = 0;
 theta_hist = 0;
+
+t_tot = [];
+defl_tot = [];
+Fc_tot = [];
+pc_tot = [];
+X_tot = [];
+dX_tot = [];
+
 
 %% Controller Response Params
 Se = 0.05;
@@ -107,13 +118,27 @@ for i = t0:dt:tf-dt
     pint1 = [0;0;0];
     pint2 = [0;0;0];
     pc_w = [0;0;0];
-    defl = 0;
-    theta1 = 0;    
+%     defl_fine = 0;
+    theta1 = 0;   
+    Ft = 0;
+    Fc = 0;
    
     %Propagate Dynamics
-%     [ pt1,pt2,Pc_w] = DetectContact1(Xtotal(end,:),wall_loc,wall_plane);    
+    
     [t,X] = ode45(@(t, X) SpiriMotion(t,X,signal_c,wall_loc,wall_plane),[i i+dt],x0_step);
-  
+    
+%     if defl ~= 0
+        for j = 1:size(X,1)
+            [dx,defl_fine,Fc,pc] = SpiriMotion(t(j),X(j,:),signal_c,wall_loc,wall_plane);
+            dX_tot = [dX_tot;dx'];
+            defl_tot = [defl_tot;defl_fine];
+            Fc_tot = [Fc_tot;Fc];
+            pc_tot = [pc_tot,pc];
+        end          
+        t_tot = [t_tot;t];
+        X_tot = [X_tot;X];
+%     end
+        
     q = [X(end,10);X(end,11);X(end,12);X(end,13)]/norm(X(end,10:13));
     R = quatRotMat(q);
    
@@ -134,6 +159,12 @@ for i = t0:dt:tf-dt
     defl_hist = [defl_hist;defl];
     theta_hist = [theta_hist;theta1];
     
+%     defl_fine_hist = [defl_fine_hist,defl_fine];
+%     t_fine = [t_fine;t];
+    
+%     display(size(t))
+%     display(size(defl_fine))
+    
     roll_hist = [roll_hist;roll];
     pitch_hist = [pitch_hist;pitch];
     yaw_hist = [yaw_hist;yaw];
@@ -146,7 +177,7 @@ for i = t0:dt:tf-dt
     ttotal = [ttotal;t(end)];
    
     %End loop if Spiri has crashed
-    if Xtotal(end,9) <= -5
+    if Xtotal(end,9) <= 0
         display('Spiri has hit the floor :(');
         break;
     end  
@@ -170,15 +201,30 @@ Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,r
 % legend('roll_des','pitch_des','r_des');
 
 if sum(defl_hist) > 0
-    figure();
-    plot(ttotal,defl_hist)
-    hold on
-    plot(ttotal,Xtotal(:,7)+Rbumper-wall_loc)
-    title('Deflection and Unrotated Deflection');
-    legend('Calculated Defl','Defl if not rotated');
+    Graphs_Contact(ttotal,Xtotal,defl_hist,wall_loc,t_tot,defl_tot,Fc_tot,dX_tot);
+    
+%     figure();
+%     subplot(2,1,1);
+%     plot(ttotal,defl_hist)
+%     hold on
+%     plot(ttotal,Xtotal(:,7)+Rbumper-wall_loc)
+%     plot(t_tot,defl_tot)
+%     title('Deflection and Unrotated Deflection');
+%     xlabel('Time (s)');
+%     ylabel('\delta (m)');
+%     legend('200Hz Defl','Defl if not rotated','CT Defl');
+%     ax = gca;
+%     axis([ax.XLim 0 ax.YLim(2)]);
+%     grid on;
+%     subplot(2,1,2);
+%     plot(t_tot,Fc_tot);
+%     title('Contact Force Magnitude');
+%     xlabel('Time (s)');
+%     ylabel('Force (N)');
+%     grid on;
 end
 
 % SpiriVisualization1(record,ttotal,Xtotal,'XZ',wall_loc,'YZ',pint1_hist,pint2_hist,pc_w_hist)
 
-% % end
+% end
 % 
