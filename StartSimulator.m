@@ -12,16 +12,20 @@ InitSpiriParams;
 
 %% Simulation Parameters
 
-traj_posn = [0 0 0;1 1 1];
-traj_head = [0;pi/2];
+% traj_posn = [0 0 0;0 0 0;0 0 0;0 0 0;0 0 0;0 0 0];
+% traj_head = [0;pi/2;pi;-pi/2;0;-pi/2];
+% 
+% traj_time = [0;5;10;15;20;25];
+traj_posn = [0 0 0;0 0 0];
+traj_head = [-pi/2; -pi/2];
+traj_time = [0; 5];
 
-traj_time = [0;8];
 % % wall_loc = 10000;
 % sim_idx = 40;
 
 t0 = traj_time(1);
 tf = traj_time(end);
-dt = 1/200;
+dt = 1/50;
 wall_loc = 10000; %0.6;
 wall_plane = 'YZ';
 
@@ -115,7 +119,7 @@ for i = t0:dt:tf-dt
     end
     
     [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev);
-    
+
     %Initialize Contact Dynamics Variables
     pint1 = [0;0;0];
     pint2 = [0;0;0];

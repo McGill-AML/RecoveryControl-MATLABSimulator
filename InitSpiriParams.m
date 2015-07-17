@@ -17,7 +17,8 @@ Ixy = -4.2e-7;
 Iyz = -1.14e-6;
 Izx = -5.289e-5;
 
-I = [Ixx 0 0;0 Iyy 0;0 0 Izz]; %vehicle moment of inertias, kg m^2
+I = [Ixx Ixy Izx;Ixy Iyy Iyz;Izx Iyz Izz]; %vehicle moment of inertias, kg m^2
+% I = [Ixx 0 0;0 Iyy 0;0 0 Izz];
 Jr = 2.20751e-5; %Propeller moment of inertia about rotation axis, kg m^2
 
 

@@ -37,7 +37,8 @@ yaw_w = sec(pitch)*(x(5)*sin(roll)+x(6)*cos(roll));
 %% Altitude Controller Parameters
 Kpz = 2;%20; %Zhang x4 value = 1
 Kiz = 0;%40;
-Kdz = 0;
+Kdz = 0.4;
+
 Kpvz = 1.6;%10; %Zhang x4 value = 2.8
 Kivz = 60;%10; %Zhang x4 value = 4
 
@@ -48,9 +49,9 @@ Kps = 1;%0.6; %Zhang x4 value = 0.6
 Kpvx = 2; %Zhang x4 value = 2
 Kpvy = 2; %Zhang x4 value = 2
 
-Kpyaw = 0.9; %Zhang x4 value = 0.7
+Kpyaw = 1.2; %Zhang x4 value = 0.7
 Kiyaw = 1;
-Kdyaw = 0.4;
+Kdyaw = 0.2;
 
 sat_vpos_des = 2.5; %Zhang x4 value = 1
 sat_roll_des = 1;%0.2 %Zhang x4 value = 0.1
@@ -150,6 +151,12 @@ pitch_des = -ax/g;
 
 % Yaw
 eyaw = ref_head - yaw;
+% 
+% if abs(eyaw) > pi
+%     Kpyaw = -Kpyaw;
+% %     Kiyaw = -Kiyaw;
+% %     Kdyaw = -Kdyaw;
+% end
 
 if i == t0
     i_yaw = 0;
@@ -223,9 +230,7 @@ omega_rad = omega * (2*pi/60);
 omega_prev_rad = omega_prev * (2*pi/60);
 
 omegadot = (omega_rad - omega_prev_rad)/dt; %in rad/s^2
-% disp(omega_rad)
-% disp(omega_prev_rad);
-% disp(omegadot);
+
 signal_c = [omega;omegadot];
 
 
