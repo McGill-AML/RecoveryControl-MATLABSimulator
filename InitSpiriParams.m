@@ -27,7 +27,7 @@ prop_loc = [p1, p2, p3, p4] - repmat(CoM,1,4); %prop locations relative to CoM
 % prop_loc = [dp1,dp2,dp3,dp4];
 % prop_loc = [0.13 -0.13 -0.13 0.13;0.13 0.13 -0.13 -0.13;-0.0373 -0.0373 -0.373 -0.373];
 CM = CoM;
-Rbumper = 0.31;
+Rbumper = 0.29;
 Cbumper = sum(prop_loc,2)/4; %bumper center relative to CoM
 
 

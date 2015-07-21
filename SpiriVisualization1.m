@@ -5,9 +5,24 @@ global prop_loc Rbumper Cbumper
 
 disprate = 30; %Hz
 disprate_idx = round((size(t,1)/(t(end)-t(1)))/disprate);
-% disprate_idx = 1;
+disprate_idx = 1;
 
 figure('units','normalized','outerposition',[0 0 1 1])
+
+%% Create body-fixed centers of 4 bumpers + virtual bumper
+load('locations2');
+% c1 = [0.2*cos(pi/4);0.2*cos(pi/4);prop_loc(3,1)];
+% c2 = [-0.2*cos(pi/4);0.2*cos(pi/4);prop_loc(3,2)];
+% c3 = [-0.2*cos(pi/4);-0.2*cos(pi/4);prop_loc(3,3)];
+% c4 = [0.2*cos(pi/4);-0.2*cos(pi/4);prop_loc(3,4)];
+c1 = prop_loc(:,1);
+c2 = prop_loc(:,2);
+c3 = prop_loc(:,3);
+c4 = prop_loc(:,4);
+cR = Cbumper;
+
+clear p1 p2 p3 p4;
+
 
 %% Create body-fixed points of spherical bumper
 [sx,sy,sz] = sphere;
@@ -20,18 +35,12 @@ syR = zeros(size(sy));
 szR = zeros(size(sz));
 
 %% Create body-fixed points of Spiri body
-p1 = [0.08;0.0115;0];
-p2 = [0;0.0575;0];
-p3 = [-0.1;0;0];
-p4 = [0;-0.0575;0];
-p5 = [0.08;-0.0115;0];
+p1 = [0.08;0.0115;0]-CoM;
+p2 = [0;0.0575;0]-CoM;
+p3 = [-0.1;0;0]-CoM;
+p4 = [0;-0.0575;0]-CoM;
+p5 = [0.08;-0.0115;0]-CoM;
 
-%% Create body-fixed centers of 4 bumpers + virtual bumper
-c1 = [0.2*cos(pi/4);0.2*cos(pi/4);prop_loc(3,1)];
-c2 = [-0.2*cos(pi/4);0.2*cos(pi/4);prop_loc(3,2)];
-c3 = [-0.2*cos(pi/4);-0.2*cos(pi/4);prop_loc(3,3)];
-c4 = [0.2*cos(pi/4);-0.2*cos(pi/4);prop_loc(3,4)];
-cR = Cbumper;
 
 %% Create body-fixed axes
 po = [0;0;0];
@@ -44,7 +53,7 @@ axis_min = min([min(X(:,7))-0.4,min(X(:,8))-0.4,min(X(:,9))-0.4]);
 axis_max = max([max(X(:,7))+0.4,max(X(:,8))+0.4,max(X(:,9))+0.4]);
 
 %% Create world-frame wall points
-[wall_pts, wall_ln] = WallPts(wall_loc,wall_plane,10,15);
+[wall_pts, wall_ln] = WallPts(wall_loc,wall_plane,3,5);
 
 if record == 1
     writerObj = VideoWriter('simulation.avi');
@@ -53,7 +62,7 @@ if record == 1
 end
 
 for i = 1:disprate_idx:size(t,1)
-% for i = 133   
+% for i = 5780%134 
    %% Rotate body-fixed points to world-frame points
    q = [X(i,10);X(i,11);X(i,12);X(i,13)];
    q = q/norm(q);

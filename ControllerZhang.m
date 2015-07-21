@@ -1,4 +1,4 @@
-function [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerZhang(x,i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev)
+function [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4,recovery] = ControllerZhang(x,i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev,accel,recovery)
 
 global m g Kt Kr prop_loc Kp Kq Jr Dt Ixx Iyy Izz
 
@@ -23,6 +23,10 @@ R = quatRotMat(q);
 
 [roll, pitch, yaw] = quat2angle(q,'xyz');
 
+if recovery == 2
+    ref_r = [-0.5;0;ref_r(3)];
+    ref_head = 0;
+end
 
 % roll2 = x(14);
 % pitch2 = x(15);
@@ -177,6 +181,26 @@ r_des = Kpyaw*eyaw + Kiyaw*dt*(i_yaw) + Kdyaw*(d_yaw)/dt;
 % roll_des = 0.1;
 % pitch_des = 0.1;
 % r_des = 0.1;
+
+if recovery ~= 2
+if accel >= 20  || recovery == 1
+    recovery = 1;
+    u1 = m*az*1.5;
+    roll_des = 0;
+    pitch_des = 45*pi/180;
+    Kprp = 100;    
+    r_des = 0;
+    
+    if abs(pitch) <= 5*pi/180
+        recovery = 2;
+        roll_des = 0;
+        pitch_des = 0;
+        Krpr = 100;
+        r_des = 0;
+    end
+end
+end
+
 
 %% Attitude Controller
 %inputs: roll_des, pitch_des, r_des
