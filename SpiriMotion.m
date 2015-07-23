@@ -17,7 +17,7 @@ dx = zeros(13,1);
 prop_speed = signal_c(1:4); %in RPM
 prop_accel = signal_c(5:8); %in rad/s^2
 
-prop_speed_rad = prop_speed * (2*pi/60); %in rad/s^2
+prop_speed_rad = prop_speed * (2*pi/60); %in rad/s
 
 %% Contact Detection
 pc_w = [100;100;0];
@@ -148,15 +148,18 @@ Fa = Tv*[-0.5*d_air*V^2*A*Cd;0;0];
 Ft = [0;0;-Kt*sum(prop_speed.^2)];
 
 assignin('base','prop_speed',prop_speed);
+assignin('base','prop_accel',prop_accel);
 
 % Mx = signal_c(2)-Kp*x(4)^2;%-x(5)*Jr*sum(prop_speed);
 % My = signal_c(3)-Kq*x(5)^2;%+x(4)*Jr*sum(prop_speed);
 % Mz = signal_c(4)-Kr*x(6)^2; %;-Jr*sum(prop_accel);
+% 
+% prop_speed = prop_speed2;
+% prop_speed_rad = prop_speed2_rad;
 
 Mx = -Kt*prop_loc(2,:)*(prop_speed.^2)-Kp*x(4)^2-x(5)*Jr*sum(prop_speed_rad) + Mc(1);
 My = Kt*prop_loc(1,:)*(prop_speed.^2)-Kq*x(5)^2+x(4)*Jr*sum(prop_speed_rad) + Mc(2);
 Mz =  [-Dt Dt -Dt Dt]*(prop_speed.^2)-Kr*x(6)^2 -Jr*sum(prop_accel) + Mc(3);
-
 
 
 dx(1:3) = (Fg + Fa + Ft + Fc_b - m*cross(x(4:6),x(1:3)))/m;

@@ -2,6 +2,9 @@ function [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll
 
 global m g Kt Kr prop_loc Kp Kq Jr Dt Ixx Iyy Izz
 
+
+prop_accel_sat = (20000*2*pi/60); %in rad/s^2
+
 % Add noise to state estimates
 % x(1) = x(1) + (0.01).*randn(1);
 % x(2) = x(2) + (0.01).*randn(1);
@@ -23,14 +26,6 @@ R = quatRotMat(q);
 
 [roll, pitch, yaw] = quat2angle(q,'xyz');
 
-if recovery == 2
-    ref_r = [-0.5;0;ref_r(3)];
-    ref_head = 0;
-end
-
-% roll2 = x(14);
-% pitch2 = x(15);
-% yaw2 = x(16);
 
 %% Tait-Bryan Euler Angle rates
 roll_w = x(4) + tan(pitch)*(x(5)*sin(roll)+x(6)*cos(roll));
@@ -182,25 +177,6 @@ r_des = Kpyaw*eyaw + Kiyaw*dt*(i_yaw) + Kdyaw*(d_yaw)/dt;
 % pitch_des = 0.1;
 % r_des = 0.1;
 
-if recovery ~= 2
-if accel >= 20  || recovery == 1
-    recovery = 1;
-    u1 = m*az*1.5;
-    roll_des = 0;
-    pitch_des = 45*pi/180;
-    Kprp = 100;    
-    r_des = 0;
-    
-    if abs(pitch) <= 5*pi/180
-        recovery = 2;
-        roll_des = 0;
-        pitch_des = 0;
-        Krpr = 100;
-        r_des = 0;
-    end
-end
-end
-
 
 %% Attitude Controller
 %inputs: roll_des, pitch_des, r_des
@@ -254,6 +230,19 @@ omega_rad = omega * (2*pi/60);
 omega_prev_rad = omega_prev * (2*pi/60);
 
 omegadot = (omega_rad - omega_prev_rad)/dt; %in rad/s^2
+
+% Saturate propeller acceleration
+
+prop_accel = zeros(4,1);
+prop_accel(1) = min(abs(omegadot(1)),prop_accel_sat)*sign(omegadot(1));
+prop_accel(2) = min(abs(omegadot(2)),prop_accel_sat)*sign(omegadot(2));
+prop_accel(3) = min(abs(omegadot(3)),prop_accel_sat)*sign(omegadot(3));
+prop_accel(4) = min(abs(omegadot(4)),prop_accel_sat)*sign(omegadot(4));
+
+% Recalculate prop speed based on saturated propeller acceleration
+omegadot = prop_accel;
+omega_rad = omegadot*dt + omega_prev_rad;
+omega = omega_rad * (60/(2*pi));
 
 signal_c = [omega;omegadot];
 

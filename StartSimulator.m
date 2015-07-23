@@ -18,17 +18,23 @@ InitSpiriParams;
 % traj_time = [0;5;10;15;20;25];
 
 %Contact with max pitch and velocity of ~1.2 m/s
-traj_posn = [0 0 2;4 0 2];
+% traj_posn = [0 0 2;4 0 2];
+% traj_head = [0; 0];
+% traj_time = [0; 2];
+% wall_loc = Rbumper*0.95 + 0.2613;
+% wall_plane = 'YZ';
+
+traj_posn = [0 0 0;0 0 1];
 traj_head = [0; 0];
-traj_time = [0; 2];
-wall_loc = Rbumper*0.95 + 0.2613;
+traj_time = [0; 6];
+wall_loc = 10000;
 wall_plane = 'YZ';
 
 
 % sim_idx = 40;
 t0 = traj_time(1);
 tf = traj_time(end);
-dt = 1/200;
+dt = 1/50;
 
 %% Create Trajectory
 [posn,head] = CreateTrajectory(traj_posn,traj_head,traj_time,dt);
@@ -39,9 +45,9 @@ traj_index = 1;
 % States
 q0 = quatmultiply([0;-1;0;0],[cos(traj_head(1)/2);0;0;sin(traj_head(1)/2)]);
 q0 = q0/norm(q0);
-x0 = [zeros(6,1);traj_posn(1,:)';q0];
 omega0 = [-1;1;-1;1].*repmat(sqrt(m*g/(4*Kt)),4,1);  %Start with hovering RPM
 prop_speed = omega0;
+x0 = [zeros(6,1);traj_posn(1,:)';q0];
 
 Xtotal = x0';
 ttotal = t0;
@@ -49,6 +55,7 @@ ttotal = t0;
 q = [Xtotal(end,10);Xtotal(end,11);Xtotal(end,12);Xtotal(end,13)]/norm(Xtotal(end,10:13));
 R = quatRotMat(q);
 [roll, pitch, yaw] = quat2angle(q,'xyz');
+% [yaw, pitch, roll] = quat2angle(q);
 
 % Controller Initial Variables
 x0_step = x0;
@@ -84,7 +91,8 @@ u1_hist = -m*g; %thrust required for hover
 u2_hist = 0;
 u3_hist = 0;
 u4_hist = 0;
-prop_speed_hist = [0;0;0;0];
+prop_speed_hist = prop_speed;
+prop_accel_hist = [0;0;0;0];
 
 % Contact
 pint1_hist = [0;0;0];
@@ -178,6 +186,7 @@ for i = t0:dt:tf-dt
     u3_hist = [u3_hist,u3];
     u4_hist = [u4_hist,u4];
     prop_speed_hist = [prop_speed_hist,prop_speed];
+    prop_accel_hist = [prop_accel_hist,prop_accel];
     
     roll_hist = [roll_hist;roll];
     pitch_hist = [pitch_hist;pitch];
@@ -211,6 +220,16 @@ Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,r
 % print(savestring,'-dpng');
 % savefig(savestring);
 % close;
+
+%plot prop speed and accelerations
+figure();
+subplot(2,1,1);
+plot(ttotal,prop_speed_hist);
+title('Prop Speeds (RPM)');
+subplot(2,1,2);
+plot(ttotal,prop_accel_hist);
+title('Prop Accelerations (rad/s^2)');
+grid on;
 
 if sum(defl_hist) > 0
     defl_rate_check = zeros(size(defl_tot));
