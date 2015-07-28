@@ -24,9 +24,9 @@ InitSpiriParams;
 % wall_loc = Rbumper*0.95 + 0.2613;
 % wall_plane = 'YZ';
 
-traj_posn = [0 0 0;0 0 1];
-traj_head = [0; 0];
-traj_time = [0; 6];
+traj_posn = [0 0 0;0 0 0];
+traj_head = [2.9; pi];
+traj_time = [0; 5];
 wall_loc = 10000;
 wall_plane = 'YZ';
 
@@ -34,7 +34,7 @@ wall_plane = 'YZ';
 % sim_idx = 40;
 t0 = traj_time(1);
 tf = traj_time(end);
-dt = 1/50;
+dt = 1/200;
 
 %% Create Trajectory
 [posn,head] = CreateTrajectory(traj_posn,traj_head,traj_time,dt);
@@ -45,6 +45,7 @@ traj_index = 1;
 % States
 q0 = quatmultiply([0;-1;0;0],[cos(traj_head(1)/2);0;0;sin(traj_head(1)/2)]);
 q0 = q0/norm(q0);
+
 omega0 = [-1;1;-1;1].*repmat(sqrt(m*g/(4*Kt)),4,1);  %Start with hovering RPM
 prop_speed = omega0;
 x0 = [zeros(6,1);traj_posn(1,:)';q0];
@@ -222,14 +223,14 @@ Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,r
 % close;
 
 %plot prop speed and accelerations
-figure();
-subplot(2,1,1);
-plot(ttotal,prop_speed_hist);
-title('Prop Speeds (RPM)');
-subplot(2,1,2);
-plot(ttotal,prop_accel_hist);
-title('Prop Accelerations (rad/s^2)');
-grid on;
+% figure();
+% subplot(2,1,1);
+% plot(ttotal,prop_speed_hist);
+% title('Prop Speeds (RPM)');
+% subplot(2,1,2);
+% plot(ttotal,prop_accel_hist);
+% title('Prop Accelerations (rad/s^2)');
+% grid on;
 
 if sum(defl_hist) > 0
     defl_rate_check = zeros(size(defl_tot));
