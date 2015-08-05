@@ -61,8 +61,8 @@ if record == 1
     open(writerObj);
 end
 
-for i = 1:disprate_idx:size(t,1)
-% for i = 5780%134 
+% for i = 1:disprate_idx:size(t,1)
+for i = 134%134 
    %% Rotate body-fixed points to world-frame points
    q = [X(i,10);X(i,11);X(i,12);X(i,13)];
    q = q/norm(q);
@@ -123,8 +123,8 @@ for i = 1:disprate_idx:size(t,1)
     plot3(zpts(1,:),zpts(2,:),zpts(3,:),'b-','LineWidth',2);
 
     %% Plot contact points
-%    plot3(pt1_hist(1,i),pt1_hist(2,i),pt1_hist(3,i),'mX');
-%    plot3(pt2_hist(1,i),pt2_hist(2,i),pt2_hist(3,i),'mX');
+   plot3(pint1_hist(1,i),pint1_hist(2,i),pint1_hist(3,i),'b*','MarkerSize',8);
+   plot3(pint2_hist(1,i),pint2_hist(2,i),pint2_hist(3,i),'b*','MarkerSize',8);
    plot3(pc_w_hist(1,i),pc_w_hist(2,i),pc_w_hist(3,i),'mX','MarkerSize',10);
 
    %% Plot wall

@@ -18,17 +18,17 @@ InitSpiriParams;
 % traj_time = [0;5;10;15;20;25];
 
 %Contact with max pitch and velocity of ~1.2 m/s
-% traj_posn = [0 0 2;4 0 2];
-% traj_head = [0; 0];
-% traj_time = [0; 2];
-% wall_loc = Rbumper*0.95 + 0.2613;
-% wall_plane = 'YZ';
-
-traj_posn = [0 0 0;0 0 0];
-traj_head = [2.9; pi];
-traj_time = [0; 5];
-wall_loc = 10000;
+traj_posn = [0 0 2;4 0 2];
+traj_head = [0; 0];
+traj_time = [0; 2];
+wall_loc = 0.29*0.95 + 0.2613;
 wall_plane = 'YZ';
+
+% traj_posn = [0 0 0;0 0 0];
+% traj_head = [2.9; pi];
+% traj_time = [0; 5];
+% wall_loc = 10000;
+% wall_plane = 'YZ';
 
 
 % sim_idx = 40;

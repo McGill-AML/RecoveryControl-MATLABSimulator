@@ -178,58 +178,58 @@ r_des = Kpyaw*eyaw + Kiyaw*dt*(i_yaw) + Kdyaw*(d_yaw)/dt;
 %     r_des = min([r_des,sat_r_des]);
 % end
 
-%% Quaternion based attitude control
-
-Axis_err_prev = [eroll_prev;epitch_prev;er_prev];
-
-q_des = angle2quat(-(roll_des+pi),pitch_des,ref_head,'xyz')';
-q_err_w = quatmultiply(q_des,quatinv(q));
-
-alpha = acos(q_err_w(1))*2;
-
-if alpha == 0
-    q_err_b = q_err_w;
-else
-    r_b = quatmultiply(quatinv(q),quatmultiply(([0;q_err_w(2:4)]./sin(alpha/2)),q));
-    q_err_b = [cos(alpha/2);sin(alpha/2).*r_b(2:4)];
-end
-
-alpha_h = acos(1-2*(q_err_b(2)^2 + q_err_b(3)^2));
-psi_h = 2*atan2(q_err_b(4),q_err_b(1));
-if alpha_h == 0
-    rx_h = 0;
-    ry_h = 0;
-else
-    rx_h = (cos(psi_h/2)*q_err_b(2)-sin(psi_h/2)*q_err_b(3))/sin(alpha_h/2);
-    ry_h = (sin(psi_h/2)*q_err_b(2)+cos(psi_h/2)*q_err_b(3))/sin(alpha_h/2);
-end
-beta_h = atan2(ry_h,rx_h);
-gamma_h = atan2(rx_h,-ry_h);
-
-Kph = 0.8;
-Kdh = 0.2;
-Kddh = 0.8;
-Kpz = 0.05;
-Kiz = 0; %0.05;
-Kddz = 0.05;
-Kdz = Kpz/4;
-
-if i == t0
-    i_roll = 0;
-    d_roll = 0;
-    i_head = 0;
-    d_head = 0;    
-else
-    i_roll = alpha_h*cos(beta_h) + eroll_prev;
-    d_roll = alpha_h*cos(beta_h) - eroll_prev;
-    i_head = psi_h + epitch_prev;
-    d_head = psi_h - epitch_prev;
-end
-
-u2 = -Kph*alpha_h*cos(beta_h) +Kddh*d_roll/dt - Kdh*x(4);
-
-u3 = Kph*alpha_h*sin(beta_h) - Kdh*x(5);
-u4 = Kpz*psi_h + Kiz*dt*i_head*0.5 + Kddz*d_head/dt - Kdz*x(6);
+% %% Quaternion based attitude control
+% 
+% Axis_err_prev = [eroll_prev;epitch_prev;er_prev];
+% 
+% q_des = angle2quat(-(roll_des+pi),pitch_des,ref_head,'xyz')';
+% q_err_w = quatmultiply(q_des,quatinv(q));
+% 
+% alpha = acos(q_err_w(1))*2;
+% 
+% if alpha == 0
+%     q_err_b = q_err_w;
+% else
+%     r_b = quatmultiply(quatinv(q),quatmultiply(([0;q_err_w(2:4)]./sin(alpha/2)),q));
+%     q_err_b = [cos(alpha/2);sin(alpha/2).*r_b(2:4)];
+% end
+% 
+% alpha_h = acos(1-2*(q_err_b(2)^2 + q_err_b(3)^2));
+% psi_h = 2*atan2(q_err_b(4),q_err_b(1));
+% if alpha_h == 0
+%     rx_h = 0;
+%     ry_h = 0;
+% else
+%     rx_h = (cos(psi_h/2)*q_err_b(2)-sin(psi_h/2)*q_err_b(3))/sin(alpha_h/2);
+%     ry_h = (sin(psi_h/2)*q_err_b(2)+cos(psi_h/2)*q_err_b(3))/sin(alpha_h/2);
+% end
+% beta_h = atan2(ry_h,rx_h);
+% gamma_h = atan2(rx_h,-ry_h);
+% 
+% Kph = 0.8;
+% Kdh = 0.2;
+% Kddh = 0.8;
+% Kpz = 0.05;
+% Kiz = 0; %0.05;
+% Kddz = 0.05;
+% Kdz = Kpz/4;
+% 
+% if i == t0
+%     i_roll = 0;
+%     d_roll = 0;
+%     i_head = 0;
+%     d_head = 0;    
+% else
+%     i_roll = alpha_h*cos(beta_h) + eroll_prev;
+%     d_roll = alpha_h*cos(beta_h) - eroll_prev;
+%     i_head = psi_h + epitch_prev;
+%     d_head = psi_h - epitch_prev;
+% end
+% 
+% u2 = -Kph*alpha_h*cos(beta_h) +Kddh*d_roll/dt - Kdh*x(4);
+% 
+% u3 = Kph*alpha_h*sin(beta_h) - Kdh*x(5);
+% u4 = Kpz*psi_h + Kiz*dt*i_head*0.5 + Kddz*d_head/dt - Kdz*x(6);
 
 % 
 % Axis_err = sign(q_err_b(1))*q_err_b(2:end);
@@ -261,9 +261,9 @@ u4 = Kpz*psi_h + Kiz*dt*i_head*0.5 + Kddz*d_head/dt - Kdz*x(6);
 % epitch = Axis_err(2);
 % er = Axis_err(3);
 
-eroll = alpha_h*cos(beta_h);
-epitch = psi_h;
-er = 0;
+% eroll = alpha_h*cos(beta_h);
+% epitch = psi_h;
+% er = 0;
 
 
 %% For Gareth testing Attitude Controller only:
@@ -273,38 +273,38 @@ er = 0;
 
 % 
 % %% Attitude Controller
-% %inputs: roll_des, pitch_des, r_des
-% %output: prop_speed, prop_accel
-% 
-% eroll = roll_des - roll;
-% epitch = pitch_des - pitch;
-% er = r_des - x(6);
-% 
-% if i == t0
-%     i_roll = 0;
-%     i_pitch = 0;
-%     i_r = 0;
-%     
-%     d_roll = 0;
-%     d_pitch = 0;
-%     d_r = 0;
-% else
-%     i_roll = eroll + eroll_prev;
-%     i_pitch = epitch + epitch_prev;
-%     i_r = er + er_prev;
-%     
-%     d_roll = eroll - eroll_prev;
-%     d_pitch = epitch - epitch_prev;
-%     d_r = er - er_prev;
-% end
-% 
-% v_roll = Kprp*eroll + Kirp*dt*(i_roll)*0.5 + Kdrp*(d_roll)/dt;
-% v_pitch = Kprp*epitch + Kirp*dt*(i_pitch)*0.5 + Kdrp*(d_pitch)/dt;
-% v_r =  Kpvyaw*er + Kivyaw*dt*(i_r)*0.5 + Kdvyaw*(d_r)/dt;
-% 
-% u2 = (v_roll - x(5)*x(6)*(Iyy-Izz)/Ixx)*Ixx;
-% u3 = (v_pitch - x(4)*x(6)*(Izz-Ixx)/Iyy)*Iyy;
-% u4 = (v_r - x(4)*x(5)*(Ixx-Iyy)/Izz)*Izz;
+%inputs: roll_des, pitch_des, r_des
+%output: prop_speed, prop_accel
+
+eroll = roll_des - roll;
+epitch = pitch_des - pitch;
+er = r_des - x(6);
+
+if i == t0
+    i_roll = 0;
+    i_pitch = 0;
+    i_r = 0;
+    
+    d_roll = 0;
+    d_pitch = 0;
+    d_r = 0;
+else
+    i_roll = eroll + eroll_prev;
+    i_pitch = epitch + epitch_prev;
+    i_r = er + er_prev;
+    
+    d_roll = eroll - eroll_prev;
+    d_pitch = epitch - epitch_prev;
+    d_r = er - er_prev;
+end
+
+v_roll = Kprp*eroll + Kirp*dt*(i_roll)*0.5 + Kdrp*(d_roll)/dt;
+v_pitch = Kprp*epitch + Kirp*dt*(i_pitch)*0.5 + Kdrp*(d_pitch)/dt;
+v_r =  Kpvyaw*er + Kivyaw*dt*(i_r)*0.5 + Kdvyaw*(d_r)/dt;
+
+u2 = (v_roll - x(5)*x(6)*(Iyy-Izz)/Ixx)*Ixx;
+u3 = (v_pitch - x(4)*x(6)*(Izz-Ixx)/Iyy)*Iyy;
+u4 = (v_r - x(4)*x(5)*(Ixx-Iyy)/Izz)*Izz;
 
 %Thrust and Moment Control Signal
 signal_c = [u1;u2;u3;u4];

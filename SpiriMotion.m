@@ -60,9 +60,9 @@ if abs(wall_loc - x(7)) <= Rbumper
                 axisc_b = axisc_b/norm(axisc_b);
 
                 if pint1(1) >= bumper_loc(1)
-                    pc_b = [0;0;prop_loc(3,1)] + Rbumper*axisc_b;
+                    pc_b = Cbumper + Rbumper*axisc_b;
                 else
-                    pc_b = [0;0;prop_loc(3,1)] - Rbumper*axisc_b;
+                    pc_b = Cbumper - Rbumper*axisc_b;
                 end
 
                 pc_w = R'*pc_b + x(7:9);
@@ -113,35 +113,35 @@ end
 assignin('base','defl',defl);
 
 %% Calculate contact force and moment
-if defl > 0
-    
-    if flag_c_fine == 0
-        flag_c_fine = 1;
-        vi_c_fine = sqrt(sum(x(1:3).^2));
-    end
-    
-%     Fc_mag = 5*10^2*defl^1.5;
-    k_c = 1*10^5;    
-    e_c = 0.95;
-    n_c = 1.5;
-    lambda_c = 6*(1-e_c)*k_c/(((2*e_c-1)^2+3)*vi_c_fine);
-    
-    Fc_mag = k_c*defl^n_c + lambda_c*defl^n_c*defl_rate;
-
-    Fc_w = [-Fc_mag;0;0];
-    Fc_b = R*Fc_w;
-        
-    Mc = cross(pc_b,Fc_b);
-else
-    if flag_c_fine == 1
-        flag_c_fine = 0;
-        vi_c_fine = 0;
-    end
+% if defl > 0
+%     
+%     if flag_c_fine == 0
+%         flag_c_fine = 1;
+%         vi_c_fine = sqrt(sum(x(1:3).^2));
+%     end
+%     
+% %     Fc_mag = 5*10^2*defl^1.5;
+%     k_c = 1*10^5;    
+%     e_c = 0.95;
+%     n_c = 1.5;
+%     lambda_c = 6*(1-e_c)*k_c/(((2*e_c-1)^2+3)*vi_c_fine);
+%     
+%     Fc_mag = k_c*defl^n_c + lambda_c*defl^n_c*defl_rate;
+% 
+%     Fc_w = [-Fc_mag;0;0];
+%     Fc_b = R*Fc_w;
+%         
+%     Mc = cross(pc_b,Fc_b);
+% else
+%     if flag_c_fine == 1
+%         flag_c_fine = 0;
+%         vi_c_fine = 0;
+%     end
     
     Fc_mag = 0;
     Fc_b = [0;0;0];
     Mc = [0;0;0];
-end
+% end
 
 Fg = R*[0;0;-m*g];
 Fa = Tv*[-0.5*d_air*V^2*A*Cd;0;0];
