@@ -5,7 +5,7 @@
 % clc;
 clear X
 
-global m g Kt Rbumper flag_c_fine vi_c_fine
+global m g Kt Rbumper flag_c_fine1 vi_c_fine1 flag_c_fine2 vi_c_fine2
 
 %% Spiri System Parameters
 InitSpiriParams;
@@ -19,16 +19,10 @@ InitSpiriParams;
 
 %Contact with max pitch and velocity of ~1.2 m/s
 traj_posn = [0 0 2;4 0 2];
-traj_head = [0; 0];
+traj_head = [pi/4; pi/4];
 traj_time = [0; 2];
 wall_loc = 0.29*0.95 + 0.2613;
 wall_plane = 'YZ';
-
-% traj_posn = [0 0 0;0 0 0];
-% traj_head = [2.9; pi];
-% traj_time = [0; 5];
-% wall_loc = 10000;
-% wall_plane = 'YZ';
 
 
 % sim_idx = 40;
@@ -69,10 +63,16 @@ er_prev = 0;
 omega_prev = omega0;
 
 % Contact Variable Values
-flag_c = 0;
-vi_c = 0;
-flag_c_fine = 0;
-vi_c_fine = 0;
+flag_c1 = 0;
+vi_c1 = 0;
+flag_c_fine1 = 0;
+vi_c_fine1 = 0;
+
+flag_c2 = 0;
+vi_c2 = 0;
+flag_c_fine2 = 0;
+vi_c_fine2 = 0;
+
 recovery = 0;
 accel = 0;
 
@@ -96,23 +96,38 @@ prop_speed_hist = prop_speed;
 prop_accel_hist = [0;0;0;0];
 
 % Contact
-pint1_hist = [0;0;0];
-pint2_hist = [0;0;0];
-pc_w_hist = [100;100;0];
-defl_hist = 0;
-theta_hist = 0;
+pint11_hist = [100;100;0];
+pint12_hist = [100;100;0];
+pc_w1_hist = [100;100;0];
+defl1_hist = 0;
+theta11_hist = 0;
+theta12_hist = 0;
+
+pint21_hist = [0;0;0];
+pint22_hist = [0;0;0];
+pc_w2_hist = [100;100;0];
+defl2_hist = 0;
+theta21_hist = 0;
+theta22_hist = 0;
 
 % Continuous Time
 t_tot = [];
 X_tot = [];
 dX_tot = [];
 
-defl_tot = [];
-defl_rate_tot = [];
-Fc_tot = [];
-pc_tot = [];
-flag_c_tot = [];
-vi_c_tot = [];
+defl1_tot = [];
+defl_rate1_tot = [];
+Fc1_tot = [];
+pc1_tot = [];
+flag_c1_tot = [];
+vi_c1_tot = [];
+
+defl2_tot = [];
+defl_rate2_tot = [];
+Fc2_tot = [];
+pc2_tot = [];
+flag_c2_tot = [];
+vi_c2_tot = [];
 
 %% Controller Response Params
 Se = 0.05;
@@ -143,33 +158,55 @@ for i = t0:dt:tf-dt
     [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4,recovery] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev,accel,recovery);
 
     %Re-Initialize Contact Dynamics Variables
-    pint1 = [0;0;0];
-    pint2 = [0;0;0];
-    pc_w = [100;100;0];
-    theta1 = 0;
-    Fc = 0;
-    flag_c = flag_c_fine;
-    vi_c = vi_c_fine;
+    pint11 = [100;100;0];
+    pint12 = [100;100;0];
+    pc_w1 = [100;100;0];
+    theta11 = 0;
+    theta12 = 0;
+    defl1 = 0;
+    Fc1 = 0;
+    flag_c1 = flag_c_fine1;
+    vi_c1 = vi_c_fine1;
+    
+    pint21 = [100;100;0];
+    pint22 = [100;100;0];
+    pc_w2 = [100;100;0];
+    theta21 = 0;
+    theta22 = 0;
+    defl2 = 0;
+    Fc2 = 0;
+    flag_c2 = flag_c_fine1;
+    vi_c2 = vi_c_fine1;
    
     %Propagate Dynamics
     
-    [t,X] = ode45(@(t, X) SpiriMotion(t,X,signal_c,wall_loc,wall_plane),[i i+dt],x0_step);
+    [t,X] = ode45(@(t, X) SpiriMotion_4Circles(t,X,signal_c,wall_loc,wall_plane),[i i+dt],x0_step);
     
     %Reset contact flags for continuous time recording
-    flag_c_fine = flag_c;
-    vi_c_fine = vi_c;
-
+    flag_c_fine1 = flag_c1;
+    vi_c_fine1 = vi_c1;
+    
+    flag_c_fine2 = flag_c2;
+    vi_c_fine2 = vi_c2;
+    
     %Continuous time recording
     for j = 1:size(X,1)
-        [dx,defl_fine,Fc,pc,defl_rate] = SpiriMotion(t(j),X(j,:),signal_c,wall_loc,wall_plane);
+        [dx,defl1_fine,Fc1,pc1,defl1_rate,defl2_fine,Fc2,pc2,defl2_rate] = SpiriMotion_4Circles(t(j),X(j,:),signal_c,wall_loc,wall_plane);
         
         dX_tot = [dX_tot;dx'];
-        defl_tot = [defl_tot;defl_fine];
-        defl_rate_tot = [defl_rate_tot;defl_rate];
-        Fc_tot = [Fc_tot;Fc];
-        pc_tot = [pc_tot,pc];        
-        flag_c_tot = [flag_c_tot;flag_c_fine];
-        vi_c_tot = [vi_c_tot;vi_c_fine];
+        defl1_tot = [defl1_tot;defl1_fine];
+        defl_rate1_tot = [defl_rate1_tot;defl1_rate];
+        Fc1_tot = [Fc1_tot;Fc1];
+        pc1_tot = [pc1_tot,pc1];        
+        flag_c1_tot = [flag_c1_tot;flag_c_fine1];
+        vi_c1_tot = [vi_c1_tot;vi_c_fine1];
+        
+        defl2_tot = [defl2_tot;defl2_fine];
+        defl_rate2_tot = [defl_rate2_tot;defl2_rate];
+        Fc2_tot = [Fc2_tot;Fc2];
+        pc2_tot = [pc2_tot,pc2];        
+        flag_c2_tot = [flag_c2_tot;flag_c_fine2];
+        vi_c2_tot = [vi_c2_tot;vi_c_fine2];
     end
     
     t_tot = [t_tot;t];
@@ -200,11 +237,19 @@ for i = t0:dt:tf-dt
     Xtotal = [Xtotal;X(end,:)];
     ttotal = [ttotal;t(end)];
    
-    pint1_hist = [pint1_hist,pint1];
-    pint2_hist = [pint2_hist,pint2];
-    pc_w_hist = [pc_w_hist,pc_w];
-    defl_hist = [defl_hist;defl];
-    theta_hist = [theta_hist;theta1];
+    pint11_hist = [pint11_hist,pint11];
+    pint12_hist = [pint12_hist,pint12];
+    pc_w1_hist = [pc_w1_hist,pc_w1];
+    defl1_hist = [defl1_hist;defl1];
+    theta11_hist = [theta11_hist;theta11];
+    theta12_hist = [theta12_hist;theta12];
+    
+    pint21_hist = [pint21_hist,pint21];
+    pint22_hist = [pint22_hist,pint22];
+    pc_w2_hist = [pc_w2_hist,pc_w2];
+    defl2_hist = [defl2_hist;defl2];
+    theta21_hist = [theta21_hist;theta21];
+    theta22_hist = [theta22_hist;theta22];
 
     %End loop if Spiri has crashed
     if Xtotal(end,9) <= -1
@@ -214,9 +259,13 @@ for i = t0:dt:tf-dt
     
 end
 
+theta1_hist = [theta11_hist,theta12_hist];
+theta2_hist = [theta21_hist,theta22_hist];
+
 [Ts, PO] = ControllerStats(ttotal,Xtotal,Se,traj_posn,traj_head);
 
-Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,rdes_hist,u1_hist,u2_hist,u3_hist,u4_hist);
+% Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,rdes_hist,u1_hist,u2_hist,u3_hist,u4_hist);
+
 % savestring = strcat('BatchSim_',num2str(sim_idx,'%03i'));
 % print(savestring,'-dpng');
 % savefig(savestring);
@@ -232,17 +281,16 @@ Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,r
 % title('Prop Accelerations (rad/s^2)');
 % grid on;
 
-if sum(defl_hist) > 0
-    defl_rate_check = zeros(size(defl_tot));
-    for i=2:size(defl_tot);
-        defl_rate_check(i) = (defl_tot(i) - defl_tot(i-1))/dt;
+if sum(defl1_hist) > 0
+    defl_rate_check = zeros(size(defl1_tot));
+    for i=2:size(defl1_tot);
+        defl_rate_check(i) = (defl1_tot(i) - defl1_tot(i-1))/dt;
     end    
     
-    Graphs_Contact(ttotal,Xtotal,wall_loc,t_tot,defl_tot,Fc_tot,dX_tot,defl_rate_tot,flag_c_tot,vi_c_tot);
-
+    Graphs_Contact(ttotal,Xtotal,dX_tot,wall_loc,t_tot,defl1_tot,Fc1_tot,defl_rate1_tot,flag_c1_tot,vi_c1_tot,defl2_tot,Fc2_tot,defl_rate2_tot,flag_c2_tot,vi_c2_tot);
 end
 
 % SpiriVisualization1(record,ttotal,Xtotal,'XZ',wall_loc,'YZ',pint1_hist,pint2_hist,pc_w_hist)
-
+SpiriVisualization1(0,ttotal,Xtotal,'XY',wall_loc,'YZ',pint11_hist,pint12_hist,pc_w1_hist,pint21_hist,pint22_hist,pc_w2_hist)
 % end
 % 

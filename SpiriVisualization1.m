@@ -1,7 +1,7 @@
-function [ ] =SpiriVisualization1( record,t,X,sideview,wall_loc,wall_plane, pint1_hist,pint2_hist,pc_w_hist )
+function [ ] =SpiriVisualization1( record,t,X,sideview,wall_loc,wall_plane, pint11_hist,pint12_hist,pc_w1_hist,pint21_hist,pint22_hist,pc_w2_hist )
 %UNTITLED6 Summary of this function goes here
 %   Detailed explanation goes here
-global prop_loc Rbumper Cbumper
+global prop_loc Rbumper Cbumper Abumper
 
 disprate = 30; %Hz
 disprate_idx = round((size(t,1)/(t(end)-t(1)))/disprate);
@@ -19,6 +19,12 @@ c1 = prop_loc(:,1);
 c2 = prop_loc(:,2);
 c3 = prop_loc(:,3);
 c4 = prop_loc(:,4);
+
+n1_b = RotMat('Z',deg2rad(45))'*RotMat('Y',Abumper + deg2rad(90))'* [1;0;0];
+n2_b = RotMat('Z',deg2rad(135))'*RotMat('Y',Abumper + deg2rad(90))'* [1;0;0];
+n3_b = RotMat('Z',deg2rad(-135))'*RotMat('Y',Abumper + deg2rad(90))'* [1;0;0];
+n4_b = RotMat('Z',deg2rad(-45))'*RotMat('Y',Abumper + deg2rad(90))'* [1;0;0];
+   
 cR = Cbumper;
 
 clear p1 p2 p3 p4;
@@ -44,9 +50,9 @@ p5 = [0.08;-0.0115;0]-CoM;
 
 %% Create body-fixed axes
 po = [0;0;0];
-px = [0.3;0;0];
-py = [0;0.3;0];
-pz = [0;0;0.3];
+px = [0.2;0;0];
+py = [0;0.2;0];
+pz = [0;0;0.2];
 
 %%  Calculate axes ranges for plotting
 axis_min = min([min(X(:,7))-0.4,min(X(:,8))-0.4,min(X(:,9))-0.4]);
@@ -61,8 +67,8 @@ if record == 1
     open(writerObj);
 end
 
-% for i = 1:disprate_idx:size(t,1)
-for i = 134%134 
+for i = 1:disprate_idx:size(t,1)
+% for i = 10%134 
    %% Rotate body-fixed points to world-frame points
    q = [X(i,10);X(i,11);X(i,12);X(i,13)];
    q = q/norm(q);
@@ -95,13 +101,19 @@ for i = 134%134
    
    %% Plot Spiri 2-d bumpers 
    normal = cross(p1_p-p2_p,p2_p-p3_p);
-   plotCircle3D(c1_p,normal,0.11);
-   plotCircle3D(c2_p,normal,0.11);
-   plotCircle3D(c3_p,normal,0.11);
-   plotCircle3D(c4_p,normal,0.11);
+
+   n1_w = R'*n1_b;
+   n2_w = R'*n2_b;
+   n3_w = R'*n3_b;
+   n4_w = R'*n4_b;
    
-   normal2 = cross(c1_p-c3_p,c2_p-c4_p);
-   plotCircle3D(cR_p,normal2,Rbumper); %Virtual bumper
+   plotCircle3D(c1_p,n1_w,Rbumper);
+   plotCircle3D(c2_p,n2_w,Rbumper);
+   plotCircle3D(c3_p,n3_w,Rbumper);
+   plotCircle3D(c4_p,n4_w,Rbumper);
+   
+%    normal2 = cross(c1_p-c3_p,c2_p-c4_p);
+%    plotCircle3D(cR_p,normal2,Rbumper); %Virtual bumper
    
    %% Plot Spiri spherical bumper
    for j = 1:size(sx,1)
@@ -123,9 +135,13 @@ for i = 134%134
     plot3(zpts(1,:),zpts(2,:),zpts(3,:),'b-','LineWidth',2);
 
     %% Plot contact points
-   plot3(pint1_hist(1,i),pint1_hist(2,i),pint1_hist(3,i),'b*','MarkerSize',8);
-   plot3(pint2_hist(1,i),pint2_hist(2,i),pint2_hist(3,i),'b*','MarkerSize',8);
-   plot3(pc_w_hist(1,i),pc_w_hist(2,i),pc_w_hist(3,i),'mX','MarkerSize',10);
+%    plot3(pint11_hist(1,i),pint11_hist(2,i),pint11_hist(3,i),'b*','MarkerSize',8);
+%    plot3(pint12_hist(1,i),pint12_hist(2,i),pint12_hist(3,i),'b*','MarkerSize',8);
+   plot3(pc_w1_hist(1,i),pc_w1_hist(2,i),pc_w1_hist(3,i),'bX','MarkerSize',10);
+   
+%    plot3(pint21_hist(1,i),pint21_hist(2,i),pint21_hist(3,i),'m*','MarkerSize',8);
+%    plot3(pint22_hist(1,i),pint22_hist(2,i),pint22_hist(3,i),'m*','MarkerSize',8);
+   plot3(pc_w2_hist(1,i),pc_w2_hist(2,i),pc_w2_hist(3,i),'mX','MarkerSize',10);
 
    %% Plot wall
    fill3(wall_pts(1,:)',wall_pts(2,:)',wall_pts(3,:)','r','FaceAlpha',0.4);
@@ -145,6 +161,12 @@ for i = 134%134
         view([0 0]); %view XZ plane
    elseif sideview == 'YZ'
         view(90, 0); %view YZ plane
+        
+   elseif sideview == 'XY'
+       view([0 0 1]);
+       
+   elseif sideview == 'V1'
+       view([-14.5,6]);
    end
    
    grid on;

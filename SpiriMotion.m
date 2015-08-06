@@ -23,7 +23,7 @@ prop_speed_rad = prop_speed * (2*pi/60); %in rad/s
 pc_w = [100;100;0];
 defl = 0;
 defl_rate = 0;
-if abs(wall_loc - x(7)) <= Rbumper
+if abs(wall_loc - x(7)) <= 0.3%Rbumper + max(max(abs(prop_loc(1:2,:))))
     if (sum(wall_plane == 'YZ')==2 || sum(wall_plane == 'ZY')==2)
         
         % Transform virtual bumper definitions to world frame
@@ -39,8 +39,9 @@ if abs(wall_loc - x(7)) <= Rbumper
         
         % Save intersection angle to base workspace
         assignin('base','theta1',theta1);
+        assignin('base','theta2',theta2);
 
-        if abs(imag(theta1)) <= 1e-5
+        if abs(imag(theta1)) <= 0.1
             theta1 = real(theta1);
             theta2 = real(theta2);
         
@@ -90,23 +91,28 @@ if abs(wall_loc - x(7)) <= Rbumper
                 assignin('base','pint2',pint2);
 
             end %else no contact
-            
+        else
+            defl = 0;
+            pc_b = [0;0;0];
+            pc_w = [100;100;0];
+            defl_rate = 0;
+        
         end
         
-        if defl == 0 %Prevent Spiri from moving through walls
-            
-            usb_b = [0.02353;-CM(2);-(0.04047+0.006)];
-            usb_w = R'*usb_b + x(7:9);
-            
-            if usb_w(1) >= wall_loc %Case where contact circle is fully vertical
-                pc_b = usb_b;
-                pc_w = usb_w;
-                defl = pc_w(1) - wall_loc;
-                defl_rate = R(:,1)'*([x(1);x(2);x(3)] + cross([x(4);x(5);x(6)],pc_b));
-                disp('Contact pt @ USB');
-                
-            end
-        end
+%         if defl == 0 %Prevent Spiri from moving through walls
+%             
+%             usb_b = [0.02353;-CM(2);-(0.04047+0.006)];
+%             usb_w = R'*usb_b + x(7:9);
+%             
+%             if usb_w(1) >= wall_loc %Case where contact circle is fully vertical
+%                 pc_b = usb_b;
+%                 pc_w = usb_w;
+%                 defl = pc_w(1) - wall_loc;
+%                 defl_rate = R(:,1)'*([x(1);x(2);x(3)] + cross([x(4);x(5);x(6)],pc_b));
+%                 disp('Contact pt @ USB');
+%                 
+%             end
+%         end
     end
 end
 

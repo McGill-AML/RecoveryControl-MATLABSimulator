@@ -2,7 +2,7 @@ function []= InitSpiriParams()
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
 
-global g m I Jr prop_loc Kt A d_air Cd V Tv Kp Kq Kr Dt alpha beta Ixx Iyy Izz CM Rbumper Cbumper;
+global g m I Jr prop_loc Kt A d_air Cd V Tv Kp Kq Kr Dt alpha beta Ixx Iyy Izz CM Rbumper Cbumper Abumper;
 
 g = 9.81;
 
@@ -27,9 +27,10 @@ prop_loc = [p1, p2, p3, p4] - repmat(CoM,1,4); %prop locations relative to CoM
 % prop_loc = [dp1,dp2,dp3,dp4];
 % prop_loc = [0.13 -0.13 -0.13 0.13;0.13 0.13 -0.13 -0.13;-0.0373 -0.0373 -0.373 -0.373];
 CM = CoM;
-Rbumper = 0.29; %0.29
-Cbumper = sum(prop_loc,2)/4; %bumper center relative to CoM
-
+Rbumper = 0.11; %0.29
+% Cbumper = sum(prop_loc,2)/4; %bumper center relative to CoM
+Cbumper = prop_loc(:,1);
+Abumper = deg2rad(11);
 
 %Thrust coefficient
 % Kt = 0.000000054; %From Pleiades primitives.c 07-03-2015
