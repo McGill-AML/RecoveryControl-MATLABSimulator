@@ -5,7 +5,8 @@
 % clc;
 clear X
 
-global m g Kt Rbumper flag_c_fine1 vi_c_fine1 flag_c_fine2 vi_c_fine2
+global m g Kt Rbumper 
+global flag_c_fine1 vi_c_fine1 flag_c_fine2 vi_c_fine2 flag_c_fine3 vi_c_fine3 flag_c_fine4 vi_c_fine4
 
 %% Spiri System Parameters
 InitSpiriParams;
@@ -73,6 +74,16 @@ vi_c2 = 0;
 flag_c_fine2 = 0;
 vi_c_fine2 = 0;
 
+flag_c3 = 0;
+vi_c3 = 0;
+flag_c_fine3 = 0;
+vi_c_fine3 = 0;
+
+flag_c4 = 0;
+vi_c4 = 0;
+flag_c_fine4 = 0;
+vi_c_fine4 = 0;
+
 recovery = 0;
 accel = 0;
 
@@ -110,6 +121,20 @@ defl2_hist = 0;
 theta21_hist = 0;
 theta22_hist = 0;
 
+pint31_hist = [0;0;0];
+pint32_hist = [0;0;0];
+pc_w3_hist = [100;100;0];
+defl3_hist = 0;
+theta31_hist = 0;
+theta32_hist = 0;
+
+pint41_hist = [0;0;0];
+pint42_hist = [0;0;0];
+pc_w4_hist = [100;100;0];
+defl4_hist = 0;
+theta41_hist = 0;
+theta42_hist = 0;
+
 % Continuous Time
 t_tot = [];
 X_tot = [];
@@ -128,6 +153,20 @@ Fc2_tot = [];
 pc2_tot = [];
 flag_c2_tot = [];
 vi_c2_tot = [];
+
+defl3_tot = [];
+defl_rate3_tot = [];
+Fc3_tot = [];
+pc3_tot = [];
+flag_c3_tot = [];
+vi_c3_tot = [];
+
+defl4_tot = [];
+defl_rate4_tot = [];
+Fc4_tot = [];
+pc4_tot = [];
+flag_c4_tot = [];
+vi_c4_tot = [];
 
 %% Controller Response Params
 Se = 0.05;
@@ -158,29 +197,25 @@ for i = t0:dt:tf-dt
     [signal_c,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4,recovery] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev,accel,recovery);
 
     %Re-Initialize Contact Dynamics Variables
-    pint11 = [100;100;0];
-    pint12 = [100;100;0];
-    pc_w1 = [100;100;0];
-    theta11 = 0;
-    theta12 = 0;
-    defl1 = 0;
-    Fc1 = 0;
+    [pint11,pint12,pc_w1,theta11,theta12,defl1,Fc1] = InitContactVar; 
     flag_c1 = flag_c_fine1;
     vi_c1 = vi_c_fine1;
     
-    pint21 = [100;100;0];
-    pint22 = [100;100;0];
-    pc_w2 = [100;100;0];
-    theta21 = 0;
-    theta22 = 0;
-    defl2 = 0;
-    Fc2 = 0;
-    flag_c2 = flag_c_fine1;
-    vi_c2 = vi_c_fine1;
+    [pint21,pint22,pc_w2,theta21,theta22,defl2,Fc2] = InitContactVar; 
+    flag_c2 = flag_c_fine2;
+    vi_c2 = vi_c_fine2;
+    
+    [pint31,pint32,pc_w3,theta31,theta32,defl3,Fc3] = InitContactVar; 
+    flag_c3 = flag_c_fine3;
+    vi_c3 = vi_c_fine3;
+    
+    [pint41,pint42,pc_w4,theta41,theta42,defl4,Fc4] = InitContactVar; 
+    flag_c4 = flag_c_fine4;
+    vi_c4 = vi_c_fine4;
    
     %Propagate Dynamics
-    
-    [t,X] = ode45(@(t, X) SpiriMotion_4Circles(t,X,signal_c,wall_loc,wall_plane),[i i+dt],x0_step);
+    options = odeset('RelTol',1e-3);
+    [t,X] = ode45(@(t, X) SpiriMotion_4Circles(t,X,signal_c,wall_loc,wall_plane),[i i+dt],x0_step,options);
     
     %Reset contact flags for continuous time recording
     flag_c_fine1 = flag_c1;
@@ -189,9 +224,15 @@ for i = t0:dt:tf-dt
     flag_c_fine2 = flag_c2;
     vi_c_fine2 = vi_c2;
     
+    flag_c_fine3 = flag_c3;
+    vi_c_fine3 = vi_c3;
+    
+    flag_c_fine4 = flag_c4;
+    vi_c_fine4 = vi_c4;
+    
     %Continuous time recording
     for j = 1:size(X,1)
-        [dx,defl1_fine,Fc1,pc1,defl1_rate,defl2_fine,Fc2,pc2,defl2_rate] = SpiriMotion_4Circles(t(j),X(j,:),signal_c,wall_loc,wall_plane);
+        [dx,defl1_fine,Fc1,pc1,defl1_rate,defl2_fine,Fc2,pc2,defl2_rate,defl3_fine,Fc3,pc3,defl3_rate,defl4_fine,Fc4,pc4,defl4_rate] = SpiriMotion_4Circles(t(j),X(j,:),signal_c,wall_loc,wall_plane);
         
         dX_tot = [dX_tot;dx'];
         defl1_tot = [defl1_tot;defl1_fine];
@@ -207,6 +248,20 @@ for i = t0:dt:tf-dt
         pc2_tot = [pc2_tot,pc2];        
         flag_c2_tot = [flag_c2_tot;flag_c_fine2];
         vi_c2_tot = [vi_c2_tot;vi_c_fine2];
+        
+        defl3_tot = [defl3_tot;defl3_fine];
+        defl_rate3_tot = [defl_rate3_tot;defl3_rate];
+        Fc3_tot = [Fc3_tot;Fc3];
+        pc3_tot = [pc3_tot,pc3];        
+        flag_c3_tot = [flag_c3_tot;flag_c_fine3];
+        vi_c3_tot = [vi_c3_tot;vi_c_fine3];
+        
+        defl4_tot = [defl4_tot;defl4_fine];
+        defl_rate4_tot = [defl_rate4_tot;defl4_rate];
+        Fc4_tot = [Fc4_tot;Fc4];
+        pc4_tot = [pc4_tot,pc4];        
+        flag_c4_tot = [flag_c4_tot;flag_c_fine4];
+        vi_c4_tot = [vi_c4_tot;vi_c_fine4];
     end
     
     t_tot = [t_tot;t];
@@ -250,6 +305,20 @@ for i = t0:dt:tf-dt
     defl2_hist = [defl2_hist;defl2];
     theta21_hist = [theta21_hist;theta21];
     theta22_hist = [theta22_hist;theta22];
+    
+    pint31_hist = [pint31_hist,pint31];
+    pint32_hist = [pint32_hist,pint32];
+    pc_w3_hist = [pc_w3_hist,pc_w3];
+    defl3_hist = [defl3_hist;defl3];
+    theta31_hist = [theta31_hist;theta31];
+    theta32_hist = [theta32_hist;theta32];
+    
+    pint41_hist = [pint41_hist,pint41];
+    pint42_hist = [pint42_hist,pint42];
+    pc_w4_hist = [pc_w4_hist,pc_w4];
+    defl4_hist = [defl4_hist;defl4];
+    theta41_hist = [theta41_hist;theta41];
+    theta42_hist = [theta42_hist;theta42];
 
     %End loop if Spiri has crashed
     if Xtotal(end,9) <= -1
@@ -261,6 +330,8 @@ end
 
 theta1_hist = [theta11_hist,theta12_hist];
 theta2_hist = [theta21_hist,theta22_hist];
+theta3_hist = [theta31_hist,theta32_hist];
+theta4_hist = [theta41_hist,theta42_hist];
 
 [Ts, PO] = ControllerStats(ttotal,Xtotal,Se,traj_posn,traj_head);
 
@@ -287,10 +358,10 @@ if sum(defl1_hist) > 0
         defl_rate_check(i) = (defl1_tot(i) - defl1_tot(i-1))/dt;
     end    
     
-    Graphs_Contact(ttotal,Xtotal,dX_tot,wall_loc,t_tot,defl1_tot,Fc1_tot,defl_rate1_tot,flag_c1_tot,vi_c1_tot,defl2_tot,Fc2_tot,defl_rate2_tot,flag_c2_tot,vi_c2_tot);
+    Graphs_Contact(ttotal,Xtotal,dX_tot,wall_loc,t_tot,defl1_tot,Fc1_tot,defl_rate1_tot,flag_c1_tot,vi_c1_tot,defl2_tot,Fc2_tot,defl_rate2_tot,flag_c2_tot,vi_c2_tot,defl3_tot,Fc3_tot,defl_rate3_tot,flag_c3_tot,vi_c3_tot,defl4_tot,Fc4_tot,defl_rate4_tot,flag_c4_tot,vi_c4_tot);
 end
 
 % SpiriVisualization1(record,ttotal,Xtotal,'XZ',wall_loc,'YZ',pint1_hist,pint2_hist,pc_w_hist)
-SpiriVisualization1(0,ttotal,Xtotal,'XY',wall_loc,'YZ',pint11_hist,pint12_hist,pc_w1_hist,pint21_hist,pint22_hist,pc_w2_hist)
+% SpiriVisualization1(0,ttotal,Xtotal,'V1',wall_loc,'YZ',pint11_hist,pint12_hist,pc_w1_hist,pint21_hist,pint22_hist,pc_w2_hist,pc_w3_hist,pc_w4_hist)
 % end
 % 

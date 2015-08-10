@@ -1,9 +1,9 @@
-function [ ] =SpiriVisualization1( record,t,X,sideview,wall_loc,wall_plane, pint11_hist,pint12_hist,pc_w1_hist,pint21_hist,pint22_hist,pc_w2_hist )
+function [ ] =SpiriVisualization1( record,t,X,sideview,wall_loc,wall_plane, pint11_hist,pint12_hist,pc_w1_hist,pint21_hist,pint22_hist,pc_w2_hist ,pc_w3_hist ,pc_w4_hist )
 %UNTITLED6 Summary of this function goes here
 %   Detailed explanation goes here
 global prop_loc Rbumper Cbumper Abumper
 
-disprate = 30; %Hz
+disprate = 200; %Hz
 disprate_idx = round((size(t,1)/(t(end)-t(1)))/disprate);
 disprate_idx = 1;
 
@@ -68,7 +68,7 @@ if record == 1
 end
 
 for i = 1:disprate_idx:size(t,1)
-% for i = 10%134 
+% for i = 269
    %% Rotate body-fixed points to world-frame points
    q = [X(i,10);X(i,11);X(i,12);X(i,13)];
    q = q/norm(q);
@@ -137,11 +137,16 @@ for i = 1:disprate_idx:size(t,1)
     %% Plot contact points
 %    plot3(pint11_hist(1,i),pint11_hist(2,i),pint11_hist(3,i),'b*','MarkerSize',8);
 %    plot3(pint12_hist(1,i),pint12_hist(2,i),pint12_hist(3,i),'b*','MarkerSize',8);
-   plot3(pc_w1_hist(1,i),pc_w1_hist(2,i),pc_w1_hist(3,i),'bX','MarkerSize',10);
+   plot3(pc_w1_hist(1,i),pc_w1_hist(2,i),pc_w1_hist(3,i),'mX','MarkerSize',10);
    
 %    plot3(pint21_hist(1,i),pint21_hist(2,i),pint21_hist(3,i),'m*','MarkerSize',8);
 %    plot3(pint22_hist(1,i),pint22_hist(2,i),pint22_hist(3,i),'m*','MarkerSize',8);
    plot3(pc_w2_hist(1,i),pc_w2_hist(2,i),pc_w2_hist(3,i),'mX','MarkerSize',10);
+   
+   plot3(pc_w3_hist(1,i),pc_w3_hist(2,i),pc_w3_hist(3,i),'mX','MarkerSize',10);
+
+   plot3(pc_w4_hist(1,i),pc_w4_hist(2,i),pc_w4_hist(3,i),'mX','MarkerSize',10);
+
 
    %% Plot wall
    fill3(wall_pts(1,:)',wall_pts(2,:)',wall_pts(3,:)','r','FaceAlpha',0.4);
