@@ -80,7 +80,7 @@ for k = 1:4
                 defl_rate(k) = R(:,1)'*([x(1);x(2);x(3)] + cross([x(4);x(5);x(6)],pc_b(:,k)));
                 sliding_axis_temp = R'*([x(1);x(2);x(3)] + cross([x(4);x(5);x(6)],pc_b(:,k)));
                 sliding_axis_temp = R*[0;sliding_axis_temp(2:3)];
-                sliding_axis(:,k) = sliding_axis_temp/norm(sliding_axis_temp);
+                sliding_axis(:,k) = sliding_axis_temp; %/norm(sliding_axis_temp);
                 
                 if defl(k) <= 0     
                     disp('Warning: Deflection calc error');

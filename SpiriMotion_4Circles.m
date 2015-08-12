@@ -1,11 +1,25 @@
-function [dx, defl1, Fc_mag1, pc_w1, defl_rate1, defl2, Fc_mag2, pc_w2, defl_rate2, defl3, Fc_mag3, pc_w3, defl_rate3, defl4, Fc_mag4, pc_w4, defl_rate4] = SpiriMotion_4Circles(t,x,signal_c,wall_loc,wall_plane)
+function [dx, defl1, Fc_mag1, pc_w1, defl_rate1, defl2, Fc_mag2, pc_w2, defl_rate2, defl3, Fc_mag3, pc_w3, defl_rate3, defl4, Fc_mag4, pc_w4, defl_rate4] = SpiriMotion_4Circles(t,x,control,wall_loc,wall_plane)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
 global g m I Jr prop_loc Kt A d_air Cd V Tv Kp Kq Kr Dt Rbumper Cbumper Ixx Iyy Izz CM;
 
-global flag_c_fine1 vi_c_fine1 flag_c_fine2 vi_c_fine2 flag_c_fine3 vi_c_fine3 flag_c_fine4 vi_c_fine4
+global flag_c_ct1 vi_c_ct1 flag_c_ct2 vi_c_ct2 flag_c_ct3 vi_c_ct3 flag_c_ct4 vi_c_ct4
 
+%% Contact Parameters
+% %Stiffness 1
+% k_c = 1*10^5;    
+% e_c = 0.95;
+% n_c = 1.5;
+% mu = 0;
+
+%Stiffness2
+k_c = 40;    
+e_c = 0.95;
+n_c = 0.54;
+mu = 0;%0.25;
+
+%% 
 q = [x(10);x(11);x(12);x(13)]/norm(x(10:13));
 R = quatRotMat(q);
 
@@ -14,8 +28,8 @@ x = reshape(x,[max(size(x)),1]);
 dx = zeros(13,1);
 
 %% Controller Signal
-prop_speed = signal_c(1:4); %in RPM
-prop_accel = signal_c(5:8); %in rad/s^2
+prop_speed = control(1:4); %in RPM
+prop_accel = control(5:8); %in rad/s^2
 
 prop_speed_rad = prop_speed * (2*pi/60); %in rad/s
 
@@ -76,9 +90,14 @@ if abs(wall_loc - x(7)) <= 0.3 %Rbumper + sqrt(max(abs(prop_loc(1,:)))^2 + max(a
         defl_rate3 = defl_rate(3);        
         pc_w3 = pc_w(:,3);
         
+%         if (sum(sum(sliding_axis)) ~=0)
+%             disp(sliding_axis);
+%         end
+        
         defl4 = defl(4);        
         defl_rate4 = defl_rate(4);        
         pc_w4 = pc_w(:,4);
+        
         
     end
 end
@@ -87,29 +106,17 @@ assignin('base','defl2',defl2);
 assignin('base','defl3',defl3);
 assignin('base','defl4',defl4);
 
-%Stiffness 1
-k_c = 1*10^5;    
-e_c = 0.95;
-n_c = 1.5;
-mu = 0;
-% 
-% %Stiffness2
-% k_c = 40;    
-% e_c = 0.95;
-% n_c = 0.54;
-% mu = 0.2;
-
 %% Calculate contact force and moment
 if defl1 > 0
     
-    if flag_c_fine1 == 0
-        flag_c_fine1 = 1;
-        vi_c_fine1 = defl_rate1;
+    if flag_c_ct1 == 0
+        flag_c_ct1 = 1;
+        vi_c_ct1 = defl_rate1;
     end
     
 %     Fc_mag = 5*10^2*defl^1.5;
     
-    lambda_c1 = 6*(1-e_c)*k_c/(((2*e_c-1)^2+3)*vi_c_fine1);    
+    lambda_c1 = 6*(1-e_c)*k_c/(((2*e_c-1)^2+3)*vi_c_ct1);    
     Fc_mag1 = k_c*defl1^n_c + lambda_c1*defl1^n_c*defl_rate1;
 
     Fc_w1 = [-Fc_mag1;0;0];
@@ -117,12 +124,12 @@ if defl1 > 0
         
     Mc1 = cross(pc_b(:,1),Fc_b1);
     
-    Ff_b1 = -Fc_mag1*mu*sliding_axis(:,1);
+    Ff_b1 = -mu*sliding_axis(:,1);
     Mf1 = cross(pc_b(:,1),Ff_b1);
 else
-    if flag_c_fine1 == 1
-        flag_c_fine1 = 0;
-        vi_c_fine1 = 0;
+    if flag_c_ct1 == 1
+        flag_c_ct1 = 0;
+        vi_c_ct1 = 0;
     end
     
     Fc_mag1 = 0;
@@ -134,14 +141,14 @@ end
 
 if defl2 > 0
     
-    if flag_c_fine2 == 0
-        flag_c_fine2 = 1;
-        vi_c_fine2 = defl_rate2;
+    if flag_c_ct2 == 0
+        flag_c_ct2 = 1;
+        vi_c_ct2 = defl_rate2;
     end
     
 %     Fc_mag = 5*10^2*defl^1.5;
     
-    lambda_c2 = 6*(1-e_c)*k_c/(((2*e_c-1)^2+3)*vi_c_fine2);    
+    lambda_c2 = 6*(1-e_c)*k_c/(((2*e_c-1)^2+3)*vi_c_ct2);    
     Fc_mag2 = k_c*defl2^n_c + lambda_c2*defl2^n_c*defl_rate2;
 
     Fc_w2 = [-Fc_mag2;0;0];
@@ -149,12 +156,12 @@ if defl2 > 0
         
     Mc2 = cross(pc_b(:,2),Fc_b2);
     
-    Ff_b2 = -Fc_mag2*mu*sliding_axis(:,2);
+    Ff_b2 = -mu*sliding_axis(:,2);
     Mf2 = cross(pc_b(:,2),Ff_b2);
 else
-    if flag_c_fine2 == 1
-        flag_c_fine2 = 0;
-        vi_c_fine2 = 0;
+    if flag_c_ct2 == 1
+        flag_c_ct2 = 0;
+        vi_c_ct2 = 0;
     end
     
     Fc_mag2 = 0;
@@ -166,14 +173,14 @@ end
 
 if defl3 > 0
     
-    if flag_c_fine3 == 0
-        flag_c_fine3 = 1;
-        vi_c_fine3 = defl_rate3;
+    if flag_c_ct3 == 0
+        flag_c_ct3 = 1;
+        vi_c_ct3 = defl_rate3;
     end
     
 %     Fc_mag = 5*10^2*defl^1.5;
     
-    lambda_c3 = 6*(1-e_c)*k_c/(((2*e_c-1)^2+3)*vi_c_fine3);    
+    lambda_c3 = 6*(1-e_c)*k_c/(((2*e_c-1)^2+3)*vi_c_ct3);    
     Fc_mag3 = k_c*defl3^n_c + lambda_c3*defl3^n_c*defl_rate3;
 
     Fc_w3 = [-Fc_mag3;0;0];
@@ -181,12 +188,12 @@ if defl3 > 0
         
     Mc3 = cross(pc_b(:,3),Fc_b3);
     
-    Ff_b3 = -Fc_mag3*mu*sliding_axis(:,3);
+    Ff_b3 = -mu*sliding_axis(:,3);
     Mf3 = cross(pc_b(:,3),Ff_b3);
 else
-    if flag_c_fine3 == 1
-        flag_c_fine3 = 0;
-        vi_c_fine3 = 0;
+    if flag_c_ct3 == 1
+        flag_c_ct3 = 0;
+        vi_c_ct3 = 0;
     end
     
     Fc_mag3 = 0;
@@ -198,14 +205,14 @@ end
 
 if defl4 > 0
     
-    if flag_c_fine4 == 0
-        flag_c_fine4 = 1;
-        vi_c_fine4 = defl_rate4;
+    if flag_c_ct4 == 0
+        flag_c_ct4 = 1;
+        vi_c_ct4 = defl_rate4;
     end
     
 %     Fc_mag = 5*10^2*defl^1.5;
     
-    lambda_c4 = 6*(1-e_c)*k_c/(((2*e_c-1)^2+3)*vi_c_fine4);    
+    lambda_c4 = 6*(1-e_c)*k_c/(((2*e_c-1)^2+3)*vi_c_ct4);    
     Fc_mag4 = k_c*defl4^n_c + lambda_c4*defl4^n_c*defl_rate4;
 
     Fc_w4 = [-Fc_mag4;0;0];
@@ -213,14 +220,14 @@ if defl4 > 0
         
     Mc4 = cross(pc_b(:,4),Fc_b4);
     
-    Ff_b4 = -Fc_mag4*mu*sliding_axis(:,4);
+    Ff_b4 = -mu*sliding_axis(:,4);
     Mf4 = cross(pc_b(:,4),Ff_b4);
     
 %     disp(Mf4);
 else
-    if flag_c_fine4 == 1
-        flag_c_fine4 = 0;
-        vi_c_fine4 = 0;
+    if flag_c_ct4 == 1
+        flag_c_ct4 = 0;
+        vi_c_ct4 = 0;
     end
     
     Fc_mag4 = 0;
@@ -263,7 +270,9 @@ Mf_tot = [0;0;0];
 
 Mx = -Kt*prop_loc(2,:)*(prop_speed.^2)-Kp*x(4)^2-x(5)*Jr*sum(prop_speed_rad) + Mc_tot(1) + Mf_tot(1);
 My = Kt*prop_loc(1,:)*(prop_speed.^2)-Kq*x(5)^2+x(4)*Jr*sum(prop_speed_rad) + Mc_tot(2) + Mf_tot(2);
-Mz =  [-Dt Dt -Dt Dt]*(prop_speed.^2)-Kr*x(6)^2 -Jr*sum(prop_accel) + Mc1(3) + Mc_tot(3) + Mf_tot(3);
+% Mz =  [-Dt Dt -Dt Dt]*(prop_speed.^2)-Kr*x(6)^2 -Jr*sum(prop_accel) + Mc1(3) + Mc_tot(3) + Mf_tot(3);
+Mz =  [-Dt Dt -Dt Dt]*(prop_speed.^2)-Kr*x(6)^2 -Jr*[-1 1 -1 1]*prop_accel + Mc1(3) + Mc_tot(3) + Mf_tot(3);
+
 
 dx(1:3) = (Fg + Fa + Ft + Fc_tot + Ff_tot - m*cross(x(4:6),x(1:3)))/m;
 dx(4:6) = inv(I)*([Mx;My;Mz]-cross(x(4:6),I*x(4:6)));

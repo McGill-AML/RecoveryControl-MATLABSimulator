@@ -31,7 +31,7 @@ function [] = Graphs_Contact(ttotal,Xtotal,dX_tot,wall_loc,t_tot,defl1_tot,Fc1_t
     hold on;
     plot(t_tot,Fc1_tot,'r-','LineWidth',1);      
     title('Contact Force Magnitude - Bumper 1');
-    legend('Contact Force 1','m*(Body Accel Mag)');
+    legend('m*(Body Accel Mag)','Contact Force 1');
     xlabel('Time (s)');
     ylabel('Force (N)');
     yl_force1 = ylim;
@@ -67,7 +67,7 @@ function [] = Graphs_Contact(ttotal,Xtotal,dX_tot,wall_loc,t_tot,defl1_tot,Fc1_t
     hold on;
     plot(t_tot,Fc2_tot,'r-','LineWidth',1);
     title('Contact Force Magnitude - Bumper 2');
-    legend('Contact Force 2','m*(Body Accel Mag)');
+    legend('m*(Body Accel Mag)','Contact Force 2');
     xlabel('Time (s)');
     ylabel('Force (N)');
     yl_force2 = ylim;
@@ -106,7 +106,7 @@ function [] = Graphs_Contact(ttotal,Xtotal,dX_tot,wall_loc,t_tot,defl1_tot,Fc1_t
     hold on;
     plot(t_tot,Fc3_tot,'r-','LineWidth',1);    
     title('Contact Force Magnitude - Bumper 3');
-    legend('Contact Force 3','m*(Body Accel Mag)');
+    legend('m*(Body Accel Mag)','Contact Force 3');
     xlabel('Time (s)');
     ylabel('Force (N)');
     yl_force3 = ylim;
@@ -150,7 +150,7 @@ function [] = Graphs_Contact(ttotal,Xtotal,dX_tot,wall_loc,t_tot,defl1_tot,Fc1_t
     hold on;
     plot(t_tot,Fc4_tot,'r-','LineWidth',1);
     title('Contact Force Magnitude - Bumper 4');
-    legend('Contact Force 4','m*(Body Accel Mag)');
+    legend('m*(Body Accel Mag)','Contact Force 4');
     xlabel('Time (s)');
     ylabel('Force (N)');
     yl_force4 = ylim;
@@ -165,12 +165,12 @@ function [] = Graphs_Contact(ttotal,Xtotal,dX_tot,wall_loc,t_tot,defl1_tot,Fc1_t
     figure('Position',[500,10,1000,500])
     plot(t_tot,accel_tot,'-','Color',[102 250 120]/256,'LineWidth',2);
     hold on;
-    plot(t_tot,Fc1_tot + Fc2_tot + Fc3_tot + Fc4_tot,'m--');
+    
     plot(t_tot,Fc1_tot,t_tot,Fc2_tot,t_tot,Fc3_tot,t_tot,Fc4_tot);
+    plot(t_tot,Fc1_tot + Fc2_tot + Fc3_tot + Fc4_tot,'m--');
     
     
-    
-    legend('m*(Body Accel Mag)','Total Contact Force','Bumper 1','Bumper 2','Bumper 3','Bumper 4');
+    legend('m*(Body Accel Mag)','Bumper 1','Bumper 2','Bumper 3','Bumper 4','Total Contact Force');
     title('Contact Forces');
     ylabel('Force (N)');
     xlabel('Time (s)');
