@@ -3,10 +3,11 @@ function [Ax] = FindAx(roll, pitch, head, tilt)
 if roll == 0 && pitch == 0
     Ax = 0;
 else
-    if head == 0 || head == pi
-        if roll >= eps
-            error('Quadcopter does not move in strictly X direction');
-        end
+    if abs(head - 0) <= deg2rad(10) || abs(head - pi) <= deg2rad(10)
+%     if head == 0 || head == pi
+%         if roll >= eps
+%             error('Quadcopter does not move in strictly X direction');
+%         end
         fit_x = [deg2rad(5) deg2rad(10) deg2rad(15) deg2rad(20) deg2rad(25)];% deg2rad(35) deg2rad(45)];
         fit_y = [0.8575 1.7330 2.5829 3.3559 4.1361];% 5.5189 6.4832];
 %         fit = polyfit(fit_x,fit_y,2);
@@ -16,9 +17,9 @@ else
         Ax = (-fit(1)*(pitch)+ fit(2));
         
     elseif abs(head) == pi/2
-        if pitch >= eps 
-            error('Quadcopter does not move in strictly X direction');
-        end
+%         if pitch >= eps 
+%             error('Quadcopter does not move in strictly X direction');
+%         end
         fit_x = [deg2rad(5) deg2rad(10) deg2rad(15) deg2rad(20) deg2rad(25)];% deg2rad(35) deg2rad(45)];
         fit_y = [0.8575 1.7330 2.5829 3.3559 4.1361];% 5.5189 6.4832];
 %         fit = polyfit(fit_x,fit_y,2);

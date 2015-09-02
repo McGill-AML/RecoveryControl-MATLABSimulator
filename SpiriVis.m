@@ -4,9 +4,9 @@ function [ ] =SpiriVis( record,t,X,sideview,wall_loc,wall_plane, pint11_hist,pin
 global prop_loc Rbumper Cbumper Abumper
 
 disprate = 200; %Hz
-recordrate = disprate/10; %Hz
+recordrate = disprate/4; %Hz
 disprate_idx = round((size(t,1)/(t(end)-t(1)))/disprate);
-disprate_idx = 1;
+% disprate_idx = 1;
 
 figure('units','normalized','outerposition',[0 0 1 1])
 
@@ -165,6 +165,9 @@ for i = 1:disprate_idx:size(t,1)
    
    if sideview == 'XZ'
         view([0 0]); %view XZ plane
+        
+   elseif sideview == 'ZX'
+       view(-175,0);
    elseif sideview == 'YZ'
         view(90, 0); %view YZ plane
         

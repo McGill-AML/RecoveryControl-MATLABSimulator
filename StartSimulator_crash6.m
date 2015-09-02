@@ -1,10 +1,13 @@
 % function [tilt, Vc_act, defl_init, defl_max, Fn_init, Fn_max, numContacts, stable ] = StartSimulator(tilt_des, e, Vc_des, recover_control,traj_head)
 
-tilt_des = deg2rad(5);
+% tilt_des = deg2rad(5);
 e = 0.9; 
-Vc_des = 1.2;
+Vc_des = 1.15;
 recover_control = 0;
-traj_head = 0;
+traj_head = deg2rad(-5);
+roll0 = deg2rad(11.3);
+pitch0 = deg2rad(-13.2);
+z_des = 1.8;
 
 % clear all;
 % close all;
@@ -33,7 +36,7 @@ InitSpiriParams;
 % wall_plane = 'YZ';
 
 
-traj_posn = [0 0 2]; %traj_posn(1) gets reassigned later
+traj_posn = [0 0 1]; %traj_posn(1) gets reassigned later
 traj_time = [0;3]; %traj_time(1) gets reassigned later
 wall_loc = 1.5;
 wall_plane = 'YZ';
@@ -50,25 +53,28 @@ dt = 1/200;
 
 % States
 
-if abs(traj_head) == pi/4
-    
-    angle = (tilt_des - 0.0042477)/1.3836686;
-    roll0 = -angle;
-    pitch0 = -angle;
-    
-elseif traj_head == 0
+% if abs(traj_head) == pi/4
+%     
 %     angle = (tilt_des - 0.0042477)/1.3836686;
-    angle = tilt_des;
-    roll0 = 0;
-    pitch0 = -angle;
-    
-elseif traj_head == pi
-    angle = tilt_des;
-    roll0 = 0;
-    pitch0 = angle;
-else
-    error('Cannot use controller with desired heading. Please choose traj_head = 0 or pi/4');
-end
+%     roll0 = -angle;
+%     pitch0 = -angle;
+%     
+% elseif traj_head == 0
+% %     angle = (tilt_des - 0.0042477)/1.3836686;
+%     angle = tilt_des;
+%     roll0 = 0;
+%     pitch0 = -angle;
+%     
+% elseif traj_head == pi
+%     angle = tilt_des;
+%     roll0 = 0;
+%     pitch0 = angle;
+% else
+%     error('Cannot use controller with desired heading. Please choose traj_head = 0 or pi/4');
+% end
+
+
+
 traj_att = [roll0;pitch0];
 
 q0 = angle2quat(-(roll0+pi),pitch0,traj_head,'xyz')';
@@ -231,8 +237,7 @@ for i = t0:dt:tf-dt
         epitch_prev = epitch;
         eyaw_prev = eyaw;
         er_prev = er;
-        omega_prev = omega;
-        
+        omega_prev = omega;        
         
     end
     
@@ -241,8 +246,26 @@ for i = t0:dt:tf-dt
         ref_head = traj_head;
         [control,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev,recover,body_accel);
     else
-        [control,ez,evz,eroll,epitch,eyaw,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerICRA(Xtotal(end,:),i,t0,dt,traj_posn(3),traj_head,traj_att,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev,recover,body_accel);
+        [control,ez,evz,eroll,epitch,eyaw,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerICRA(Xtotal(end,:),i,t0,dt,z_des,traj_head,traj_att,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev,recover,body_accel);
+        if i >= Tc
+            u1 = -m*g;
+            u2 = 0;
+            u4 = 0;
+        end
+        
+%         if i >= Tc + 0.33
+%             u2 = 0;
+%             u3 = 0;
+%             u4 = 0;
+%         end
     end
+    
+    if i >= Tc + 0.15
+        wall_loc = 50;
+    end
+    
+           
+    
     %Re-Initialize Contact Dynamics Variables
     [pint11,pint12,pc_w1,theta11,theta12,defl1,Fc1] = InitContactVar; 
     flag_c1 = flag_c_ct1;
@@ -376,7 +399,7 @@ for i = t0:dt:tf-dt
     theta42_hist = [theta42_hist;theta42];
 
     %End loop if Spiri has crashed
-    if Xtotal(end,9) <= -0.3
+    if Xtotal(end,9) <= 0
         display('Spiri has hit the floor :(');
         stable = 0;
         break;
