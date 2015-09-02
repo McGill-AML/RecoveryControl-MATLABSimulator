@@ -1,4 +1,4 @@
-function [dx, defl1, Fc_mag1, pc_w1, defl_rate1, defl2, Fc_mag2, pc_w2, defl_rate2, defl3, Fc_mag3, pc_w3, defl_rate3, defl4, Fc_mag4, pc_w4, defl_rate4] = SpiriMotion_4Circles(t,x,control,wall_loc,wall_plane)
+function [dx, defl1, Fc_mag1, pc_w1, defl_rate1, defl2, Fc_mag2, pc_w2, defl_rate2, defl3, Fc_mag3, pc_w3, defl_rate3, defl4, Fc_mag4, pc_w4, defl_rate4] = SpiriMotion_4Circles(t,x,control,wall_loc,wall_plane,e_c)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -15,7 +15,7 @@ global flag_c_ct1 vi_c_ct1 flag_c_ct2 vi_c_ct2 flag_c_ct3 vi_c_ct3 flag_c_ct4 vi
 
 %Stiffness2
 k_c = 40;    
-e_c = 0.95;
+% e_c = 0.9;
 n_c = 0.54;
 mu = 0;%0.25;
 
@@ -250,8 +250,8 @@ Fg = R*[0;0;-m*g];
 Fa = Tv*[-0.5*d_air*V^2*A*Cd;0;0];
 Ft = [0;0;-Kt*sum(prop_speed.^2)];
 
-assignin('base','prop_speed',prop_speed);
-assignin('base','prop_accel',prop_accel);
+% assignin('caller','prop_speed',prop_speed);
+% assignin('caller','prop_accel',prop_accel);
 
 % Mx = signal_c(2)-Kp*x(4)^2;%-x(5)*Jr*sum(prop_speed);
 % My = signal_c(3)-Kq*x(5)^2;%+x(4)*Jr*sum(prop_speed);
@@ -261,12 +261,15 @@ assignin('base','prop_accel',prop_accel);
 % prop_speed_rad = prop_speed2_rad;
 
 Fc_tot = Fc_b1 + Fc_b2 + Fc_b3 + Fc_b4;
+% Fc_tot = [0;0;0];
 % Ff_tot = Ff_b1 + Ff_b2 + Ff_b3 + Ff_b4;
 Ff_tot = [0;0;0];
 
 Mc_tot = Mc1 + Mc2 + Mc3 + Mc4;
+% Mc_tot = [0;0;0];
 % Mf_tot = Mf1 + Mf2 + Mf3 + Mf4;
 Mf_tot = [0;0;0];
+
 
 Mx = -Kt*prop_loc(2,:)*(prop_speed.^2)-Kp*x(4)^2-x(5)*Jr*sum(prop_speed_rad) + Mc_tot(1) + Mf_tot(1);
 My = Kt*prop_loc(1,:)*(prop_speed.^2)-Kq*x(5)^2+x(4)*Jr*sum(prop_speed_rad) + Mc_tot(2) + Mf_tot(2);

@@ -1,11 +1,18 @@
-% function [Ts, PO] = StartSimulator(traj_posn,traj_head,traj_time,sim_idx)
+% function [tilt, Vc_act, defl_init, defl_max, Fn_init, Fn_max, numContacts, stable ] = StartSimulator(tilt_des, e, Vc_des, recover_control,traj_head)
+
+tilt_des = deg2rad(20);
+e = 0.9; 
+Vc_des = .55;
+recover_control = 0;
+traj_head = pi;
 
 % clear all;
 % close all;
 % clc;
 clear X
+stable = 1;
 
-global m g Kt Rbumper 
+global m g Kt Rbumper prop_loc
 global flag_c_ct1 vi_c_ct1 flag_c_ct2 vi_c_ct2 flag_c_ct3 vi_c_ct3 flag_c_ct4 vi_c_ct4
 
 %% Spiri System Parameters
@@ -19,44 +26,74 @@ InitSpiriParams;
 % traj_time = [0;5;10;15;20;25];
 
 % %Contact with max pitch and velocity of ~1 m/s
-traj_posn = [0 0 2;4 0 2];
-traj_head = [0; 0];
-traj_time = [0; 2.5];
-wall_loc = 0.5; %2.87 + 0.29; %1.5822 + 0.29; %0.29*0.95 + 0.2613;
-wall_plane = 'YZ';
-
-
-% traj_posn = [0 0 2;5 0 2];
-% traj_head = [pi/4; pi/4];
-% traj_time = [0;4];
-% wall_loc = 4;
+% traj_posn = [0 0 2;4 0 2];
+% traj_head = [0; 0];
+% traj_time = [0; 2.5];
+% wall_loc = 0.5; %2.87 + 0.29; %1.5822 + 0.29; %0.29*0.95 + 0.2613;
 % wall_plane = 'YZ';
+
+
+traj_posn = [0 0 2]; %traj_posn(1) gets reassigned later
+traj_time = [0;3]; %traj_time(1) gets reassigned later
+wall_loc = 1.5;
+wall_plane = 'YZ';
+Tc = 0.5;
+Vc = Vc_des;
+
 
 % sim_idx = 40;
 t0 = traj_time(1);
 tf = traj_time(end);
 dt = 1/200;
 
-%% Create Trajectory
-[posn,head] = CreateTrajectory(traj_posn,traj_head,traj_time,dt);
-traj_index = 1;
-
-%% Initial Variable Values
+% Initial Variable Values
 
 % States
-q0 = quatmultiply([0;-1;0;0],[cos(traj_head(1)/2);0;0;sin(traj_head(1)/2)]);
-q0 = q0/norm(q0);
+
+if abs(traj_head) == pi/4
+    
+    angle = (tilt_des - 0.0042477)/1.3836686;
+    roll0 = -angle;
+    pitch0 = -angle;
+    
+elseif traj_head == 0
+%     angle = (tilt_des - 0.0042477)/1.3836686;
+    angle = tilt_des;
+    roll0 = 0;
+    pitch0 = -angle;
+    
+elseif traj_head == pi
+    angle = tilt_des;
+    roll0 = 0;
+    pitch0 = angle;
+else
+    error('Cannot use controller with desired heading. Please choose traj_head = 0 or pi/4');
+end
+traj_att = [roll0;pitch0];
+
+q0 = angle2quat(-(roll0+pi),pitch0,traj_head,'xyz')';
+R0 = quatRotMat(q0);
+[roll, pitch, yaw] = quat2angle(q0,'xyz');
+
+[traj_posn(1), vx_w0, t0 ] = FindRxVx( Tc, Vc, wall_loc, q0, traj_head, t0);
+vy_w0 = 0;
+vz_w0 = 0;
+
+v_b0 =  R0*[vx_w0;vy_w0;vz_w0];
+
+% q0 = quatmultiply([0;-1;0;0],[cos(traj_head(1)/2);0;0;sin(traj_head(1)/2)]);
+% q0 = q0/norm(q0);
 
 omega0 = [-1;1;-1;1].*repmat(sqrt(m*g/(4*Kt)),4,1);  %Start with hovering RPM
 prop_speed = omega0;
-x0 = [zeros(6,1);traj_posn(1,:)';q0];
+x0 = [v_b0;zeros(3,1);traj_posn(1,:)';q0];
 
 Xtotal = x0';
 ttotal = t0;
 
-q = [Xtotal(end,10);Xtotal(end,11);Xtotal(end,12);Xtotal(end,13)]/norm(Xtotal(end,10:13));
-R = quatRotMat(q);
-[roll, pitch, yaw] = quat2angle(q,'xyz');
+% q = [Xtotal(end,10);Xtotal(end,11);Xtotal(end,12);Xtotal(end,13)]/norm(Xtotal(end,10:13));
+% R = quatRotMat(q);
+
 % [yaw, pitch, roll] = quat2angle(q);
 
 % Controller Initial Variables
@@ -101,8 +138,8 @@ roll_hist = roll;
 pitch_hist = pitch;
 yaw_hist = yaw;
 
-rolldes_hist = 0;
-pitchdes_hist = 0;
+rolldes_hist = traj_att(1);
+pitchdes_hist = traj_att(2);
 rdes_hist = 0;
 
 % Controller
@@ -182,14 +219,9 @@ Se = 0.05;
 %% Simulation Loop
 for i = t0:dt:tf-dt
 %     display(size(ttotal))
-    display(i)
+%     display(i)
     
-    %Trajectory Control Position
-    ref_r = posn(traj_index,:)';
-    ref_head = head(traj_index);
-    traj_index = traj_index + 1;
-
-    
+   
     %Find Control Signal based on ref_r, ref_head
     if i ~= t0
         x0_step = X(end,:);
@@ -199,11 +231,18 @@ for i = t0:dt:tf-dt
         epitch_prev = epitch;
         eyaw_prev = eyaw;
         er_prev = er;
-        omega_prev = omega;         
+        omega_prev = omega;
+        
+        
     end
     
-    [control,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev,recover,body_accel);
-
+    if recover*recover_control == 1
+        ref_r = [0 traj_posn(2:3)];
+        ref_head = traj_head;
+        [control,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev,recover,body_accel);
+    else
+        [control,ez,evz,eroll,epitch,eyaw,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerICRA(Xtotal(end,:),i,t0,dt,traj_posn(3),traj_head,traj_att,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev,recover,body_accel);
+    end
     %Re-Initialize Contact Dynamics Variables
     [pint11,pint12,pc_w1,theta11,theta12,defl1,Fc1] = InitContactVar; 
     flag_c1 = flag_c_ct1;
@@ -223,7 +262,7 @@ for i = t0:dt:tf-dt
    
     %Propagate Dynamics
     options = odeset('RelTol',1e-3);
-    [t,X] = ode45(@(t, X) SpiriMotion_4Circles(t,X,control,wall_loc,wall_plane),[i i+dt],x0_step,options);
+    [t,X] = ode45(@(t, X) SpiriMotion_4Circles(t,X,control,wall_loc,wall_plane,e),[i i+dt],x0_step,options);
     
     %Reset contact flags for continuous time recording
     flag_c_ct1 = flag_c1;
@@ -240,7 +279,7 @@ for i = t0:dt:tf-dt
     
     %Continuous time recording
     for j = 1:size(X,1)
-        [dx,defl1_fine,Fc1,pc1,defl1_rate,defl2_fine,Fc2,pc2,defl2_rate,defl3_fine,Fc3,pc3,defl3_rate,defl4_fine,Fc4,pc4,defl4_rate] = SpiriMotion_4Circles(t(j),X(j,:),control,wall_loc,wall_plane);
+        [dx,defl1_fine,Fc1,pc1,defl1_rate,defl2_fine,Fc2,pc2,defl2_rate,defl3_fine,Fc3,pc3,defl3_rate,defl4_fine,Fc4,pc4,defl4_rate] = SpiriMotion_4Circles(t(j),X(j,:),control,wall_loc,wall_plane,e);
         
         dX_ct = [dX_ct;dx'];
         defl1_ct = [defl1_ct;defl1_fine];
@@ -290,6 +329,10 @@ for i = t0:dt:tf-dt
     u2_hist = [u2_hist,u2];
     u3_hist = [u3_hist,u3];
     u4_hist = [u4_hist,u4];
+    
+    prop_speed = control(1:4); %in RPM;
+    prop_accel = control(5:8); %in rad/s^2;
+    
     prop_speed_hist = [prop_speed_hist,prop_speed];
     prop_accel_hist = [prop_accel_hist,prop_accel];
     
@@ -333,8 +376,9 @@ for i = t0:dt:tf-dt
     theta42_hist = [theta42_hist;theta42];
 
     %End loop if Spiri has crashed
-    if Xtotal(end,9) <= -1
+    if Xtotal(end,9) <= -0.3
         display('Spiri has hit the floor :(');
+        stable = 0;
         break;
     end  
     
@@ -348,6 +392,13 @@ theta4_hist = [theta41_hist,theta42_hist];
 [Ts, PO] = ControllerStats(ttotal,Xtotal,Se,traj_posn,traj_head);
 
 % Graphs( ttotal,Xtotal,roll_hist,pitch_hist,yaw_hist,rolldes_hist,pitchdes_hist,rdes_hist,u1_hist,u2_hist,u3_hist,u4_hist);
+
+% figure()
+% plot(t_ct,dX_ct(:,7),t_ct,dX_ct(:,8),t_ct,dX_ct(:,9));
+% title('World Velocities');
+% ylabel('Velocity (m/s)');
+% xlabel('Time (s)');
+% legend('x^W','y^W','z^W');
 
 % savestring = strcat('BatchSim_',num2str(sim_idx,'%03i'));
 % print(savestring,'-dpng');
@@ -364,12 +415,37 @@ theta4_hist = [theta41_hist,theta42_hist];
 % title('Prop Accelerations (rad/s^2)');
 % grid on;
 
-if sum(defl1_hist) > 0
+if sum(defl1_hist)+sum(defl2_hist)+sum(defl3_hist)+sum(defl4_hist) > 0
    
 %     Graphs_Contact(ttotal,Xtotal,dX_ct,wall_loc,t_ct,defl1_ct,Fc1_ct,defl_rate1_ct,flag_c1_ct,vi_c1_ct,defl2_ct,Fc2_ct,defl_rate2_ct,flag_c2_ct,vi_c2_ct,defl3_ct,Fc3_ct,defl_rate3_ct,flag_c3_ct,vi_c3_ct,defl4_ct,Fc4_ct,defl_rate4_ct,flag_c4_ct,vi_c4_ct);
 end
+%     Graphs_Contact(ttotal,Xtotal,dX_ct,wall_loc,t_ct,defl1_ct,Fc1_ct,defl_rate1_ct,flag_c1_ct,vi_c1_ct,defl2_ct,Fc2_ct,defl_rate2_ct,flag_c2_ct,vi_c2_ct,defl3_ct,Fc3_ct,defl_rate3_ct,flag_c3_ct,vi_c3_ct,defl4_ct,Fc4_ct,defl_rate4_ct,flag_c4_ct,vi_c4_ct);
 
 % SpiriVis(0,ttotal,Xtotal,'V2',wall_loc,'YZ',pint11_hist,pint12_hist,pc_w1_hist,pint21_hist,pint22_hist,pc_w2_hist,pc_w3_hist,pc_w4_hist);
+
+[ti1, ~, defls1, Fns1, ~, Vx1, ~, ~, ~, ~, Tilt1, numContacts1] = ContactStats( t_ct,X_ct,defl1_ct, Fc1_ct,vi_c1_ct,traj_head);
+[ti2, ~, defls2, Fns2, ~, Vx2, ~, ~, ~, ~, Tilt2, numContacts2] = ContactStats( t_ct,X_ct,defl2_ct, Fc2_ct,vi_c2_ct,traj_head);
+[ti3, ~, defls3, Fns3, ~, Vx3, ~, ~, ~, ~, Tilt3, numContacts3] = ContactStats( t_ct,X_ct,defl3_ct, Fc3_ct,vi_c3_ct,traj_head);
+[ti4, ~, defls4, Fns4, ~, Vx4, ~, ~, ~, ~, Tilt4, numContacts4] = ContactStats( t_ct,X_ct,defl4_ct, Fc4_ct,vi_c4_ct,traj_head);
+
+if traj_head == pi/4    
+    tilt = Tilt4(1);
+    defl_init = defls4(1);
+    Fn_init = Fns4(1);
+    Vc_act = Vx4(1);
+elseif traj_head == 0
+    
+    tilt = (defls1(1)>=defls4(1))*Tilt1(1) + (defls1(1)<defls4(1))*Tilt4(1);
+    defl_init = (defls1(1)>=defls4(1))*defls1(1) + (defls1(1)<defls4(1))*defls4(1);
+    Fn_init = (defls1(1)>=defls4(1))*Fns1(1) + (defls1(1)<defls4(1))*Fns4(1);
+    Vc_act = (defls1(1)>=defls4(1))*Vx1(1) + (defls1(1)<defls4(1))*Vx4(1);
+    
+end
+
+Fn_max = max([Fns1,Fns2,Fns3,Fns4]);
+defl_max = max([defls1,defls2,defls3,defls4]);
+
+numContacts = numContacts1 + numContacts2 + numContacts3 + numContacts4;
 
 % end
 % 
