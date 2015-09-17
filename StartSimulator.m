@@ -2,9 +2,10 @@
 
 tilt_des = deg2rad(5);
 e = 0.9; 
-Vc_des = 1.2;
+Vc_des = 0.5;
 recover_control = 0;
 traj_head = 0;
+ax_given = 0;
 
 % clear all;
 % close all;
@@ -34,7 +35,7 @@ InitSpiriParams;
 
 
 traj_posn = [0 0 2]; %traj_posn(1) gets reassigned later
-traj_time = [0;3]; %traj_time(1) gets reassigned later
+traj_time = [0;4]; %traj_time(1) gets reassigned later
 wall_loc = 1.5;
 wall_plane = 'YZ';
 Tc = 0.5;
@@ -75,7 +76,7 @@ q0 = angle2quat(-(roll0+pi),pitch0,traj_head,'xyz')';
 R0 = quatRotMat(q0);
 [roll, pitch, yaw] = quat2angle(q0,'xyz');
 
-[traj_posn(1), vx_w0, t0 ] = FindRxVx( Tc, Vc, wall_loc, q0, traj_head, t0);
+[traj_posn(1), vx_w0, t0 ] = FindRxVx( Tc, Vc, wall_loc, q0, traj_head, t0, ax_given);
 vy_w0 = 0;
 vz_w0 = 0;
 
@@ -89,7 +90,7 @@ prop_speed = omega0;
 x0 = [v_b0;zeros(3,1);traj_posn(1,:)';q0];
 
 Xtotal = x0';
-ttotal = t0;
+ttotal = t0;20
 
 % q = [Xtotal(end,10);Xtotal(end,11);Xtotal(end,12);Xtotal(end,13)]/norm(Xtotal(end,10:13));
 % R = quatRotMat(q);
@@ -376,7 +377,7 @@ for i = t0:dt:tf-dt
     theta42_hist = [theta42_hist;theta42];
 
     %End loop if Spiri has crashed
-    if Xtotal(end,9) <= -0.3
+    if Xtotal(end,9) <= 0
         display('Spiri has hit the floor :(');
         stable = 0;
         break;

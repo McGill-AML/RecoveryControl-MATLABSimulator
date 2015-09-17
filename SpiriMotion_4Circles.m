@@ -1,11 +1,12 @@
-function [dx, defl1, Fc_mag1, pc_w1, defl_rate1, defl2, Fc_mag2, pc_w2, defl_rate2, defl3, Fc_mag3, pc_w3, defl_rate3, defl4, Fc_mag4, pc_w4, defl_rate4] = SpiriMotion_4Circles(t,x,control,wall_loc,wall_plane,e_c)
+function [dx, defl1, Fc_mag1, pc_w1, defl_rate1, defl2, Fc_mag2, pc_w2, defl_rate2, defl3, Fc_mag3, pc_w3, defl_rate3, defl4, Fc_mag4, pc_w4, defl_rate4, prop_speed] = SpiriMotion_4Circles(t,x,control,wall_loc,wall_plane,e_c,prop_speed_prev)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
 global g m I Jr prop_loc Kt A d_air Cd V Tv Kp Kq Kr Dt Rbumper Cbumper Ixx Iyy Izz CM;
 
-global flag_c_ct1 vi_c_ct1 flag_c_ct2 vi_c_ct2 flag_c_ct3 vi_c_ct3 flag_c_ct4 vi_c_ct4
+global flag_c_ct1 vi_c_ct1 flag_c_ct2 vi_c_ct2 flag_c_ct3 vi_c_ct3 flag_c_ct4 vi_c_ct4 Tc_act
 
+global prop_speed_chkpt prop_speed_chkpt_flag
 %% Contact Parameters
 % %Stiffness 1
 % k_c = 1*10^5;    
@@ -237,6 +238,50 @@ else
     Mf4 = [0;0;0];
 end
 
+if Tc_act == 10000
+    if ( flag_c_ct1 || flag_c_ct2 || flag_c_ct3 || flag_c_ct4) == 1
+        Tc_act = t;
+        prop_speed_chkpt(:,1) = prop_speed_prev;
+        prop_speed_chkpt_flag(1) = 1;
+    end
+end
+
+
+if t >= Tc_act + 0.2084;
+    prop_speed(1) = 0;
+    prop_speed(2) = 0;
+    prop_speed(3) = 0;
+    prop_speed(4) = 0;
+    
+elseif t >= Tc_act + 0.0984;
+    if prop_speed_chkpt_flag(3) == 0        
+        prop_speed_chkpt(:,3) = prop_speed_prev;
+        prop_speed_chkpt_flag(3) = 1;
+    end
+    prop_speed(1) = sign(prop_speed(1))*(-2345.5*(t - Tc_act - 0.0984)+abs(prop_speed_chkpt(1,3)));
+    prop_speed(2) = 0;
+    prop_speed(3) = 0;
+    prop_speed(4) = 0;
+ 
+elseif t >= Tc_act + 0.0616;
+    if prop_speed_chkpt_flag(2) == 0        
+        prop_speed_chkpt(:,2) = prop_speed_prev;
+        prop_speed_chkpt_flag(2) = 1;
+    end
+    prop_speed(1) = sign(prop_speed(1))*(-20897*(t - Tc_act - 0.0616)+abs(prop_speed_chkpt(1,2)));
+    prop_speed(2) = 0;
+    prop_speed(3) = sign(prop_speed(3))*(-9592.4*(t - Tc_act - 0.0616)+abs(prop_speed_chkpt(3,2)));
+    prop_speed(4) = sign(prop_speed(4))*(13342*(t - Tc_act - 0.0616)+abs(prop_speed_chkpt(4,2)));   
+    
+elseif t >= Tc_act;
+    prop_speed(1) = sign(prop_speed(1))*(-3863.6*(t - Tc_act)+abs(prop_speed_chkpt(1,1)));
+    prop_speed(2) = 0;
+    prop_speed(3) = sign(prop_speed(3))*(-31218*(t - Tc_act)+abs(prop_speed_chkpt(3,1)));
+    prop_speed(4) = sign(prop_speed(4))*(-1704.5*(t - Tc_act)+abs(prop_speed_chkpt(4,1)));    
+end
+
+
+prop_speed_rad = prop_speed * (2*pi/60); %in rad/s
 
 % No Contact:
 % Fc_mag1 = 0;

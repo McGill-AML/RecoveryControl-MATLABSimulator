@@ -153,6 +153,9 @@ for i = frame
    
    if sideview == 'XZ'
         view([0 0]); %view XZ plane
+        
+   elseif sideview == 'ZX'
+       view(-180,0);
    elseif sideview == 'YZ'
         view(90, 0); %view YZ plane
         
@@ -164,10 +167,16 @@ for i = frame
        
    elseif sideview == 'V2'
        view([-19.5,28]);
+   elseif sideview == 'VV'
+       view([-180,26]);
    end
    
    grid on;
    axis square;
+   zlim([-0.2 0.8]);
+   ylim([-0.8 0.2]);
+   xlim([1 2]);
+   
    
    drawnow;    
    

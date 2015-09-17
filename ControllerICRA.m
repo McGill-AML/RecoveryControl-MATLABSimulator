@@ -52,13 +52,23 @@ Kiyaw = 1;
 Kdyaw = 0.2;
 
 %% Attitude Controller Parameters
-Kprp = 7.2; %Zhang x4 value = 7.2
-Kirp = 4; %Zhang x4 value = 4
-Kdrp = 4.2; %Zhang x4 value = 4.2
+% Original Simulator Values:
+% Kprp = 7.2; %Zhang x4 value = 7.2
+% Kirp = 4; %Zhang x4 value = 4
+% Kdrp = 4.2; %Zhang x4 value = 4.2
+% 
+% Kpvyaw = 1.8; %Zhang x4 value = 2.8
+% Kivyaw = 2; %Zhang x4 value = 4;
+% Kdvyaw = 0; %Zhang x4 value = 0;
 
-Kpvyaw = 1.8; %Zhang x4 value = 2.8
-Kivyaw = 2; %Zhang x4 value = 4;
-Kdvyaw = 0; %Zhang x4 value = 0;
+% Spiri Experimental Values:
+Kprp = 60;
+Kirp = 0;
+Kdrp = 6;
+
+Kpvyaw = 1.8;
+Kivyaw = 0.2;
+Kdvyaw = 0;
 
 if recover == 0
     %% PID Altitude Controller

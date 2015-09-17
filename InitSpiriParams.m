@@ -34,7 +34,8 @@ Abumper = deg2rad(11);
 
 %Thrust coefficient
 % Kt = 0.000000054; %From Pleiades primitives.c 07-03-2015
-Kt = 7.015e-8; %Calculated from 8x4.5 APC Prop
+Kt = 8.7e-8; %Calculated from thrust needed for Spiri to hover w/ white 8" props
+%Kt = 7.015e-8; %Calculated from 8x4.5 APC Prop
 
 %Drag Torque factor of coaxial rotor pairs
 Dt = 9.61e-10; %Calculated from 8x4.5 APC Prop

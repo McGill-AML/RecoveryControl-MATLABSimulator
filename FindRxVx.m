@@ -1,4 +1,4 @@
-function [ Rx_init, Vx_init, t0  ] = FindRxVx( Tc, Vc, wall_loc, q0, traj_head, t0 )
+function [ Rx_init, Vx_init, t0  ] = FindRxVx( Tc, Vc, wall_loc, q0, traj_head, t0, ax_given )
 %UNTITLED6 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -22,7 +22,7 @@ end
 tilt = FindTilt(R0,traj_head);
 xc_w = wall_loc - (R0(:,1)'*(prop_loc(:,bumper_c)) + Rbumper*cos(tilt));
 
-ax = FindAx(roll, pitch, traj_head, tilt); 
+ax = FindAx(roll, pitch, traj_head, tilt, ax_given); 
 
 
 Vx_init = Vc - ax*Tc;
