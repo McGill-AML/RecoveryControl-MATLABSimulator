@@ -3,7 +3,7 @@ function [ ] =SpiriVis_Static( frame,t,X,sideview,wall_loc,wall_plane, pint11_hi
 %   Detailed explanation goes here
 global prop_loc Rbumper Cbumper Abumper
 
-figure('units','normalized','outerposition',[0 0 1 1])
+%figure('units','normalized','outerposition',[0 0 1 1])
 
 %% Create body-fixed centers of 4 bumpers + virtual bumper
 load('locations2');
@@ -55,7 +55,7 @@ axis_min = min([min(X(:,7))-0.4,min(X(:,8))-0.4,min(X(:,9))-0.4]);
 axis_max = max([max(X(:,7))+0.4,max(X(:,8))+0.4,max(X(:,9))+0.4]);
 
 %% Create world-frame wall points
-[wall_pts, wall_ln] = WallPts(wall_loc,wall_plane,-1,0,3.5,4);
+[wall_pts, wall_ln] = WallPts(wall_loc,wall_plane,0,0.4,1.5,1.4);
 
 for i = frame
    %% Rotate body-fixed points to world-frame points
@@ -157,25 +157,41 @@ for i = frame
    elseif sideview == 'ZX'
        view(-180,0);
    elseif sideview == 'YZ'
-        view(90, 0); %view YZ plane
-        
+        view(90, 0); %view YZ plane        
    elseif sideview == 'XY'
-       view([0 0 1]);
+       view([0 0 1]);  
        
    elseif sideview == 'V1'
-       view([-14.5,6]);
-       
+       view([-14.5,6]);       
    elseif sideview == 'V2'
-       view([-19.5,28]);
+       view([-19.5,28]);       
+   elseif sideview == 'C3'
+       view(-140,26);       
+   elseif sideview == 'C5'
+        view(-176,30);
+   elseif sideview == 'C7'
+        view(-178,8);
+   elseif sideview == 'C8'
+       view(-180,8);
+   elseif sideview == 'CT' %crash Ten
+       view(-177,20);
    elseif sideview == 'VV'
        view([-180,26]);
    end
    
    grid on;
    axis square;
-   zlim([-0.2 0.8]);
-   ylim([-0.8 0.2]);
-   xlim([1 2]);
+   
+   
+%    %Crash 11
+%    zlim([-0.2 0.8]);
+%    ylim([-0.8 0.2]);
+%    xlim([1 2]);
+
+%Crash 6
+xlim([0.5 2]);
+ylim([-0.5 1.6]);
+zlim([0 1.5]);
    
    
    drawnow;    

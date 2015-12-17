@@ -1,4 +1,4 @@
-function [control,ez,evz,eroll,epitch,eyaw,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerICRA_att(x,i,t0,dt,ref_z,ref_head,ref_att,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev,recover,off_control, Tc_act, cmds_time, cmds, motors_time,motors)
+function [control,ez,evz,eroll,epitch,eyaw,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerICRA_att(x,i,t0,dt,ref_z,ref_head,ref_att,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev,recover,Tc_act, cmds_time, cmds)
 
 global m g Kt Kr prop_loc Kp Kq Jr Dt Ixx Iyy Izz
 
@@ -60,7 +60,7 @@ Kpvyaw = 1.8; %1.8 %Zhang x4 value = 2.8
 Kivyaw = 0.2; %2 %Zhang x4 value = 4;
 Kdvyaw = 0; %Zhang x4 value = 0;
 
-if off_control == 0
+if recover == 0
     %% PID Altitude Controller
     ez = ref_z - x(9);
     if i == t0
@@ -111,43 +111,24 @@ if off_control == 0
 
     r_des = Kpyaw*eyaw + Kiyaw*dt*(i_yaw) + Kdyaw*(d_yaw)/dt;
     
-    if recover == 1
-        u1 = -m*g;
-        roll_des = deg2rad(2.6);
-        pitch_des = deg2rad(5.6);
-        r_des = 0;
-        
-        ez = 0;
-        evz = 0;
-        eyaw = 0;
+
+    
+else
+    for k = max(size(cmds_time)):-1:1
+%         disp(size(cmds))
+        if i >= Tc_act + cmds_time(k)    
+            u1 = cmds(k,1);
+            roll_des = cmds(k,2);
+            pitch_des = cmds(k,3);
+            r_des = cmds(k,4);
+
+            ez = 0;
+            evz = 0;
+            eyaw = 0;
+
+            break    
+        end
     end
-    
-else %Recovery Controller
-% 
-%     if i >= Tc_act + cmds_time(1)
-%         u1 = cmds(1);
-%     end
-%     
-%     if i >= Tc_act + cmds_time(2)
-%         roll_des = cmds(2);
-%     end
-%     
-%     if i >= Tc_act + cmds_time(3)
-%         pitch_des = cmds(3);
-%     end
-%     
-%     if i >= Tc_act + cmds_time(4)
-%         r_des = cmds(4);
-%     end
-                
-    u1 = -m*g; %m*R(3,3)*g
-    roll_des = 0;
-    pitch_des = 0;
-    r_des = 0;
-    
-    ez = 0;
-    evz = 0;
-    eyaw = 0;
     
 end
 

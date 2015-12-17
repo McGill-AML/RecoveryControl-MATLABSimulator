@@ -5,8 +5,8 @@ global prop_loc Rbumper Cbumper Abumper
 
 disprate = 200; %Hz
 recordrate = disprate/4; %Hz
-disprate_idx = round((size(t,1)/(t(end)-t(1)))/disprate);
-% disprate_idx = 2;
+% disprate_idx = round((size(t,1)/(t(end)-t(1)))*(disprate));
+% disprate_idx = round(disprate/200);
 
 figure('units','normalized','outerposition',[0 0 1 1])
 
@@ -60,8 +60,8 @@ axis_min = min([min(X(:,7))-0.4,min(X(:,8))-0.4,min(X(:,9))-0.4]);
 axis_max = max([max(X(:,7))+0.4,max(X(:,8))+0.4,max(X(:,9))+0.4]);
 
 %% Create world-frame wall points
-[wall_pts, wall_ln] = WallPts(wall_loc,wall_plane,-1,0,5,5);
-
+[wall_pts, wall_ln] = WallPts(wall_loc,wall_plane,0,0.5,5,1.4);
+                                                  %bottom,center, height, width  
 if record == 1
     writerObj = VideoWriter('simulation.avi');
     writerObj.FrameRate = recordrate;
@@ -171,6 +171,9 @@ for i = 1:size(t,1)
    elseif sideview == 'YZ'
         view(90, 0); %view YZ plane
         
+   elseif sideview =='ZY'
+       view(-90,0);
+        
    elseif sideview == 'XY'
        view([0 0 1]);
        
@@ -182,6 +185,22 @@ for i = 1:size(t,1)
        
    elseif sideview == 'V3'
        view(-130,14);
+       
+   elseif sideview == 'C3'
+       view(-140,26);
+       
+   elseif sideview == 'C5'
+        view(-176,30);
+        
+   elseif sideview == 'C7'
+        view(-178,8);
+        
+   elseif sideview == 'C8'
+       view(-180,8);
+   elseif sideview == 'CT' %crash Ten
+       view(-177,20);       
+   elseif sideview == 'VV'
+       view([-180,26]);
    end
    
    grid on;

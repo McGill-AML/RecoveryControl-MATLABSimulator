@@ -1,38 +1,166 @@
 % function [tilt, Vc_act, defl_init, defl_max, Fn_init, Fn_max, numContacts, stable ] = StartSimulator(tilt_des, e, Vc_des, recover_control,traj_head)
-
-e = 0.9; 
-Vc_des = 1.17; %1.98
-recover_control = 0;
-traj_head = -pi + deg2rad(20);
-roll0 = deg2rad(5);
-pitch0 = deg2rad(6.3);
-z_start = 1;
-z_des = 1.6; %roll0 = -6: 2.1
-ax_given = 1.4896; %pitch0 = 6.3: 1.4896
-tfinal = 1.2;
-
-cmd_roll = 
-cmd_pitch = 
-cmd_r = 
-cmd_thrust = 
-
-cmds_time = []
-cmds = [cmd_thrust;cmd_roll;cmd_pitch;cmd_r];
-
-motors_time = [100;0;100;100]
-motors = [1;0;1;1]
-
-% clear all;
-% close all;
-% clc;
-clear X
-stable = 1;
+clear all
 
 global m g Kt Rbumper prop_loc
 global flag_c_ct1 vi_c_ct1 flag_c_ct2 vi_c_ct2 flag_c_ct3 vi_c_ct3 flag_c_ct4 vi_c_ct4
+global Tc_act prop_speed_chkpt prop_speed_chkpt_flag
+
+% clear X
 
 %% Spiri System Parameters
 InitSpiriParams;
+stable = 1;
+e = 0.9; 
+% 
+% % ---- Crash 3 ---- %
+% Vc_des = 0.6856;
+% recover_control = 0;
+% traj_head = -pi + deg2rad(26); %deg2rad(20);
+% roll0 = deg2rad(-1.3);%deg2rad(5);
+% pitch0 = deg2rad(10);%deg2rad(6.3);
+% z_start = 0.2;
+% z_des = 1.1; %roll0 = -6: 2.1
+% ax_given = 1.7170;%1.4896; %pitch0 = 6.3: 1.4896
+% tfinal = 1.2;
+% 
+% cmds_time = [0;0.5];
+% cmd_roll = [deg2rad(2.5);0];
+% cmd_pitch = [deg2rad(3.5);0];
+% cmd_r = [deg2rad(-10);0];
+% cmd_thrust = [-m*9.12;-m*g];
+% cmds = [cmd_thrust,cmd_roll,cmd_pitch,cmd_r];
+% 
+% load('crash3_motorslopes.mat');
+% Change Fc2 = 2*Fc2 in SpiriMotion_4Circles
+
+% % ---- Crash 5 ---- %
+% Vc_des = 1.1056;
+% recover_control = 0;
+% traj_head = -pi + deg2rad(4.6); %deg2rad(20);
+% roll0 = deg2rad(0.6);%deg2rad(5);
+% pitch0 = deg2rad(4.4);%deg2rad(6.3);
+% z_start = 0.2;
+% z_des = 0.51; %roll0 = -6: 2.1
+% ax_given = 0.7811;%1.4896; %pitch0 = 6.3: 1.4896
+% tfinal = 1.2;
+% 
+% cmds_time = [0;0.2];
+% cmd_roll = [deg2rad(2.5);0];
+% cmd_pitch = [deg2rad(3.5);0];
+% cmd_r = [0;0];
+% cmd_thrust = [-m*g;-m*g];
+% cmds = [cmd_thrust,cmd_roll,cmd_pitch,cmd_r];
+% 
+% load('crash5_motorslopes.mat');
+
+% % ---- Crash 6 ---- %
+% Vc_des = 1.15;%1.17;
+% recover_control = 0;
+% traj_head = -pi + deg2rad(11); %deg2rad(20);
+% roll0 = deg2rad(4);%deg2rad(5);
+% pitch0 = deg2rad(6);%deg2rad(6.3);
+% z_start = 0.7;
+% z_des = 1.37; %roll0 = -6: 2.1
+% ax_given = 1.2595;%1.4896; %pitch0 = 6.3: 1.4896
+% tfinal = 1.2;
+% 
+% cmds_time = [0;0.4];
+% cmd_roll = [deg2rad(3);0];
+% cmd_pitch = [deg2rad(5.5);0];
+% cmd_r = [deg2rad(-1);0];
+% cmd_thrust = [-m*g;-m*g];
+% cmds = [cmd_thrust,cmd_roll,cmd_pitch,cmd_r];
+% 
+% load('crash6_motorslopes.mat');
+
+% % ---- Crash 7 ---- %
+% Vc_des = 1.351;
+% recover_control = 0;
+% traj_head = -pi + deg2rad(8.86);
+% roll0 = deg2rad(-5.1);
+% pitch0 = deg2rad(6.7);
+% z_start = 0.6;
+% z_des = 0.88; %roll0 = -6: 2.1
+% ax_given =1.0580;%1.4896; %pitch0 = 6.3: 1.4896
+% tfinal = 1.2;
+% 
+% cmds_time = [0;0.35];
+% cmd_roll = [deg2rad(-1);0];
+% cmd_pitch = [deg2rad(8);0];
+% cmd_r = [deg2rad(7);0];
+% cmd_thrust = [-m*10.11;-m*g];
+% cmds = [cmd_thrust,cmd_roll,cmd_pitch,cmd_r];
+% 
+% load('crash7_motorslopes.mat');
+
+% % ---- Crash 9 ---- %
+% Vc_des = 2.0283;
+% recover_control = 0;
+% traj_head = -pi + deg2rad(17);
+% roll0 = deg2rad(-2.7);
+% pitch0 = deg2rad(9.4);
+% z_start = 0.6;
+% z_des = 1.02; 
+% ax_given = 1.5356;
+% tfinal = 1.2;
+% 
+% cmds_time = [0;0.2];
+% cmd_roll = [deg2rad(2);0];
+% cmd_pitch = [deg2rad(12);0];
+% cmd_r = [0;0];
+% cmd_thrust = [-m*g;-m*g];
+% cmds = [cmd_thrust,cmd_roll,cmd_pitch,cmd_r];
+% 
+% load('crash9_motorslopes.mat');
+
+% % ---- Crash 10 ---- %
+% Vc_des = 2.6799;
+% recover_control = 0;
+% traj_head = -pi + deg2rad(4);
+% roll0 = deg2rad(-1.2);
+% pitch0 = deg2rad(16);
+% z_start = 0.6;
+% z_des = 0.66; %roll0 = -6: 2.1
+% ax_given = 2.7158;%1.4896; %pitch0 = 6.3: 1.4896
+% tfinal = 1.2;
+% 
+% cmds_time = [0;0.65];
+% cmd_roll = [deg2rad(2);0];
+% cmd_pitch = [deg2rad(11);0];
+% cmd_r = [deg2rad(3);0];
+% cmd_thrust = [-m*g;-m*g];
+% cmds = [cmd_thrust,cmd_roll,cmd_pitch,cmd_r];
+% 
+% load('crash10_motorslopes.mat');
+
+% ---- Crash 11 ---- %
+e = 0.9; 
+Vc_des = 1.98; %1.98
+recover_control = 0;
+traj_head = -pi + deg2rad(11-2.5); %10
+roll0 = deg2rad(-4.4+2.2); %-6
+pitch0 = deg2rad(20.2); %23.7
+z_start = 0;
+z_des = 0.92; %1.08
+ax_given = 3.8768; %roll0 = -6: 3.995, roll0 = 6: 4.891
+tfinal = 1.2;
+
+cmds_time = [0;0.14;0.3];
+cmd_roll = [deg2rad(0.6883);deg2rad(0.6883);0];
+cmd_pitch = [deg2rad(12);deg2rad(12);0];
+cmd_r = [deg2rad(-0.1337);0;0];
+cmd_thrust = [-m*10.5;-m*10.5;-m*g];
+cmds = [cmd_thrust,cmd_roll,cmd_pitch,cmd_r];
+
+motors_time = [0;0.0616;0.0984;0.2084];
+motors_slope = [[-3863.6;-20897;-2345.5;0],[0;0;0;0],...
+                [-31218;-9592.4;0;0],[-1704.5;13342;0;0]];
+
+prop_speed_chkpt = zeros(4,size(motors_time,1));
+prop_speed_chkpt_flag = zeros(1,size(motors_time,1));
+
+
+
 
 %% Simulation Parameters
 
@@ -56,35 +184,10 @@ wall_plane = 'YZ';
 Tc = 0.5;
 Vc = Vc_des;
 
-
 % sim_idx = 40;
 t0 = traj_time(1);
 tf = traj_time(end);
 dt = 1/200;
-
-% Initial Variable Values
-
-% States
-
-% if abs(traj_head) == pi/4
-%     
-%     angle = (tilt_des - 0.0042477)/1.3836686;
-%     roll0 = -angle;
-%     pitch0 = -angle;
-%     
-% elseif traj_head == 0
-% %     angle = (tilt_des - 0.0042477)/1.3836686;
-%     angle = tilt_des;
-%     roll0 = 0;
-%     pitch0 = -angle;
-%     
-% elseif traj_head == pi
-%     angle = tilt_des;
-%     roll0 = 0;
-%     pitch0 = angle;
-% else
-%     error('Cannot use controller with desired heading. Please choose traj_head = 0 or pi/4');
-% end
 
 Tc_act = 10000;
 
@@ -148,7 +251,6 @@ flag_c_ct4 = 0;
 vi_c_ct4 = 0;
 
 recover = 0;
-off_control = 0;
 body_accel = [0;0;0];
 
 %% Initialize History Arrays
@@ -251,20 +353,17 @@ for i = t0:dt:tf-dt
         epitch_prev = epitch;
         eyaw_prev = eyaw;
         er_prev = er;
-        omega_prev = omega;        
+        omega_prev = omega;      
         
     end
-    
-    if i >= Tc_act + 0
-        off_control = 1;
-    end
+
     
     if recover*recover_control == 1
         ref_r = [0 traj_posn(2:3)];
         ref_head = traj_head;
         [control,ez,evz,evx,evy,eyaw,eroll,epitch,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerZhang(Xtotal(end,:),i,t0,dt,ref_r,ref_head,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev,recover,body_accel);
     else
-        [control,ez,evz,eroll,epitch,eyaw,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerICRA_att(Xtotal(end,:),i,t0,dt,z_des,traj_head,traj_att,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev,recover,off_control,Tc_act, cmds_time, cmds, motors_time,motors);
+        [control,ez,evz,eroll,epitch,eyaw,er,omega,roll,pitch,yaw,roll_des,pitch_des,r_des,u1,u2,u3,u4] = ControllerICRA_att(Xtotal(end,:),i,t0,dt,z_des,traj_head,traj_att,ez_prev,evz_prev,eroll_prev,epitch_prev,eyaw_prev,er_prev,omega_prev,recover,Tc_act, cmds_time, cmds);
 %         if i >= Tc_act
 %             u1 = -m*g;
 %         end
@@ -301,7 +400,7 @@ for i = t0:dt:tf-dt
    
     %Propagate Dynamics
     options = odeset('RelTol',1e-3);
-    [t,X] = ode45(@(t, X) SpiriMotion_4Circles(t,X,control,wall_loc,wall_plane,e),[i i+dt],x0_step,options);
+    [t,X] = ode45(@(t, X) SpiriMotion_4Circles_att(t,X,control,wall_loc,wall_plane,e,prop_speed,motors_time,motors_slope),[i i+dt],x0_step,options);
     
     %Reset contact flags for continuous time recording
     flag_c_ct1 = flag_c1;
@@ -318,7 +417,7 @@ for i = t0:dt:tf-dt
     
     %Continuous time recording
     for j = 1:size(X,1)
-        [dx,defl1_fine,Fc1,pc1,defl1_rate,defl2_fine,Fc2,pc2,defl2_rate,defl3_fine,Fc3,pc3,defl3_rate,defl4_fine,Fc4,pc4,defl4_rate] = SpiriMotion_4Circles(t(j),X(j,:),control,wall_loc,wall_plane,e);
+        [dx,defl1_fine,Fc1,pc1,defl1_rate,defl2_fine,Fc2,pc2,defl2_rate,defl3_fine,Fc3,pc3,defl3_rate,defl4_fine,Fc4,pc4,defl4_rate, prop_speed] = SpiriMotion_4Circles_att(t(j),X(j,:),control,wall_loc,wall_plane,e, prop_speed, motors_time, motors_slope);
         
         dX_ct = [dX_ct;dx'];
         defl1_ct = [defl1_ct;defl1_fine];
@@ -352,7 +451,7 @@ for i = t0:dt:tf-dt
     
     if (flag_c1 || flag_c2 || flag_c3 || flag_c4) == 1
         recover = 1;
-        Tc_act = i;
+%         Tc_act = i;
     end
     
     t_ct = [t_ct;t];
@@ -370,7 +469,7 @@ for i = t0:dt:tf-dt
     u3_hist = [u3_hist,u3];
     u4_hist = [u4_hist,u4];
     
-    prop_speed = control(1:4); %in RPM;
+%     prop_speed = control(1:4); %in RPM;
     prop_accel = control(5:8); %in rad/s^2;
     
     prop_speed_hist = [prop_speed_hist,prop_speed];
