@@ -52,9 +52,10 @@ else
         error(message('aero:quat2angle:notChar'));
     end
 end
+q = reshape(q,1,[max(size(q))]);
 
 % qin = quatnormalize( q );
-qin = q'/norm(q');
+qin = q/norm(q);
 
 switch lower( type )
     case 'zyx'
