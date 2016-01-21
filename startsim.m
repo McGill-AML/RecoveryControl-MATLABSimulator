@@ -23,13 +23,17 @@ ImpactParams.compliantModel.n = 0.54;
 timeImpact = 10000;
 
 %% Initialize Structures
+IC = initIC;
+Control = initcontrol;
+PropState = initpropstate;
+Setpoint = initsetpoint;
 
-[state, stateDeriv, PropState, IC, Twist, Pose, Control, Setpoint, Hist] = initstructs;
 [Contact, ImpactInfo] = initcontactstructs;
 localFlag = initflags;
 
 %% Match initial conditions to experiment
-[Control.twist.posnDeriv(1), IC.attEuler, IC.posn(3), Setpoint.posn(3), xAcc, Experiment] = matchexperimentIC(3);
+expCrash = 11;
+[Control.twist.posnDeriv(1), IC.attEuler, IC.posn(3), Setpoint.posn(3), xAcc, Experiment] = matchexperimentIC(expCrash);
 
 
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
@@ -51,15 +55,14 @@ PropState.rpm = IC.rpm;
 [Pose, Twist] = updatekinematics(state, stateDeriv);
 
 
-
 %% Initialize History Arrays
 
 % Initialize history 
-Hist = inithist(Hist, SimParams.timeInit, state, zeros(13,1), PropState, Pose, Twist, Control, Contact, localFlag);
+Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag);
 
 % Initialize Continuous History
 if SimParams.recordContTime == 1 
-    ContHist = initconthist(ContHist,SimParams.timeInit,state,Contact,PropState,zeros(13,1),globalFlag); 
+    ContHist = initconthist(ContHist,SimParams.timeInit,state,Contact,PropState,stateDeriv,globalFlag); 
 end
 
 
@@ -77,7 +80,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     
     %Propagate Dynamics
     options = odeset('RelTol',1e-3);
-    [tODE,stateODE] = ode45(@(tODE, stateODE) spiridynamics(tODE,stateODE,tStep,Control.rpm,ImpactParams,PropState.rpm,Experiment.propCmds),[iSim iSim+tStep],state,options);
+    [tODE,stateODE] = ode45(@(tODE, stateODE) dynamicsystem(tODE,stateODE,tStep,Control.rpm,ImpactParams,PropState.rpm,Experiment.propCmds),[iSim iSim+tStep],state,options);
     
     % Reset contact flags for continuous time recording        
     globalFlag.contact = localFlag.contact;
@@ -85,7 +88,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     
     if SimParams.recordContTime == 0
         
-        [stateDeriv, Contact, PropState] = spiridynamics(tODE(end),stateODE(end,:),tStep,Control.rpm,ImpactParams, PropState.rpm,Experiment.propCmds);
+        [stateDeriv, Contact, PropState] = dynamicsystem(tODE(end),stateODE(end,:),tStep,Control.rpm,ImpactParams, PropState.rpm,Experiment.propCmds);
         
         if sum(globalFlag.contact.isContact)>0
             Contact.hasOccured = 1;
@@ -95,7 +98,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     
         % Continuous time recording
         for j = 1:size(stateODE,1)
-            [stateDeriv, Contact, PropState] = spiridynamics(tODE(j),stateODE(j,:),tStep,Control.rpm,ImpactParams, PropState.rpm,Experiment.propCmds);
+            [stateDeriv, Contact, PropState] = dynamicsystem(tODE(j),stateODE(j,:),tStep,Control.rpm,ImpactParams, PropState.rpm,Experiment.propCmds);
             
             if sum(globalFlag.contact.isContact)>0
                 Contact.hasOccured = 1;
@@ -113,7 +116,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     [Pose, Twist] = updatekinematics(state, stateDeriv);
 
     %Discrete Time recording @ 200 Hz
-    Hist = updatehist(Hist, t, state, stateDeriv, PropState, Pose, Twist, Control, Contact, localFlag);
+    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag);
 
     %End loop if Spiri has crashed
     if state(9) <= 0
