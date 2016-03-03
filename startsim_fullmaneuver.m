@@ -1,3 +1,5 @@
+% Full maneuver based on Crash 10
+
 tic
 
 clear all
@@ -11,12 +13,12 @@ initparams;
 
 SimParams.recordContTime = 0;
 SimParams.useRecovery = 0;
-SimParams.timeFinal = 3;
-tStep = 1/200;
+SimParams.timeFinal = 45;
+tStep = 1/60;
 
-ImpactParams.wallLoc = 1.5;
+ImpactParams.wallLoc = 1000;
 ImpactParams.wallPlane = 'YZ';
-ImpactParams.timeDes = 0.5;
+ImpactParams.timeDes = 1.5;%0.5;
 ImpactParams.compliantModel.e = 0.9;
 ImpactParams.compliantModel.k = 40;
 ImpactParams.compliantModel.n = 0.54;
@@ -32,30 +34,99 @@ Setpoint = initsetpoint;
 localFlag = initflags;
 
 %% Match initial conditions to experiment
-expCrash = 'A07';
-[Control.twist.posnDeriv(1), IC.attEuler, IC.posn(3), Setpoint.posn(3), xAcc, Experiment] = matchexperimentIC(expCrash);
+ expCrash = 10;
+ [Control.twist.posnDeriv(1), IC.attEuler, IC.posn(3), Setpoint.posn(3), xAcc, Experiment] = matchexperimentIC(expCrash);
+% 
+% 
+% rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
+% 
+% [IC.posn(1), initialLinVel, SimParams.timeInit ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
+% 
+% Setpoint.head = IC.attEuler(3);
+% Setpoint.time = SimParams.timeInit;
+% Setpoint.posn(1) = IC.posn(1);
+% Trajectory = Setpoint;
 
-
-rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
-
-[IC.posn(1), initialLinVel, SimParams.timeInit ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
-
-Setpoint.head = IC.attEuler(3);
-Setpoint.time = SimParams.timeInit;
-Setpoint.posn(1) = IC.posn(1);
-Trajectory = Setpoint;
-
-IC.linVel =  rotMat*[initialLinVel;0;0];
+% IC.linVel =  rotMat*[initialLinVel;0;0];
 IC.rpm = [-1;1;-1;1].*repmat(sqrt(m*g/(4*Kt)),4,1);  %Start with hovering RPM
 
 PropState.rpm = IC.rpm;
 
-% %only to test controller:
-% IC.posn = [0;0;0];    
-% IC.angVel = [0;0;0];
-% IC.attEuler = [0;0;0];
-% IC.linVel = [0;0;0];
-% SimParams.timeInit = 0;
+%only to test controller:
+IC.posn = [0;0;0];%[0;0;0];    
+IC.angVel = [0;0;0];
+IC.attEuler = [0;0;0];
+IC.linVel = [0;0;0];
+SimParams.timeInit = 0;
+
+%% Crash Maneuver
+% %First setpoint
+% Setpoint.head = pi;
+% Setpoint.time = 0;
+% Setpoint.posn = IC.posn;
+% Trajectory = Setpoint;
+% 
+% %Second setpoint
+% Setpoint.head = pi;
+% Setpoint.time = 5;
+% Setpoint.posn = [0;0;0.6];
+% Trajectory = [Trajectory;Setpoint];
+
+%% Waypoint Maneuver
+% Setpt 1
+Setpoint.head = 0;
+Setpoint.time = 0;
+Setpoint.posn = IC.posn;
+Trajectory = Setpoint;
+
+%% Setpt 2
+Setpoint.head = 0;
+Setpoint.time = Setpoint.time + 5;
+Setpoint.posn = [0;0;0];
+Trajectory = [Trajectory;Setpoint];
+
+%% Setpt 2
+Setpoint.head = 0;
+Setpoint.time = Setpoint.time + 5;
+Setpoint.posn = [0;0;1];
+Trajectory = [Trajectory;Setpoint];
+
+%% Setpt 3
+Setpoint.head = 0;
+Setpoint.time = Setpoint.time + 5;
+Setpoint.posn = [2;0;1];
+Trajectory = [Trajectory;Setpoint];
+
+%% Setpt 4
+Setpoint.head = 0;
+Setpoint.time = Setpoint.time + 5;
+Setpoint.posn = [2;1;1];
+Trajectory = [Trajectory;Setpoint];
+
+%% Setpt 5
+Setpoint.head = 0;
+Setpoint.time = Setpoint.time + 5;
+Setpoint.posn = [0;1;1];
+Trajectory = [Trajectory;Setpoint];
+
+%% Setpt 6
+Setpoint.head = 0;
+Setpoint.time = Setpoint.time + 5;
+Setpoint.posn = [0;0;1];
+Trajectory = [Trajectory;Setpoint];
+
+%% Setpt 7
+Setpoint.head = pi/2;
+Setpoint.time = Setpoint.time + 5;
+Setpoint.posn = [0;0;1];
+Trajectory = [Trajectory;Setpoint];
+
+%% Setpt 8
+Setpoint.head = pi/2;
+Setpoint.time = Setpoint.time + 5;
+Setpoint.posn = [0;0;0];
+Trajectory = [Trajectory;Setpoint];
+
 
 %% Initialize state and kinematics structs from ICs
 [state, stateDeriv] = initstate(IC);
@@ -73,23 +144,35 @@ if SimParams.recordContTime == 1
                             PropState, Contact, globalFlag);
 end
 
+iTrajectory = 2;
+t = SimParams.timeInit;
+crashIntoWall = 0;
 
 %% Simulation Loop
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
-%     display(iSim)    
-   
-%         %only to test controller:
-%         Control.pose.posn = [1 1 1]; 
-%         Control = controllerposn(state,iSim,SimParams.timeInit,tStep,pi/4,Control);
-%         Control.type = 'posn';
+%     display(iSim)       
     
-    if Contact.hasOccured*SimParams.useRecovery == 1        
-        Control.pose.posn = [0 Trajectory(end).posn(2:3)];
-        Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
+    if crashIntoWall == 0
+        if t > Trajectory(iTrajectory).time
+            if iTrajectory + 1 <= size(Trajectory,1)
+                iTrajectory = iTrajectory + 1;
+            else
+                crashIntoWall = 1;
+            end
+        end    
+    end
+    
+    crashIntoWall = 0;
+    
+    if crashIntoWall == 0
+        Control.pose.posn = Trajectory(iTrajectory).posn;
+        Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(iTrajectory).head,Control);
         Control.type = 'posn';
     else
-        Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Setpoint.posn(3), ... 
-                                IC.attEuler,Control,Contact.hasOccured,timeImpact, Experiment.manualCmds);
+        altitudeDes = 0.66;
+        attitudeDes = [deg2rad(-1.2);deg2rad(16);pi + deg2rad(4)];
+        Control = controlleratt(state,iSim,SimParams.timeInit,tStep,altitudeDes, ... 
+                                attitudeDes,Control,Contact.hasOccured,timeImpact, Experiment.manualCmds);
         Control.type = 'att';
     end
     
@@ -139,12 +222,12 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     %Discrete Time recording @ 200 Hz
     Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag);
 
-    %End loop if Spiri has crashed
-    if state(9) <= 0
-        display('Spiri has hit the floor :(');
-        ImpactInfo.isStable = 0;
-        break;
-    end  
+%     %End loop if Spiri has crashed
+%     if state(9) <= 0 && t > 0
+%         display('Spiri has hit the floor :(');
+%         ImpactInfo.isStable = 0;
+%         break;
+%     end  
     
 end
 
@@ -168,3 +251,4 @@ ImpactInfo.maxDefl = max([cellBumperInfos{find(strcmp(fieldnames(ImpactInfo.bump
 ImpactInfo.numContacts = sum([cellBumperInfos{find(strcmp(fieldnames(ImpactInfo.bumperInfos),'numContacts')),:}]);
 
 Plot = hist2plot(Hist);
+copy2ros = [[1:1:size(Plot.times)]', ones(size(Plot.times)), Plot.times, Plot.posns',Plot.quaternions'];

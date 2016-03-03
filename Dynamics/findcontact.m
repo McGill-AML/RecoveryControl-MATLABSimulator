@@ -1,7 +1,6 @@
 function [ Contact ] = findcontact( rotMat,state,wallLoc)
+%Returns contact information based on current state and wall location
 
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
 global BUMP_RADIUS PROP_POSNS BUMP_NORMS BUMP_TANGS
 
 Contact = initcontact(0);

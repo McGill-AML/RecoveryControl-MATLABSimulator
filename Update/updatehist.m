@@ -1,6 +1,6 @@
 function Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag)
     
-Hist.times = [Hist.times;t];
+    Hist.times = [Hist.times;t];
     Hist.states = [Hist.states, state];
     Hist.stateDerivs = [Hist.stateDerivs, stateDeriv];
     

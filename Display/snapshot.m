@@ -42,15 +42,29 @@ axisYBody = [0;0.1;0];
 axisZBody = [0;0;0.1];
 
 %%  Calculate axes ranges for plotting
-axisMin = min([min(stateHist(:,7))-0.4,min(stateHist(:,8))-0.4,min(stateHist(:,9))-0.4]);
-axisMax = max([max(stateHist(:,7))+0.4,max(stateHist(:,8))+0.4,max(stateHist(:,9))+0.4]);
+% axisMin = min([min(stateHist(:,7))-0.4,min(stateHist(:,8))-0.4,min(stateHist(:,9))-0.4]);
+% axisMax = max([max(stateHist(:,7))+0.4,max(stateHist(:,8))+0.4,max(stateHist(:,9))+0.4]);
+
+axisWidth = 1;
+
+% xAxisMin = mean([min(stateHist(:,7)),max(stateHist(:,7))])-axisWidth/2;
+% xAxisMax = xAxisMin + axisWidth;
+xAxisMin = 0.8; % 0.5750;
+xAxisMax = xAxisMin + axisWidth;
+
+yAxisMin = mean([min(stateHist(:,8)),max(stateHist(:,8))])-axisWidth/2;
+yAxisMax = yAxisMin + axisWidth;
+
+zAxisMin = mean([min(stateHist(:,9)),max(stateHist(:,9))])-axisWidth/2 + 0.2;
+zAxisMax = zAxisMin + axisWidth;
 
 %% Create world-frame wall points
 impactYPosn = stateHist(vlookup(t,timeImpact),8);
 impactZPosn = stateHist(vlookup(t,timeImpact),9);
-[wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,roundn(impactZPosn,-1)-(axisMax-axisMin)/2,roundn(impactYPosn,-1)+0.5,(axisMax-axisMin),1.8);
+% [wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,roundn(impactZPosn,-1)-axisWidth/2,roundn(impactYPosn,-1)+0.5,(axisWidth),1.8);
                                                   %bottom,center, height, width  
-
+[wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,zAxisMin,mean([yAxisMin,yAxisMax]),axisWidth, axisWidth);
+    
 %% Plot Frame
 %% Rotate body-fixed points to world-frame points
 q = [stateHist(frame,10);stateHist(frame,11);stateHist(frame,12);stateHist(frame,13)];
@@ -113,7 +127,7 @@ fill3(wallPts(1,:)',wallPts(2,:)',wallPts(3,:)','r','FaceAlpha',0.4);
 %    plot3(wallLines(1,3:4)',wallLines(2,3:4)',wallLines(3,3:4)','r-');
 
 %% Figure settings
-axis([axisMin,axisMax,axisMin,axisMax,axisMin,axisMax]);
+axis([xAxisMin,xAxisMax,yAxisMin,yAxisMax,zAxisMin,zAxisMax]);
 xlhand = xlabel('X(m)','Interpreter','LaTex');
 ylhand = ylabel('Y(m)','Interpreter','LaTex');
 zlhand = zlabel('Z(m)','Interpreter','LaTex');

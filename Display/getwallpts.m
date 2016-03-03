@@ -1,6 +1,6 @@
 function [ wallPts, wallLines ] = getwallpts(wallLoc,wallPlane,wallBottom,wallMiddle,wallHeight,wallWidth)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%Returns points needed to to display wall using fill3, and points to plot
+%lines representing middle of wall
 
 wallPts = zeros(3,4);
 wallLines = zeros(3,4);

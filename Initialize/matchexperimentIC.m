@@ -4,7 +4,7 @@ global m g globalFlag
 
 
 switch crash
-    case 3 % ---- Crash 3 ---- %
+    case 'A03' % ---- Crash 3 ---- %
 %         posnDeriv = 0.6856;
 %         attEuler = [deg2rad(-1.3);deg2rad(10);-pi + deg2rad(26)];
 %         altitude = 0.2;
@@ -28,7 +28,7 @@ switch crash
         
         display('Did you remember to change Fc2 = 2*Fc2?');
 
-    case 5  % ---- Crash 5 ---- %
+    case 'A05'  % ---- Crash 5 ---- %
         posnDeriv = 1.1056;
         attEuler = [deg2rad(0.6); deg2rad(4.4); -pi + deg2rad(4.6)];
         altitude = 0.2;
@@ -43,7 +43,7 @@ switch crash
 
         inputData = load('crash5_motorslopes.mat');
         
-    case 6 % ---- Crash 6 ---- %
+    case 'A06' % ---- Crash 6 ---- %
         posnDeriv = 1.15;%1.17;
         attEuler = [deg2rad(4); deg2rad(6); -pi + deg2rad(11)];
         altitude = 0.7;
@@ -58,8 +58,9 @@ switch crash
 
         inputData = load('crash6_motorslopes.mat');
         
-    case 7 % ---- Crash 7 ---- %
+    case 'A07' % ---- Crash 7 ---- %
         posnDeriv = 1.351;
+%         attEuler = [deg2rad(5.1); deg2rad(-6.7); deg2rad(8.86)]; 
         attEuler = [deg2rad(-5.1); deg2rad(6.7); -pi + deg2rad(8.86)]; 
         altitude = 0.6;
         setpointAltitude = 0.88; %roll0 = -6: 2.1
@@ -73,7 +74,7 @@ switch crash
 
         inputData = load('crash7_motorslopes.mat');
         
-    case 9 % ---- Crash 9 ---- %
+    case 'A09' % ---- Crash 9 ---- %
         posnDeriv = 2.0283;
         attEuler = [deg2rad(-2.7); deg2rad(9.4); -pi + deg2rad(17)]; 
         altitude = 0.6;
@@ -88,7 +89,7 @@ switch crash
 
         inputData = load('crash9_motorslopes.mat');
         
-    case 10 % ---- Crash 10 ---- %
+    case 'A10' % ---- Crash 10 ---- %
         posnDeriv = 2.6799;
         attEuler = [deg2rad(-1.2);deg2rad(16);-pi + deg2rad(4)];
         altitude = 0.6;
@@ -103,7 +104,7 @@ switch crash
 
         inputData = load('crash10_motorslopes.mat');
         
-    case 11 % ---- Crash 11 ---- %
+    case 'A11' % ---- Crash 11 ---- %
         posnDeriv = 1.98; %1.98
         attEuler = [deg2rad(-4.4+2.2); deg2rad(20.2);-pi + deg2rad(11-2.5)]; 
         altitude = 0;

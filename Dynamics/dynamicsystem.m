@@ -38,7 +38,32 @@ state = reshape(state,[max(size(state)),1]);
 stateDeriv = zeros(13,1);
 
 %% Control Signal
-rpm = rpmControl;
+% rpm = rpmControl;
+maxRPM = 8000;
+minRPM = 3000;
+maxRPMDeriv = 14000; % in rpm/s
+
+rpmMagnitude = abs(rpmControl);
+rpmSaturated = [-1;1;-1;1].*max(min(rpmMagnitude,maxRPM),minRPM); %saturate motor speeds
+% rpm = rpmSaturated;
+
+maxDifference = maxRPMDeriv*tStep;
+% rpmDifference = rpmSaturated - rpmPrev;
+% rpmDifferenceSaturated = sign(rpmDifference).*max(abs(rpmDifference),maxDifference);
+% rpm = rpmDifferenceSaturated + rpmPrev;
+rpm = zeros(4,1);
+for iBumper = 1:4
+    if abs(rpmSaturated(iBumper)-rpmPrev(iBumper)) > maxDifference
+        rpm(iBumper) = sign(rpmSaturated(iBumper)-rpmPrev(iBumper))*maxDifference + rpmPrev(iBumper);
+    else
+        rpm(iBumper) = rpmSaturated(iBumper);
+    end
+end
+
+
+% rpmDerivDesired = (rpmSaturated - rpmPrev)/tStep;
+% rpmDerivSaturated = max(abs(rpmDerivDesired),maxRPMDeriv).*sign(rpmDerivDesired);
+% rpm = rpmPrev + rpmDerivSaturated*tStep;
 
 %% Contact Detection
 
@@ -96,7 +121,9 @@ if timeImpact == 10000
     end
 end
 
-
+% if t >= timeImpact
+%     rpm = [0;0;0;0];
+% end
 for iCmds = max(size(propCmds)):-1:1
     if t >= timeImpact + propCmds(iCmds).rpmTime   
         if rpmChkptIsPassed(iCmds) == 0        
@@ -116,7 +143,7 @@ end
 globalFlag.experiment.rpmChkpt = rpmChkpt;
 globalFlag.experiment.rpmChkptIsPassed = rpmChkptIsPassed;
 
-rpmDeriv = (rpm2rad(rpm) - rpm2rad(rpmPrev))/tStep; %in rad/s
+rpmDeriv = (rpm2rad(rpm) - rpm2rad(rpmPrev))/tStep; %in rad/s^2
 
 PropState.rpm = rpm;
 PropState.rpmDeriv = rpmDeriv;
@@ -129,9 +156,25 @@ Ft = [0;0;-Kt*sum(rpm.^2)];
 totalNormalForce = sum(normalForceBody,2);
 totalContactMoment = sum(contactMomentBody,2);
 
+%% Status Quo
 Mx = -Kt*PROP_POSNS(2,:)*(rpm.^2)-Kp*state(4)^2-state(5)*Jr*sum(rpm2rad(rpm)) + totalContactMoment(1) ;
 My = Kt*PROP_POSNS(1,:)*(rpm.^2)-Kq*state(5)^2+state(4)*Jr*sum(rpm2rad(rpm)) + totalContactMoment(2) ;
-Mz =  [-Dt Dt -Dt Dt]*(rpm.^2)-Kr*state(6)^2 -Jr*[-1 1 -1 1]*rpmDeriv + totalContactMoment(3);
+Mz =  [-Dt Dt -Dt Dt]*(rpm.^2)-Kr*state(6)^2 -Jr*sum(rpmDeriv) + totalContactMoment(3);
+
+% %% No angular acceleration or gyroscopic moment
+% Mx = -Kt*PROP_POSNS(2,:)*(rpm.^2)-Kp*state(4)^2 + totalContactMoment(1) ;
+% My = Kt*PROP_POSNS(1,:)*(rpm.^2)-Kq*state(5)^2 + totalContactMoment(2) ;
+% Mz =  [-Dt Dt -Dt Dt]*(rpm.^2)-Kr*state(6)^2 + totalContactMoment(3);
+
+% %% No angular acceleration only
+% Mx = -Kt*PROP_POSNS(2,:)*(rpm.^2)-Kp*state(4)^2 -state(5)*Jr*sum(rpm2rad(rpm)) + totalContactMoment(1) ;
+% My = Kt*PROP_POSNS(1,:)*(rpm.^2)-Kq*state(5)^2 + state(4)*Jr*sum(rpm2rad(rpm)) + totalContactMoment(2) ;
+% Mz =  [-Dt Dt -Dt Dt]*(rpm.^2)-Kr*state(6)^2 + totalContactMoment(3);
+
+% No gyroscopic moment only
+% Mx = -Kt*PROP_POSNS(2,:)*(rpm.^2)-Kp*state(4)^2 + totalContactMoment(1) ;
+% My = Kt*PROP_POSNS(1,:)*(rpm.^2)-Kq*state(5)^2 + totalContactMoment(2) ;
+% Mz =  [-Dt Dt -Dt Dt]*(rpm.^2)-Kr*state(6)^2 -Jr*sum(rpmDeriv) + totalContactMoment(3);
 
 stateDeriv(1:3) = (Fg + Fa + Ft + totalNormalForce - m*cross(state(4:6),state(1:3)))/m;
 stateDeriv(4:6) = inv(I)*([Mx;My;Mz]-cross(state(4:6),I*state(4:6)));

@@ -17,6 +17,16 @@ function [Control] = initcontrol()
     Control.errAltitude = 0;
     Control.errAltitudeDeriv = 0; 
     Control.errYawDeriv = 0;
+    
+    % Cumulative errors
+    Control.integralErrEuler = [0;0;0];
+    Control.integralErrAltitude = 0;
+    Control.integralErrAltitudeDeriv = 0;
+    Control.integralErrYawDeriv = 0;
+    
+    % Desired attitude
+    Control.desEuler = [0; 0; 0];
+    Control.desYawDeriv = 0;
 
     % Control force and torque outputs in body frame
     Control.u = [-m*g; 0; 0; 0];
@@ -25,10 +35,10 @@ function [Control] = initcontrol()
     Control.rpm = [0; 0; 0; 0];
     Control.rpmDeriv = [0; 0; 0; 0];
     
-    % Type 1: controllerposn
-    % Type 2: controlleratt
-    % Type 3: controllerrecovery
-    Control.type = 0;
+    % controllerposn: 'posn'
+    % controlleratt: 'att'
+    % controllerrecovery: 'recovery'
+    Control.type = 'na';
     
     
     

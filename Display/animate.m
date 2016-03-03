@@ -60,7 +60,7 @@ impactZPosn = stateHist(vlookup(t,timeImpact),9);
                                                   %bottom,center, height, width  
 
 %% Animate!
-for iFrame = 1:size(t,1)
+for iFrame = 1:4:size(t,1)
     %% Rotate body-fixed points to world-frame points
     q = [stateHist(iFrame,10);stateHist(iFrame,11);stateHist(iFrame,12);stateHist(iFrame,13)];
     q = q/norm(q);

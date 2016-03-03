@@ -1,10 +1,18 @@
-function ContHist = initconthist(ContHist,timeInit,state,Contact,PropState,zeros(13,1),globalFlag)
+function ContHist = initconthist(timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, globalFlag)
+                    
+% Initialize history of the state and its derivative
+ContHist.states = state;
+ContHist.stateDerivs = stateDeriv;
+ContHist.times = timeInit;
 
-    ContHist.globalFlag.contact.initialNormalVels = globalFlag.contact.initialNormalVel;
-    ContHist.globalFlag.contact.isContacts = globalFlag.contact.isContact;
-    ContHist.contacts = Contact;
-    ContHist.propStates = PropState;
-    ContHist.stateDerivs = stateDeriv;
-    ContHist.times = timeInit;
-    ContHist.states = state;
+% Initialize history of twist, pose and control structs
+ContHist.poses = Pose;
+ContHist.twists = Twist;
+ContHist.controls = Control;
+
+ContHist.contacts = Contact;
+ContHist.propStates = PropState;
+ContHist.globalFlag.contact.initialNormalVels = globalFlag.contact.initialNormalVel;
+ContHist.globalFlag.contact.isContacts = globalFlag.contact.isContact;
+
 end

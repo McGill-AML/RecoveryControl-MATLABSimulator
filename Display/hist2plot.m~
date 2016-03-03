@@ -31,6 +31,8 @@ Plot.desEulers = [temp{13,:}];
 Plot.desYawDerivs = [temp{14,:}];
 
 %% Simulate accelerometer data
+% Reference: "Small Unmanned Aircraft: Theory and Practice" - Beard &
+% McLain, 2012 - 7.1 Accelerometers
 global g
 Plot.accelerometers = zeros(3,size(Plot.quaternions,2));
 for iData = 1:size(Plot.quaternions,2)

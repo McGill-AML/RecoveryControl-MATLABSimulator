@@ -1,6 +1,5 @@
 function [ ref_posn, ref_head ] = createtrajectory( posn,heading,t,timeStep )
-%UNTITLED4 Summary of this function goes here
-%   Detailed explanation goes here
+%Creates array of trajectory positions and headings
 
 ref_x = posn(2,1);
 ref_y = posn(2,2);

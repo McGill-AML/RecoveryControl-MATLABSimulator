@@ -28,18 +28,19 @@ Kiz = 0;%40;
 Kdz = 0.4;
 
 Kpvz = 1.6;%10; %Zhang x4 value = 2.8
-Kivz = 60;%10; %Zhang x4 value = 4
+Kivz = 0;%10; %Zhang x4 value = 4
+
 
 % altitudeDerivSaturation = 3; %Zhang x4 value = 0.6
 
 %% Heading Controller Parameters
 Kpyaw = 1.2; %1.2
-Kiyaw = 1; %1
+Kiyaw = 0; %1
 Kdyaw = 0.2; %0.2
 
 %% Attitude Controller Parameters
 Kprp = 60; %Zhang x4 value = 7.2
-Kirp = 0; %Zhang x4 value = 4
+Kirp = 1.8*60; %Zhang x4 value = 4
 Kdrp = 6; %Zhang x4 value = 4.2
 
 Kpvyaw = 1.8; %1.8 %Zhang x4 value = 2.8
@@ -49,6 +50,7 @@ Kdvyaw = 0; %Zhang x4 value = 0;
 if impactOccured == 0
     %% PID Altitude Controller
     errAltitude = altitudeDes - state(9);
+
     if iSim == timeInit
         errAltitudeIntegral = 0;
         errAltitudeDeriv = 0;    
@@ -56,12 +58,15 @@ if impactOccured == 0
         errAltitudeIntegral = errAltitude + errAltitudePrev;
         errAltitudeDeriv = errAltitude - errAltitudePrev;
     end
+    
+    Control.integralErrAltitude = Control.integralErrAltitude + errAltitudeIntegral*tStep*0.5;
+%     altitudeDerivDes = Kpz*errAltitude + Kiz*tStep*(errAltitudeIntegral)*0.5 + Kdz*(errAltitudeDeriv)/tStep;
+    altitudeDerivDes = Kpz*errAltitude + Kiz*Control.integralErrAltitude + Kdz*(errAltitudeDeriv)/tStep;
 
-    altitudeDerivDes = Kpz*errAltitude + Kiz*tStep*(errAltitudeIntegral)*0.5 + Kdz*(errAltitudeDeriv)/tStep;
-    % if altitudeDerivDes < 0
-    %     altitudeDerivDes = max([-altitudeDerivSaturation,altitudeDerivDes]);
+    % if v_des < 0
+    %     v_des = max([-altitudeDerivSaturation,v_des]);
     % else
-    %     altitudeDerivDes = min([altitudeDerivDes,altitudeDerivSaturation]);
+    %     v_des = min([v_des,altitudeDerivSaturation]);
     % end
 
     errAltitudeDeriv = altitudeDerivDes - R(:,3)'*state(1:3);
@@ -69,7 +74,9 @@ if impactOccured == 0
         errAltitudeDerivPrev = -errAltitudeDeriv;
     end
 
-    altitudeAcc = Kpvz*errAltitudeDeriv + Kivz*tStep*(errAltitudeDerivPrev+errAltitudeDeriv)*0.5;
+    Control.integralErrAltitudeDeriv = Control.integralErrAltitudeDeriv + (errAltitudeDerivPrev+errAltitudeDeriv)*tStep*0.5;
+%     altitudeAcc = Kpvz*errAltitudeDeriv + Kivz*tStep*(errAltitudeDerivPrev+errAltitudeDeriv)*0.5;
+    altitudeAcc = Kpvz*errAltitudeDeriv + Kivz*Control.integralErrAltitudeDeriv;
     u1 = m*R(3,3)*(altitudeAcc+g);
 
     %% PID Heading Controller
@@ -88,7 +95,8 @@ if impactOccured == 0
         errYawDeriv = errAttYaw - errAttYawPrev;
     end
 
-    attYawDerivDes = Kpyaw*errAttYaw + Kiyaw*tStep*(errYawIntegral) + Kdyaw*(errYawDeriv)/tStep;  
+    Control.integralErrEuler(3) = Control.integralErrEuler(3) + tStep*errYawIntegral*0.5;
+    attYawDerivDes = Kpyaw*errAttYaw + Kiyaw*Control.integralErrEuler(3) + Kdyaw*(errYawDeriv)/tStep; 
 
     
 else % Use experiment joystick commands to match controller thrust and attitude commands
@@ -135,13 +143,25 @@ else
     errYawDerivDeriv = errAttYawDeriv - errAttYawDerivPrev;
 end
 
-rollDeriv = Kprp*errAttRoll + Kirp*tStep*(errRollIntegral)*0.5 + Kdrp*(errRollDeriv)/tStep;
-pitchDeriv = Kprp*errAttPitch + Kirp*tStep*(errPitchIntegral)*0.5 + Kdrp*(errPitchDeriv)/tStep;
-yawDerivDeriv =  Kpvyaw*errAttYawDeriv + Kivyaw*tStep*(errYawDerivIntegral)*0.5 + Kdvyaw*(errYawDerivDeriv)/tStep;
+% rollDerivDes = Kprp*errAttRoll + Kirp*tStep*(errRollIntegral)*0.5 + Kdrp*(errRollDeriv)/tStep;
+% pitchDerivDes = Kprp*errAttPitch + Kirp*tStep*(errPitchIntegral)*0.5 + Kdrp*(errPitchDeriv)/tStep;
+% yawDerivDerivDes =  Kpvyaw*errAttYawDeriv + Kivyaw*tStep*(errYawDerivIntegral)*0.5 + Kdvyaw*(errYawDerivDeriv)/tStep;
+% 
+% u2 = (rollDerivDes - state(5)*state(6)*(Iyy-Izz)/Ixx)*Ixx;
+% u3 = (pitchDerivDes - state(4)*state(6)*(Izz-Ixx)/Iyy)*Iyy;
+% u4 = (yawDerivDerivDes - state(4)*state(5)*(Ixx-Iyy)/Izz)*Izz;
 
-u2 = (rollDeriv - state(5)*state(6)*(Iyy-Izz)/Ixx)*Ixx;
-u3 = (pitchDeriv - state(4)*state(6)*(Izz-Ixx)/Iyy)*Iyy;
-u4 = (yawDerivDeriv - state(4)*state(5)*(Ixx-Iyy)/Izz)*Izz;
+Control.integralErrEuler(1) = Control.integralErrEuler(1) + tStep*errRollIntegral*0.5;
+Control.integralErrEuler(2) = Control.integralErrEuler(2) + tStep*errPitchIntegral*0.5;
+Control.integralErrYawDeriv = Control.integralErrYawDeriv + tStep*errYawDerivIntegral*0.5;
+
+rollDerivDes = Kprp*errAttRoll + Kirp*Control.integralErrEuler(1) + Kdrp*(errRollDeriv)/tStep;
+pitchDerivDes = Kprp*errAttPitch + Kirp*Control.integralErrEuler(2) + Kdrp*(errPitchDeriv)/tStep;
+yawDerivDerivDes =  Kpvyaw*errAttYawDeriv + Kivyaw*Control.integralErrYawDeriv + Kdvyaw*(errYawDerivDeriv)/tStep;
+
+u2 = (rollDerivDes - state(5)*state(6)*(Iyy-Izz)/Ixx)*Ixx;
+u3 = (pitchDerivDes - state(4)*state(6)*(Izz-Ixx)/Iyy)*Iyy;
+u4 = (yawDerivDerivDes - state(4)*state(5)*(Ixx-Iyy)/Izz)*Izz;
 
 %% Generate Control Signal
 %Thrust and Moment Control Signal
