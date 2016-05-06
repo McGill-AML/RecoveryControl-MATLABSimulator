@@ -120,12 +120,44 @@ switch crash
         inputData.motors_time = [0;0.0616;0.0984;0.2084];
         inputData.motors_slope = [[-3863.6;-20897;-2345.5;0],[0;0;0;0],...
                         [-31218;-9592.4;0;0],[-1704.5;13342;0;0]];
+                    
+    case 'B01' 
+        posnDeriv = 1.54; %1.98
+        attEuler = [deg2rad(4.68); deg2rad(1.88+6);-pi + deg2rad(19.5)]; 
+        altitude = 0.6;
+        setpointAltitude = 0.66; %1.08
+        xAcc = 1.55; %roll0 = -6: 3.995, roll0 = 6: 4.891
+
+       % These do nothing
+        rawManualCmd.times = [0;0.14;0.3];
+        rawManualCmd.rolls = [deg2rad(0.6883);deg2rad(0.6883);0];
+        rawManualCmd.pitches = [deg2rad(12);deg2rad(12);0];
+        rawManualCmd.yawDerivs = [deg2rad(-0.1337);0;0];
+        rawManualCmd.thrusts = [-m*10.5;-m*10.5;-m*g];
+
+        inputData = load('crashb01_motorslopes.mat');
+        
+    case 'C01' 
+        posnDeriv = 1.30; %1.98
+        attEuler = [deg2rad(3.20); deg2rad(1.69+6.5);pi - deg2rad(6)]; 
+        altitude = 0.6;
+        setpointAltitude = 0.66; %1.08
+        xAcc = 1.2614; %roll0 = -6: 3.995, roll0 = 6: 4.891
+
+       % These do nothing
+        rawManualCmd.times = [0;0.14;0.3];
+        rawManualCmd.rolls = [deg2rad(0.6883);deg2rad(0.6883);0];
+        rawManualCmd.pitches = [deg2rad(12);deg2rad(12);0];
+        rawManualCmd.yawDerivs = [deg2rad(-0.1337);0;0];
+        rawManualCmd.thrusts = [-m*10.5;-m*10.5;-m*g];
+
+        inputData = load('crashc01_motorslopes.mat');
+        
     otherwise
         error('Invalid experiment crash number');
 end
 
 Experiment = matchexperimentcmds(rawManualCmd,inputData);
-
 globalFlag.experiment.rpmChkpt = zeros(4,1);
 globalFlag.experiment.rpmChkptIsPassed = zeros(1,size(inputData.motors_time,1));
 

@@ -13,6 +13,7 @@ global u2RpmMat BUMP_NORMS BUMP_TANGS
 
 g = 9.81;
 
+% Spiri Properties
 %Mass Properties
 m = 0.933; %kg
 
@@ -24,12 +25,28 @@ Ixy = -4.2e-7;
 Iyz = -1.14e-6;
 Izx = -5.289e-5;
 
+load('locations2');
+
+
+% %% Navi Properties
+% %Mass Properties
+% m = 1.095; %kg
+% 
+% %Inertia Properties in body fixed frame
+% Ixx = 0.01121976;
+% Iyy = 0.01122668;
+% Izz = 0.021082335;
+% Ixy = -5.62297e-05;
+% Iyz = -4.4954e-06;
+% Izx = -1.418e-08;
+% 
+% load('locations_navi');
+
+PROP_POSNS = [p1, p2, p3, p4] - repmat(CoM,1,4); %prop locations relative to CoM
+
 
 I = [Ixx Ixy Izx;Ixy Iyy Iyz;Izx Iyz Izz]; %vehicle moment of inertias, kg m^2
 Jr = 2.20751e-5; %Propeller moment of inertia about rotation axis, kg m^2
-
-load('locations2');
-PROP_POSNS = [p1, p2, p3, p4] - repmat(CoM,1,4); %prop locations relative to CoM
 
 %Thrust coefficient
 % Kt = 0.000000054; %From Pleiades primitives.c 07-03-2015
@@ -57,8 +74,10 @@ ALPHA = 0;
 BETA = 0;
 
 % Bumper things
-BUMP_RADIUS = 0.11;
-BUMP_ANGLE = deg2rad(11);
+% BUMP_RADIUS = 0.11;
+% BUMP_ANGLE = deg2rad(11);
+BUMP_RADIUS = 0.12;
+BUMP_ANGLE = deg2rad(5);
 
 BUMP_NORMS(:,1) = invar2rotmat('Z',deg2rad(45))'*invar2rotmat('Y',BUMP_ANGLE + deg2rad(90))'* [1;0;0];
 BUMP_NORMS(:,2) = invar2rotmat('Z',deg2rad(135))'*invar2rotmat('Y',BUMP_ANGLE + deg2rad(90))'* [1;0;0];

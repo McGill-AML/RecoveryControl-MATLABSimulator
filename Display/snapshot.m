@@ -2,7 +2,7 @@ function [ ] =snapshot( frame,Hist,sideview,ImpactParams,timeImpact)
  
 %UNTITLED6 Summary of this function goes here
 %   Detailed explanation goes here
-global PROP_POSNS BUMP_RADIUS BUMP_ANGLE
+global BUMP_POSNS BUMP_RADIUS BUMP_ANGLE
 
 %% Save inputs to arrays
 t = Hist.times;
@@ -13,10 +13,10 @@ figure('Position',[962 25 960 949]);
 %% Define body-fixed points and axes
 
 % Body-fixed bumper centers
-bumperCenter1 = PROP_POSNS(:,1);
-bumperCenter2 = PROP_POSNS(:,2);
-bumperCenter3 = PROP_POSNS(:,3);
-bumperCenter4 = PROP_POSNS(:,4);
+bumperCenter1 = BUMP_POSNS(:,1);
+bumperCenter2 = BUMP_POSNS(:,2);
+bumperCenter3 = BUMP_POSNS(:,3);
+bumperCenter4 = BUMP_POSNS(:,4);
 
 % Body-fixed bumper normal vectors
 bumperNormalBody1 = invar2rotmat('Z',deg2rad(45))'*invar2rotmat('Y',BUMP_ANGLE + deg2rad(90))'* [1;0;0];

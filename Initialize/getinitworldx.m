@@ -8,6 +8,8 @@ yaw = IC.attEuler(3);
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 timeInit = 0;
 
+   
+
 if yaw >= 0 && yaw < pi/2
     initialContactBumper = 4;
 elseif yaw >= pi/2 && yaw <= pi

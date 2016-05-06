@@ -17,12 +17,14 @@ function [Control] = initcontrol()
     Control.errAltitude = 0;
     Control.errAltitudeDeriv = 0; 
     Control.errYawDeriv = 0;
+    Control.errPosnMag = 0;
     
     % Cumulative errors
     Control.integralErrEuler = [0;0;0];
     Control.integralErrAltitude = 0;
     Control.integralErrAltitudeDeriv = 0;
     Control.integralErrYawDeriv = 0;
+    Control.integralErrPosnMag = 0;
     
     % Desired attitude
     Control.desEuler = [0; 0; 0];

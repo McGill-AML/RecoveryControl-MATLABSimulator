@@ -1,7 +1,7 @@
 function [ Contact ] = findcontact( rotMat,state,wallLoc)
 %Returns contact information based on current state and wall location
 
-global BUMP_RADIUS PROP_POSNS BUMP_NORMS BUMP_TANGS
+global BUMP_RADIUS BUMP_POSNS BUMP_NORMS BUMP_TANGS
 
 Contact = initcontact(0);
 ptsIntersection = Contact.point.intersection;
@@ -12,7 +12,7 @@ for iBumper = 1:4
     % Transform bumper definitions to world frame
     bumperNormalWorld = rotMat'*BUMP_NORMS(:,iBumper); %normal to bumper circle
     bumperTangentWorld = rotMat'*BUMP_TANGS(:,iBumper); %in plane with bumper circle
-    bumperCenterWorld = rotMat'*PROP_POSNS(:,iBumper) + state(7:9);
+    bumperCenterWorld = rotMat'*BUMP_POSNS(:,iBumper) + state(7:9);
 
     % Solve for intersection angle
     bumperCrossProduct = cross(bumperNormalWorld,bumperTangentWorld);
@@ -40,9 +40,9 @@ for iBumper = 1:4
             contactAxisBody = contactAxisBody/norm(contactAxisBody);
 
             if ptsIntersection(1,iBumper) >= bumperCenterWorld(1)
-                Contact.point.contactBody(:,iBumper) = PROP_POSNS(:,iBumper) + BUMP_RADIUS*contactAxisBody;
+                Contact.point.contactBody(:,iBumper) = BUMP_POSNS(:,iBumper) + BUMP_RADIUS*contactAxisBody;
             else
-                Contact.point.contactBody(:,iBumper) = PROP_POSNS(:,iBumper) - BUMP_RADIUS*contactAxisBody;
+                Contact.point.contactBody(:,iBumper) = BUMP_POSNS(:,iBumper) - BUMP_RADIUS*contactAxisBody;
             end
 
             Contact.point.contactWorld(:,iBumper) = real(rotMat'*Contact.point.contactBody(:,iBumper) + state(7:9));
@@ -50,9 +50,21 @@ for iBumper = 1:4
             % Find deflection
             Contact.defl(iBumper) = Contact.point.contactWorld(1,iBumper) - wallLoc;
 
+            % Contact point velocity, world
+            contactPointVelocityWorld = rotMat'*([state(1);state(2);state(3)] + cross([state(4);state(5);state(6)],Contact.point.contactBody(:,iBumper)));
+            % for validation only:
+            Contact.pointVelocityWorld(:,iBumper) = contactPointVelocityWorld ;
+            
             % Find deflection rate
-            Contact.deflDeriv(iBumper) = rotMat(:,1)'*([state(1);state(2);state(3)] + cross([state(4);state(5);state(6)],Contact.point.contactBody(:,iBumper)));
+            %Contact.deflDeriv(iBumper) = rotMat(:,1)'*([state(1);state(2);state(3)] + cross([state(4);state(5);state(6)],Contact.point.contactBody(:,iBumper)));
+            Contact.deflDeriv(iBumper) = contactPointVelocityWorld(1);
+            
+            % Find sliding direction
+            Contact.slidingVelocityWorld(:,iBumper) = [0;contactPointVelocityWorld(2:3)];
+            Contact.slidingDirectionWorld(:,iBumper) = Contact.slidingVelocityWorld(:,iBumper)/norm(Contact.slidingVelocityWorld(:,iBumper));
 
+            %                         disp(Contact.slidingDirectionWorld(:,iBumper));
+            
             if Contact.defl(iBumper) <= 0     
                 disp('Warning: Deflection calc error');
                 disp(Contact.defl(iBumper));

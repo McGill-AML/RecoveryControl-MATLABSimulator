@@ -2,6 +2,8 @@ function Control = controlleratt(state,iSim,timeInit,tStep,altitudeDes,eulerAngl
 
 global m g Ixx Iyy Izz u2RpmMat
 
+impactOccured = 0;
+
 %% Save inputs 
 attRollDes = eulerAnglesDes(1);
 attPitchDes = eulerAnglesDes(2);
@@ -47,7 +49,7 @@ Kpvyaw = 1.8; %1.8 %Zhang x4 value = 2.8
 Kivyaw = 0.2; %2 %Zhang x4 value = 4;
 Kdvyaw = 0; %Zhang x4 value = 0;
 
-if impactOccured == 0
+if impactOccured == 0 || isempty(manualCmds)
     %% PID Altitude Controller
     errAltitude = altitudeDes - state(9);
 

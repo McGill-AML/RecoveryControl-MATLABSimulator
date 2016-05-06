@@ -23,11 +23,15 @@ nContact = ImpactParams.compliantModel.n;
 wallLoc = ImpactParams.wallLoc;
 wallPlane = ImpactParams.wallPlane;
 
+velocitySliding = ImpactParams.frictionModel.velocitySliding;
+
 %% Initialize Local Contact Vars
 Contact = initcontact(0);
 normalForceWorld = zeros(3,4);
 normalForceBody = zeros(3,4);
 contactMomentBody = zeros(3,4);
+%tangentialForceWorld = zeros(3,4);
+tangentialForceBody = zeros(3,4);
 
 %% 
 q = [state(10);state(11);state(12);state(13)]/norm(state(10:13));
@@ -91,8 +95,26 @@ if abs(wallLoc - state(7)) <= 0.3 %BUMP_RADIUS + sqrt(max(abs(PROP_POSNS(1,:)))^
 %                 end 
                 
                 normalForceBody(:,iBumper) = rotMat*normalForceWorld(:,iBumper);
-                contactMomentBody(:,iBumper) = cross(Contact.point.contactBody(:,iBumper),normalForceBody(:,iBumper));
-
+                
+                
+                % Calculate tangential force on bumper from friction
+                
+                % Account for stiction
+                slidingVelocityNorm = norm(Contact.slidingVelocityWorld);
+                
+                if slidingVelocityNorm <= velocitySliding
+                    Contact.muSliding = slidingVelocityNorm*ImpactParams.frictionModel.muSliding/velocitySliding;
+                else
+                    Contact.muSliding = ImpactParams.frictionModel.muSliding;
+                end                
+               
+                %Coulomb friction                
+                Contact.tangentialForceWorld(:,iBumper) = -Contact.muSliding*Contact.normalForceMag(iBumper)*Contact.slidingDirectionWorld(:,iBumper);
+                tangentialForceBody(:,iBumper) = rotMat*Contact.tangentialForceWorld(:,iBumper);
+                
+                %Total contact moment 
+                contactMomentBody(:,iBumper) = cross(Contact.point.contactBody(:,iBumper),normalForceBody(:,iBumper)+tangentialForceBody(:,iBumper));
+                
             else
                 if globalFlag.contact.isContact(iBumper) == 1
                     globalFlag.contact.isContact(iBumper) = 0;
@@ -113,6 +135,7 @@ end
 
 %% Calculate contact force and moment
 
+% uncomment after friction is added
 if timeImpact == 10000
     if sum(globalFlag.contact.isContact) > 0
         timeImpact = t;
@@ -121,22 +144,21 @@ if timeImpact == 10000
     end
 end
 
-% if t >= timeImpact
-%     rpm = [0;0;0;0];
-% end
-for iCmds = max(size(propCmds)):-1:1
-    if t >= timeImpact + propCmds(iCmds).rpmTime   
-        if rpmChkptIsPassed(iCmds) == 0        
-            rpmChkpt = rpmPrev;
-            rpmChkptIsPassed(iCmds) = 1;
-        end
-        
-        for iMotor = 1:4
-              rpm(iMotor) = (propCmds(iCmds,1).rpmDeriv(iMotor)~=0)*(sign(rpm(iMotor))*(propCmds(iCmds,1).rpmDeriv(iMotor)*(t - timeImpact - propCmds(iCmds,1).rpmTime)+abs(rpmChkpt(iMotor))));
+if isempty(propCmds) == 0
+    for iCmds = max(size(propCmds)):-1:1
+        if t >= timeImpact + propCmds(iCmds).rpmTime   
+            if rpmChkptIsPassed(iCmds) == 0        
+                rpmChkpt = rpmPrev;
+                rpmChkptIsPassed(iCmds) = 1;
+            end
 
+            for iMotor = 1:4
+                  rpm(iMotor) = (propCmds(iCmds,1).rpmDeriv(iMotor)~=0)*(sign(rpm(iMotor))*(propCmds(iCmds,1).rpmDeriv(iMotor)*(t - timeImpact - propCmds(iCmds,1).rpmTime)+abs(rpmChkpt(iMotor))));
+
+            end
+
+            break    
         end
-        
-        break    
     end
 end
 
@@ -153,7 +175,9 @@ V = 0;
 Fa = Tv*[-0.5*AERO_DENS*V^2*AERO_AREA*Cd;0;0];
 Ft = [0;0;-Kt*sum(rpm.^2)];
 
-totalNormalForce = sum(normalForceBody,2);
+totalContactForce = sum(normalForceBody,2) + sum(tangentialForceBody,2);
+
+% totalNormalForce = [0;0;0]; %sum(normalForceBody,2);
 totalContactMoment = sum(contactMomentBody,2);
 
 %% Status Quo
@@ -176,7 +200,7 @@ Mz =  [-Dt Dt -Dt Dt]*(rpm.^2)-Kr*state(6)^2 -Jr*sum(rpmDeriv) + totalContactMom
 % My = Kt*PROP_POSNS(1,:)*(rpm.^2)-Kq*state(5)^2 + totalContactMoment(2) ;
 % Mz =  [-Dt Dt -Dt Dt]*(rpm.^2)-Kr*state(6)^2 -Jr*sum(rpmDeriv) + totalContactMoment(3);
 
-stateDeriv(1:3) = (Fg + Fa + Ft + totalNormalForce - m*cross(state(4:6),state(1:3)))/m;
+stateDeriv(1:3) = (Fg + Fa + Ft + totalContactForce - m*cross(state(4:6),state(1:3)))/m;
 stateDeriv(4:6) = inv(I)*([Mx;My;Mz]-cross(state(4:6),I*state(4:6)));
 stateDeriv(7:9) = rotMat'*state(1:3);
 stateDeriv(10:13) = -0.5*quatmultiply([0;state(4:6)],q);

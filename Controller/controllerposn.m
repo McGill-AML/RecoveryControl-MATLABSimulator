@@ -10,6 +10,8 @@ posnDes = Control.pose.posn;
 errAltitudePrev = Control.errAltitude;
 errAltitudeDerivPrev = Control.errAltitudeDeriv;
 
+errPosnMagPrev = Control.errPosnMag;
+
 errAttRollPrev = Control.errEuler(1);
 errAttPitchPrev = Control.errEuler(2);
 errAttYawPrev = Control.errEuler(3);
@@ -35,6 +37,7 @@ Kivz = 0;%0.16;%60; %Zhang x4 value = 4
 
 %% Horizontal Position Controller Parameters
 Kps = 1;%0.6; %Zhang x4 value = 0.6
+Kis = 0.1;
 Kpvx = 2; %Zhang x4 value = 2
 Kpvy = 2; %Zhang x4 value = 2
 
@@ -109,9 +112,16 @@ if recover == 0
     % Roll & Pitch
     errPosnX = posnDes(1) - state(7);
     errPosnY = posnDes(2) - state(8);
-    errPosnMag = sqrt(errPosnX^2 + errPosnY^2);    
-
-    posnDerivDes = Kps*errPosnMag;
+    errPosnMag = sqrt(errPosnX^2 + errPosnY^2);
+    
+    if iSim == timeInit
+        errPosnMagIntegral = 0;
+    else
+        errPosnMagIntegral = errPosnMag + errPosnMagPrev;
+    end
+    
+    Control.integralErrPosnMag = Control.integralErrPosnMag + errPosnMagIntegral*tStep*0.5;
+    posnDerivDes = Kps*errPosnMag + Kis*Control.integralErrPosnMag;
     
     % if posnDerivDes < 0
     %     posnDerivDes = max([-posnDerivSaturation,posnDerivDes]);
@@ -266,6 +276,7 @@ rpm = [-rpm(1);rpm(2);-rpm(3);rpm(4)]; %in RPM
 Control.rpm = rpm;
 Control.errAltitude = errAltitude;
 Control.errAltitudeDeriv = errAltitudeDeriv;
+Control.errPosnMag = errPosnMag;
 Control.errEuler = [errAttRoll; errAttPitch; errAttYaw];
 Control.errYawDeriv = errAttYawDeriv;
 Control.twist.angVel(3) = attYawDerivDes;

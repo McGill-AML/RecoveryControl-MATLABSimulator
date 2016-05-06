@@ -3,6 +3,7 @@ function [Contact, ImpactInfo] = initcontactstructs
     Contact = initcontact(0);
     
     ImpactInfo.isStable = 1;
+    ImpactInfo.firstImpactOccured = 0;
     
     %Init bumperInfo
     bumperInfo.timeImpacts = [];

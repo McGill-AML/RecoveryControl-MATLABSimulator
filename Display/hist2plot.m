@@ -23,7 +23,28 @@ Plot.bodyAccs = Hist.stateDerivs(1:3,:);
 
 temp = struct2cell(Hist.contacts);
 % Plot.normalForces = [temp{5,:}];
-Plot.normalForces = reshape([temp{5,:}],[4,size(temp,2)]);
+Plot.normalForces = reshape([temp{6,:}],[4,size(temp,2)]);
+temp2 = [temp{8,:}];
+Plot.slidingDirectionWorlds_bump1 =  temp2(:,1:4:end)';
+Plot.slidingDirectionWorlds_bump2 =  temp2(:,2:4:end)';
+Plot.slidingDirectionWorlds_bump3 =  temp2(:,3:4:end)';
+Plot.slidingDirectionWorlds_bump4 =  temp2(:,4:4:end)';
+
+temp2 = [temp{9,:}];
+Plot.tangentialForceWorlds_bump1 = temp2(:,1:4:end)';
+Plot.tangentialForceWorlds_bump2 = temp2(:,2:4:end)';
+Plot.tangentialForceWorlds_bump3 = temp2(:,3:4:end)';
+Plot.tangentialForceWorlds_bump4 = temp2(:,4:4:end)';
+
+temp2 = [temp{7,:}];
+Plot.contactPtVelocityWorlds_bump1 = temp2(:,1:4:end)';
+Plot.contactPtVelocityWorlds_bump2 = temp2(:,2:4:end)';
+Plot.contactPtVelocityWorlds_bump3 = temp2(:,3:4:end)';
+Plot.contactPtVelocityWorlds_bump4 = temp2(:,4:4:end)';
+
+Plot.defls = reshape([temp{4,:}],[4,size(temp,2)])';
+
+Plot.muSlidings = [temp{11,:}];
 
 temp = struct2cell(Hist.controls);
 Plot.errEulers = [temp{5,:}];
@@ -31,6 +52,8 @@ Plot.desEulers = [temp{13,:}];
 Plot.desYawDerivs = [temp{14,:}];
 
 %% Simulate accelerometer data
+% Reference: "Small Unmanned Aircraft: Theory and Practice" - Beard &
+% McLain, 2012 - 7.1 Accelerometers
 global g
 Plot.accelerometers = zeros(3,size(Plot.quaternions,2));
 for iData = 1:size(Plot.quaternions,2)
@@ -39,25 +62,25 @@ for iData = 1:size(Plot.quaternions,2)
     Plot.accelerometers(:,iData) = invar2rotmat('x',pi)*(rotmat*[0;0;g] + Plot.bodyAccs(:,iData) + cross(Plot.angVels(:,iData),Plot.linVels(:,iData)))/g;
 end
 
-%% Add noise to accelerometer data
-load('/home/thread/fmchui/Spiri/Collison Experiments/2016_02_25/MATLAB_processed_data/sensor_covs.mat');
-numSamples = size(Hist.times,1);
-numStates = 3;
-sigma = C_accel; %Covariance matrix
-R = chol(sigma);
-noise = randn(numSamples,numStates)*R;
-Plot.accelerometersNoisy = Plot.accelerometers + noise';
-
-%% Simulate gyroscope data
-Plot.gyros = rad2deg(Plot.angVels);
-
-%% Add noise to gyroscope data
-numSamples = size(Hist.times,1);
-numStates = 3;
-sigma = C_gyro; %Covariance matrix
-R = chol(sigma);
-noise = randn(numSamples,numStates)*R;
-Plot.gyrosNoisy = Plot.gyros + noise';
+% %% Add noise to accelerometer data
+% load('/home/thread/fmchui/Spiri/Collison Experiments/2016_02_25/MATLAB_processed_data/sensor_covs.mat');
+% numSamples = size(Hist.times,1);
+% numStates = 3;
+% sigma = C_accel; %Covariance matrix
+% R = chol(sigma);
+% noise = randn(numSamples,numStates)*R;
+% Plot.accelerometersNoisy = Plot.accelerometers + noise';
+% 
+% %% Simulate gyroscope data
+% Plot.gyros = sign(rad2deg(Plot.angVels)).*min(abs(rad2deg(Plot.angVels)),240);
+% Plot.gyros(3,:) = -Plot.gyros(3,:);
+% %% Add noise to gyroscope data
+% numSamples = size(Hist.times,1);
+% numStates = 3;
+% sigma = C_gyro; %Covariance matrix
+% R = chol(sigma);
+% noise = randn(numSamples,numStates)*R;
+% Plot.gyrosNoisy = Plot.gyros + noise';
 
 
 end

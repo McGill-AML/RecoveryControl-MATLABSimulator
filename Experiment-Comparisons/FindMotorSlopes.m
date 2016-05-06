@@ -1,8 +1,17 @@
-impact_time = 18.2537;
+impact_time = 39.17;
 
-end_time = impact_time + 1;
+if exist('v_motors___time','var') == 0
+    v_motors___time = vmotors___time;
+%     v_accel___time = vaccel___time;
+    v_motors_z = vmotors_z;
+    v_motors_w = vmotors_w;
+    v_motors_x = vmotors_x;
+    v_motors_y = vmotors_y;
+end
+
+end_time = min(impact_time + 1,floor(v_motors___time(end)));
 impact_idx = vlookup(v_motors___time,impact_time);
-end_idx = size(v_accel___time,1)-1; %vlookup(v_motors___time,end_time);
+end_idx = size(v_motors___time,1)-1; %vlookup(v_motors___time,end_time);
 
 motor1 = v_motors_z;
 motor2 = v_motors_w;

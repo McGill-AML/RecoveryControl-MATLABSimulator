@@ -1,18 +1,19 @@
 tic
 
-clear all
+% clear all
+clearvars -except Hist_mu0 Plot_mu0 Hist_mu1 Plot_mu1 Hist_mu2 Plot_mu2 Hist_mu3 Plot_mu3 Hist_mu4 Plot_mu4
 
 global m g Kt 
 global timeImpact
 global globalFlag
 
 %% Initialize Simulation Parameters
-initparams;
+initparams_spiri;
 
-SimParams.recordContTime = 0;
+SimParams.recordContTime = 1;
 SimParams.useRecovery = 0;
-SimParams.timeFinal = 3;
-tStep = 1/200;
+SimParams.timeFinal = 5;
+tStep = 1/200;%1/200;
 
 ImpactParams.wallLoc = 1.5;
 ImpactParams.wallPlane = 'YZ';
@@ -20,6 +21,8 @@ ImpactParams.timeDes = 0.5;
 ImpactParams.compliantModel.e = 0.9;
 ImpactParams.compliantModel.k = 40;
 ImpactParams.compliantModel.n = 0.54;
+ImpactParams.frictionModel.muSliding = 0.1;
+ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
 
 %% Initialize Structures
@@ -32,7 +35,7 @@ Setpoint = initsetpoint;
 localFlag = initflags;
 
 %% Match initial conditions to experiment
-expCrash = 'A07';
+expCrash = 'A10';
 [Control.twist.posnDeriv(1), IC.attEuler, IC.posn(3), Setpoint.posn(3), xAcc, Experiment] = matchexperimentIC(expCrash);
 
 
@@ -46,6 +49,7 @@ Setpoint.posn(1) = IC.posn(1);
 Trajectory = Setpoint;
 
 IC.linVel =  rotMat*[initialLinVel;0;0];
+
 IC.rpm = [-1;1;-1;1].*repmat(sqrt(m*g/(4*Kt)),4,1);  %Start with hovering RPM
 
 PropState.rpm = IC.rpm;
@@ -76,13 +80,9 @@ end
 
 %% Simulation Loop
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
-%     display(iSim)    
+    display(iSim)    
    
-%         %only to test controller:
-%         Control.pose.posn = [1 1 1]; 
-%         Control = controllerposn(state,iSim,SimParams.timeInit,tStep,pi/4,Control);
-%         Control.type = 'posn';
-    
+  
     if Contact.hasOccured*SimParams.useRecovery == 1        
         Control.pose.posn = [0 Trajectory(end).posn(2:3)];
         Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
@@ -92,25 +92,31 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
                                 IC.attEuler,Control,Contact.hasOccured,timeImpact, Experiment.manualCmds);
         Control.type = 'att';
     end
-    
+       
     %Propagate Dynamics
-    options = odeset('RelTol',1e-3);
-    [tODE,stateODE] = ode45(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
+    options = odeset('RelTol',1e-3,'AbsTol',[1e-5 1e-5 1e-5 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3]); %Default: RelTol 1e-3, AbsTol 1e-6
+%     [tODE,stateODE] = ode45(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
+%                                                             tStep,Control.rpm,ImpactParams,PropState.rpm, ...
+%                                                             Experiment.propCmds),[iSim iSim+tStep],state,options);
+    [tODE,stateODE] = ode113(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
                                                             tStep,Control.rpm,ImpactParams,PropState.rpm, ...
                                                             Experiment.propCmds),[iSim iSim+tStep],state,options);
+
+                                                        
     
     % Reset contact flags for continuous time recording        
-    globalFlag.contact = localFlag.contact;
-    
+    globalFlag.contact = localFlag.contact;  
     
     if SimParams.recordContTime == 0
         
         [stateDeriv, Contact, PropState] = dynamicsystem(tODE(end),stateODE(end,:), ...
                                                          tStep,Control.rpm,ImpactParams, PropState.rpm, ...
-                                                         Experiment.propCmds);
-        
+                                                         Experiment.propCmds);        
         if sum(globalFlag.contact.isContact)>0
             Contact.hasOccured = 1;
+            if ImpactInfo.firstImpactOccured == 0
+                ImpactInfo.firstImpactOccured = 1;
+            end
         end  
 
     else  
@@ -123,6 +129,9 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
             
             if sum(globalFlag.contact.isContact)>0
                 Contact.hasOccured = 1;
+                if ImpactInfo.firstImpactOccured == 0
+                    ImpactInfo.firstImpactOccured = 1;
+                end
             end     
                       
             ContHist = updateconthist(ContHist,stateDeriv, Pose, Twist, Control, PropState, Contact, globalFlag); 
