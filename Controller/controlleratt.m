@@ -1,8 +1,7 @@
-function Control = controlleratt(state,iSim,timeInit,tStep,altitudeDes,eulerAnglesDes,Control,impactOccured,timeImpact, manualCmds)
+function Control = controlleratt(state,iSim,timeInit,tStep,altitudeDes,eulerAnglesDes,Control,impactOccured, timeImpact, manualCmds)
 
 global m g Ixx Iyy Izz u2RpmMat
 
-impactOccured = 0;
 
 %% Save inputs 
 attRollDes = eulerAnglesDes(1);
@@ -26,7 +25,7 @@ R = quat2rotmat(q);
 %% Zhang 2014 Controller
 %% Altitude Controller Parameters
 Kpz = 2;%20; %Zhang x4 value = 1
-Kiz = 0;%40;
+Kiz = 0.05;%40;
 Kdz = 0.4;
 
 Kpvz = 1.6;%10; %Zhang x4 value = 2.8
@@ -42,8 +41,8 @@ Kdyaw = 0.2; %0.2
 
 %% Attitude Controller Parameters
 Kprp = 60; %Zhang x4 value = 7.2
-Kirp = 1.8*60; %Zhang x4 value = 4
-Kdrp = 6; %Zhang x4 value = 4.2
+Kirp = 0; %Zhang x4 value = 4
+Kdrp = 12; %Zhang x4 value = 4.2
 
 Kpvyaw = 1.8; %1.8 %Zhang x4 value = 2.8
 Kivyaw = 0.2; %2 %Zhang x4 value = 4;

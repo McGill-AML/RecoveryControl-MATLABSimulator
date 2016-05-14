@@ -1,4 +1,4 @@
-function [ImpactParams]= initparams_spiri()
+function [ImpactParams]= initparams_spiriwithnavibumpers()
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -76,8 +76,8 @@ BUMP_TANGS(:,4) = invar2rotmat('Z',deg2rad(-45))'*invar2rotmat('Y',BUMP_ANGLE)'*
 BUMP_POSNS = PROP_POSNS;
 
 ImpactParams.compliantModel.e = 0.9;
-ImpactParams.compliantModel.k = 40;
-ImpactParams.compliantModel.n = 0.54;
+ImpactParams.compliantModel.k = 372;
+ImpactParams.compliantModel.n = 0.66;
 
 end
 

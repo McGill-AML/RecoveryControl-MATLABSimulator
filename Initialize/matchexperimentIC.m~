@@ -123,21 +123,20 @@ switch crash
                     
     case 'II-01' 
         posnDeriv = 1.54; %1.98
-        attEuler = [deg2rad(1.88); deg2rad(4.68);-pi + deg2rad(15.3)]; 
+        attEuler = [deg2rad(4.68); deg2rad(1.88+6);-pi + deg2rad(19.5)]; 
         altitude = 0.6;
         setpointAltitude = 0.66; %1.08
         xAcc = 1.55; %roll0 = -6: 3.995, roll0 = 6: 4.891
-        warning('xAcc in matchexperimentIC may not be correct');
+
        % To set propCmds and manualCmds to []
         rawManualCmd.times = [];
         
     case 'III-01' 
         posnDeriv = 1.30; %1.98
-        attEuler = [deg2rad(-1.69); deg2rad(3.2);pi - deg2rad(-4.4)]; 
+        attEuler = [deg2rad(3.20); deg2rad(1.69+6.5);pi - deg2rad(6)]; 
         altitude = 0.6;
         setpointAltitude = 0.66; %1.08
         xAcc = 1.2614; %roll0 = -6: 3.995, roll0 = 6: 4.891
-        warning('xAcc in matchexperimentIC may not be correct');
 
        % To set propCmds and manualCmds to []
         rawManualCmd.times = [];
@@ -156,7 +155,7 @@ switch crash
         attEuler = [deg2rad(-2.59); deg2rad(0.22);deg2rad(7.9)]; 
         altitude = 0.6;
         setpointAltitude = 0.6; %1.08
-        xAcc = 0.0202; %roll0 = -6: 3.995, roll0 = 6: 4.891
+        xAcc = 1; %roll0 = -6: 3.995, roll0 = 6: 4.891
 
        % To set propCmds and manualCmds to []
         rawManualCmd.times = [];
@@ -182,8 +181,8 @@ switch crash
         rawManualCmd.times = [];
         
     case 'VI-14'
-        posnDeriv = 1.76; %1.98
-        attEuler = [deg2rad(0.75); deg2rad(-1.76);deg2rad(12.8)]; 
+        posnDeriv = 1.35; %1.98
+        attEuler = [deg2rad(-2.59); deg2rad(0.22);deg2rad(1.35)]; 
         altitude = 0.6;
         setpointAltitude = 0.6; %1.08
         xAcc = 1; %roll0 = -6: 3.995, roll0 = 6: 4.891

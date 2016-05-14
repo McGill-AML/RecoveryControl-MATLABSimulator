@@ -42,6 +42,19 @@ Plot.contactPtVelocityWorlds_bump2 = temp2(:,2:4:end)';
 Plot.contactPtVelocityWorlds_bump3 = temp2(:,3:4:end)';
 Plot.contactPtVelocityWorlds_bump4 = temp2(:,4:4:end)';
 
+temp2 = [temp{3,:}];
+temp3 = struct2cell(temp2');
+temp4 = [temp3{2,:}];
+Plot.contactPointWorlds_bump1 = temp4(:,1:4:end)';
+Plot.contactPointWorlds_bump2 = temp4(:,2:4:end)';
+Plot.contactPointWorlds_bump3 = temp4(:,3:4:end)';
+Plot.contactPointWorlds_bump4 = temp4(:,4:4:end)';
+temp4 = [temp3{3,:}];
+Plot.contactPointBodys_bump1 = temp4(:,1:4:end)';
+Plot.contactPointBodys_bump2 = temp4(:,2:4:end)';
+Plot.contactPointBodys_bump3 = temp4(:,3:4:end)';
+Plot.contactPointBodys_bump4 = temp4(:,4:4:end)';
+
 Plot.defls = reshape([temp{4,:}],[4,size(temp,2)])';
 
 Plot.muSlidings = [temp{11,:}];
@@ -50,16 +63,22 @@ temp = struct2cell(Hist.controls);
 Plot.errEulers = [temp{5,:}];
 Plot.desEulers = [temp{13,:}];
 Plot.desYawDerivs = [temp{14,:}];
+Plot.controlAccDes = [temp{3,:}];
+
+temp2 = [temp{2,:}]; %Control.twist
+temp3 = struct2cell(temp2');
+Plot.controlAngVels = [temp3{4,:}];
 
 %% Simulate accelerometer data
 % Reference: "Small Unmanned Aircraft: Theory and Practice" - Beard &
 % McLain, 2012 - 7.1 Accelerometers
 global g
-Plot.accelerometers = zeros(3,size(Plot.quaternions,2));
-for iData = 1:size(Plot.quaternions,2)
-    
-    rotmat = quat2rotmat(Plot.quaternions(:,iData));
-    Plot.accelerometers(:,iData) = invar2rotmat('x',pi)*(rotmat*[0;0;g] + Plot.bodyAccs(:,iData) + cross(Plot.angVels(:,iData),Plot.linVels(:,iData)))/g;
+Plot.accelerometers = zeros(3,numel(Plot.times));
+Plot.worldAccs = zeros(3,numel(Plot.times));
+for iData = 1:numel(Plot.times)    
+    rotMat = quat2rotmat(Plot.quaternions(:,iData));
+    Plot.accelerometers(:,iData) = invar2rotmat('x',pi)*(rotMat*[0;0;g] + Plot.bodyAccs(:,iData) + cross(Plot.angVels(:,iData),Plot.linVels(:,iData)))/g;
+    Plot.worldAccs(:,iData) = rotMat'*Plot.bodyAccs(:,iData);
 end
 
 % %% Add noise to accelerometer data

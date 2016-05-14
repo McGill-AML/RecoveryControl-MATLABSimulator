@@ -101,10 +101,10 @@ bumperNormalWorld2 = rotMat'*bumperNormalBody2;
 bumperNormalWorld3 = rotMat'*bumperNormalBody3;
 bumperNormalWorld4 = rotMat'*bumperNormalBody4;
 
-plotCircle3D(bumperCenterWorld1,bumperNormalWorld1,BUMP_RADIUS);
-plotCircle3D(bumperCenterWorld2,bumperNormalWorld2,BUMP_RADIUS);
-plotCircle3D(bumperCenterWorld3,bumperNormalWorld3,BUMP_RADIUS);
-plotCircle3D(bumperCenterWorld4,bumperNormalWorld4,BUMP_RADIUS);
+plotCircle3D(bumperCenterWorld1,bumperNormalWorld1,BUMP_RADIUS,1);
+plotCircle3D(bumperCenterWorld2,bumperNormalWorld2,BUMP_RADIUS,1);
+plotCircle3D(bumperCenterWorld3,bumperNormalWorld3,BUMP_RADIUS,2);
+plotCircle3D(bumperCenterWorld4,bumperNormalWorld4,BUMP_RADIUS,2);
 
 %% Plot body-fixed axes
 axisXWorldPts = [comWorld axisXWorld];
@@ -136,37 +136,7 @@ set(ylhand,'fontsize',14);
 set(zlhand,'fontsize',14);
 % title(strcat('t = ',num2str(t(frame),'%.2f'),' s'));
 
-if sideview == 'XZ'
-    view([0 0]); %view XZ plane
-elseif sideview == 'ZX'
-   view(-180,0);       
-elseif sideview == 'YZ'
-    view(90, 0); %view YZ plane
-elseif sideview =='ZY'
-    view(-90,0);
-elseif sideview == 'XY'
-    view([0 0 1]);
-elseif sideview == 'V1'
-    view([-14.5,6]);
-elseif sideview == 'V2'
-    view([-19.5,28]);
-elseif sideview == 'V3'
-    view(-130,14);
-elseif sideview == 'C3'
-    view(-140,26);
-elseif sideview == 'C5'
-    view(-176,30);
-elseif sideview == 'C6'
-    view(-177,6);
-elseif sideview == 'C7'
-    view(-178,8);
-elseif sideview == 'C9'
-    view(-180,8);
-elseif sideview == 'CT' %crash Ten
-    view(-177,20);       
-elseif sideview == 'VV'
-    view([-180,26]);
-end
+setsimulationview(sideview);
 
 grid on;
 axis square;

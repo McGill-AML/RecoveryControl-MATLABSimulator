@@ -8,7 +8,7 @@ global timeImpact
 global globalFlag
 
 %% Initialize Simulation Parameters
-initparams_spiri;
+ImpactParams = initparams_spiriwithnavibumpers;
 
 SimParams.recordContTime = 1;
 SimParams.useRecovery = 0;
@@ -18,11 +18,8 @@ tStep = 1/200;%1/200;
 ImpactParams.wallLoc = 1.5;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5;
-ImpactParams.compliantModel.e = 0.9;
-ImpactParams.compliantModel.k = 40;
-ImpactParams.compliantModel.n = 0.54;
 ImpactParams.frictionModel.muSliding = 0.1;
-ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
+ImpactParams.frictionModel.velocitySliding = 1e-4; %5e-2 m/s
 timeImpact = 10000;
 
 %% Initialize Structures
@@ -35,7 +32,7 @@ Setpoint = initsetpoint;
 localFlag = initflags;
 
 %% Match initial conditions to experiment
-expCrash = 'A10';
+expCrash = 'VI-03';
 [Control.twist.posnDeriv(1), IC.attEuler, IC.posn(3), Setpoint.posn(3), xAcc, Experiment] = matchexperimentIC(expCrash);
 
 
@@ -83,18 +80,18 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     display(iSim)    
    
   
-    if Contact.hasOccured*SimParams.useRecovery == 1        
+    if ImpactInfo.firstImpactOccured*SimParams.useRecovery == 1 %normal setpoint recovery        
         Control.pose.posn = [0 Trajectory(end).posn(2:3)];
         Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
         Control.type = 'posn';
     else
         Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Setpoint.posn(3), ... 
-                                IC.attEuler,Control,Contact.hasOccured,timeImpact, Experiment.manualCmds);
+                                IC.attEuler,Control,ImpactInfo.firstImpactOccured,timeImpact, Experiment.manualCmds);
         Control.type = 'att';
     end
        
     %Propagate Dynamics
-    options = odeset('RelTol',1e-3,'AbsTol',[1e-5 1e-5 1e-5 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3]); %Default: RelTol 1e-3, AbsTol 1e-6
+    options = getOdeOptions();
 %     [tODE,stateODE] = ode45(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
 %                                                             tStep,Control.rpm,ImpactParams,PropState.rpm, ...
 %                                                             Experiment.propCmds),[iSim iSim+tStep],state,options);
@@ -146,11 +143,11 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     [Pose, Twist] = updatekinematics(state, stateDeriv);
 
     %Discrete Time recording @ 200 Hz
-    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag);
+    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag,[]);
 
     %End loop if Spiri has crashed
     if state(9) <= 0
-        display('Spiri has hit the floor :(');
+        display('Navi has hit the floor :(');
         ImpactInfo.isStable = 0;
         break;
     end  

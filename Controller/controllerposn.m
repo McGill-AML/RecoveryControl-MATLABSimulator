@@ -2,7 +2,6 @@ function Control = controllerposn(state,iSim,timeInit,tStep,yawDes,Control)
 % [control,errAltitude,errAltitudeDeriv,evx,evy,errAttYaw,errAttRoll,errAttPitch,errAttYawDeriv,omega,roll_des,pitch_des,attYawDerivDes,u1,u2,u3,u4] = controllerposn(state,iSim,timeInit,tStep,posnDes,attYawDes,errAltitudePrev,errAltitudeDerivPrev,errAttRollPrev,errAttPitchPrev,errAttYawPrev,errAttYawDerivPrev)
 global m g Ixx Iyy Izz Kt Dt PROP_POSNS u2RpmMat
 
-recover = 0;
 
 %% Save inputs 
 posnDes = Control.pose.posn;
@@ -77,7 +76,7 @@ Kpvyaw = 1.8;
 Kivyaw = 0.2;
 Kdvyaw = 0;
 
-if recover == 0
+
     %% PID Altitude Controller
     errAltitude = posnDes(3) - state(9);
 
@@ -192,22 +191,6 @@ if recover == 0
     else
         attYawDerivDes = min([attYawDerivDes,yawDerivSaturation]);
     end
-
-else %Recovery Controller
-    u1 = m*g; %m*R(3,3)*g
-    rollDes = 0;
-    pitchDes = 0;
-    attYawDerivDes = 0;
-    
-    errAltitude = 0;
-    errAltitudeDeriv = 0;
-    errPosnDerivX = 0;
-    errPosnDerivY = 0;
-    errAttYaw = 0;
-    errAttRoll = 0;
-    errAttPitch = 0;
-    errAttYawDeriv = 0;
-end
 
 % 
 %% Attitude Controller

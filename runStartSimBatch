@@ -1,0 +1,7 @@
+
+
+
+
+
+
+[Plot,accelMagMax,accelMagHorizMax,accelDir_atPeak,angVels_atPeak,angVels_avg] = startsimBatch_prescribeVelocity(1,-15);

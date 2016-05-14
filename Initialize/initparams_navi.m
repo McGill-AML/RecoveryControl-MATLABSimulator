@@ -1,4 +1,4 @@
-function []= initparams_navi()
+function [ImpactParams]= initparams_navi()
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -12,7 +12,6 @@ global u2RpmMat BUMP_NORMS BUMP_TANGS BUMP_POSNS
 
 
 g = 9.81;
-
 
 %Mass Properties
 m = 1.095; %kg
@@ -76,5 +75,11 @@ BUMP_TANGS(:,4) = invar2rotmat('Z',deg2rad(-45))'*invar2rotmat('Y',BUMP_ANGLE)'*
 load('bumperlocations_navi');
 
 BUMP_POSNS = [b1, b2, b3, b4] - repmat(CoM,1,4); %bumper center locations relative to CoM
+
+% Ribbon stiffness params
+ImpactParams.compliantModel.e = 0.9;
+ImpactParams.compliantModel.k = 372;
+ImpactParams.compliantModel.n = 0.66;
+
 end
 

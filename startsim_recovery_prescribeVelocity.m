@@ -7,20 +7,18 @@ global timeImpact
 global globalFlag
 
 %% Initialize Simulation Parameters
-initparams_navi;
+ImpactParams = initparams_navi;
 
 SimParams.recordContTime = 0;
-SimParams.useRecovery = 0;
+SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
+SimParams.useRecovery = 1; 
 SimParams.timeFinal = 5;
 tStep = 1/200;%1/200;
 
-ImpactParams.wallLoc = 1.5;
+ImpactParams.wallLoc = 1.5;%1.5;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5;
-ImpactParams.compliantModel.e = 0.9;
-ImpactParams.compliantModel.k = 370; %40
-ImpactParams.compliantModel.n = 0.66; %0.54
-ImpactParams.frictionModel.muSliding = 0.2;
+ImpactParams.frictionModel.muSliding = 0.1;
 ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
 
@@ -34,38 +32,38 @@ Setpoint = initsetpoint;
 localFlag = initflags;
 
 %% Match initial conditions to experiment
-% expCrash = 'A06';
-% [Control.twist.posnDeriv(1), IC.attEuler, IC.posn(3), Setpoint.posn(3), xAcc, Experiment] = matchexperimentIC(expCrash);
+% IC.attEuler = [0;0;0];
+% IC.posn = [0;0;2];
+% IC.linVel = [0;0;0];
+% SimParams.timeInit = 0;
 % 
-% 
-% rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
-% 
-% [IC.posn(1), initialLinVel, SimParams.timeInit ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
-% 
-% Setpoint.head = IC.attEuler(3);
-% Setpoint.time = SimParams.timeInit;
-% Setpoint.posn(1) = IC.posn(1);
+% Setpoint.head = 0;
+% Setpoint.time = 0;
+% Setpoint.posn = [4;0;2]; %1.4
 % Trajectory = Setpoint;
-% 
-% IC.linVel =  rotMat*[initialLinVel;0;0];
 
-% --- Friction Devel ---- %
-IC.attEuler = [0;0;0];
-IC.posn = [0.5;0;1];
-IC.linVel = [0;0;0];
-SimParams.timeInit = 0;
+Control.twist.posnDeriv(1) = 2;%World X Velocity at impact
+IC.attEuler = [0;-deg2rad(15);0];
+IC.posn = [0;0;5];
+Setpoint.posn(3) = IC.posn(3);
+xAcc = 0;
 
-Setpoint.head = 0;
-Setpoint.time = 0;
-Setpoint.posn = [1.5;1;1]; %1.4
+rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
+
+[IC.posn(1), initialLinVel, SimParams.timeInit ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
+
+Setpoint.head = IC.attEuler(3);
+Setpoint.time = SimParams.timeInit;
+Setpoint.posn(1) = IC.posn(1);
 Trajectory = Setpoint;
+
+IC.linVel =  rotMat*[initialLinVel;0;0];
 
 Experiment.propCmds = [];
 Experiment.manualCmds = [];
 
 globalFlag.experiment.rpmChkpt = zeros(4,1);
 globalFlag.experiment.rpmChkptIsPassed = zeros(1,4);
-% --- end friction devel --- %
 
 IC.rpm = [-1;1;-1;1].*repmat(sqrt(m*g/(4*Kt)),4,1);  %Start with hovering RPM
 
@@ -93,26 +91,31 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     display(iSim)    
    
   
-%     if Contact.hasOccured*SimParams.useRecovery == 1        
-%         Control.pose.posn = [0 Trajectory(end).posn(2:3)];
-%         Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
-%         Control.type = 'posn';
-%     else
-%         Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Setpoint.posn(3), ... 
-%                                 IC.attEuler,Control,Contact.hasOccured,timeImpact, Experiment.manualCmds);
-%         Control.type = 'att';
-%     end
-    
-    %Friction devel
-%     if ImpactInfo.firstImpactOccured == 1
-    if iSim > timeImpact + 0.05
-        Control.pose.posn = [0;Trajectory(end).posn(2)+1;Trajectory(end).posn(3)];        
-    else
-        Control.pose.posn = Trajectory(end).posn;
+    if ImpactInfo.firstImpactOccured*SimParams.useRecovery == 1 %recovery control        
+        if SimParams.useFaesslerRecovery == 1        
+            recoveryStage = checkrecoverystage(Pose, Twist) ;
+
+            Control = computedesiredacceleration(Control, Pose, Twist, recoveryStage);    
+            % Compute control outputs
+            Control = controllerrecovery(tStep, Pose, Twist, Control);   
+            Control.type = 'recovery';
+        else
+            Control.pose.posn = [0;0;2];
+            Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
+            
+            Control.type = 'posn';
+            
+%             Control = controlleratt(state,iSim,SimParams.timeInit,tStep,2,[0;deg2rad(20);0],Control,timeImpact, manualCmds)
+        end
+    else %normal posn control
+        recoveryStage = 0;
+        Control.desEuler = IC.attEuler;
+        Control.pose.posn(3) = Trajectory(end).posn(3);
+        Control = controlleratt2(state,iSim,SimParams.timeInit,tStep,Control);
+        Control.type = 'att';
     end
     
-    Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
-    Control.type = 'posn';
+
     
     %Propagate Dynamics
     options = getOdeOptions();
@@ -162,15 +165,20 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     [Pose, Twist] = updatekinematics(state, stateDeriv);
 
     %Discrete Time recording @ 200 Hz
-    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag);
+    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, recoveryStage);
 
     %End loop if Spiri has crashed
     if state(9) <= 0
-        display('Spiri has hit the floor :(');
+        display('Navi has hit the floor :(');
         ImpactInfo.isStable = 0;
         break;
     end  
     
+    if state(7) <= -10
+        display('Navi has left the building');
+        ImpactInfo.isStable = 1;
+        break;
+    end
 end
 
 toc
