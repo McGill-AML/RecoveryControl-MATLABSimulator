@@ -44,7 +44,7 @@ stateDeriv = zeros(13,1);
 %% Control Signal
 % rpm = rpmControl;
 maxRPM = 8000;
-minRPM = 1000;
+minRPM = 3000;
 maxRPMDeriv = 14000; % in rpm/s
 
 rpmMagnitude = abs(rpmControl);

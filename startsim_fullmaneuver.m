@@ -171,8 +171,10 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     else
         altitudeDes = 0.66;
         attitudeDes = [deg2rad(-1.2);deg2rad(16);pi + deg2rad(4)];
-        Control = controlleratt(state,iSim,SimParams.timeInit,tStep,altitudeDes, ... 
-                                attitudeDes,Control,Contact.hasOccured,timeImpact, Experiment.manualCmds);
+
+        Control.pose.posn(3) = altitudeDes;
+        Control.desEuler = attitudeDes;
+        Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Control,Experiment.manualCmds);   
         Control.type = 'att';
     end
     

@@ -10,15 +10,15 @@ global globalFlag
 ImpactParams = initparams_navi;
 
 SimParams.recordContTime = 0;
-SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
-SimParams.useRecovery = 1; 
-SimParams.timeFinal = 5;
+SimParams.useFaesslerRecovery = 0;%Use Faessler recovery
+SimParams.useRecovery = 0; 
+SimParams.timeFinal = 3;
 tStep = 1/200;%1/200;
 
 ImpactParams.wallLoc = 1.5;%1.5;
 ImpactParams.wallPlane = 'YZ';
-ImpactParams.timeDes = 0.5;
-ImpactParams.frictionModel.muSliding = 0.1;
+ImpactParams.timeDes = 0.2;
+ImpactParams.frictionModel.muSliding = 0;
 ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
 
@@ -31,20 +31,11 @@ Setpoint = initsetpoint;
 [Contact, ImpactInfo] = initcontactstructs;
 localFlag = initflags;
 
-%% Match initial conditions to experiment
-% IC.attEuler = [0;0;0];
-% IC.posn = [0;0;2];
-% IC.linVel = [0;0;0];
-% SimParams.timeInit = 0;
-% 
-% Setpoint.head = 0;
-% Setpoint.time = 0;
-% Setpoint.posn = [4;0;2]; %1.4
-% Trajectory = Setpoint;
+%% Set initial Conditions
 
-Control.twist.posnDeriv(1) = 2;%World X Velocity at impact
-IC.attEuler = [0;-deg2rad(15);0];
-IC.posn = [0;0;5];
+Control.twist.posnDeriv(1) = 1.3; %World X Velocity at impact
+IC.attEuler = [deg2rad(0);-deg2rad(15);0];
+IC.posn = [0;0;1];
 Setpoint.posn(3) = IC.posn(3);
 xAcc = 0;
 
@@ -99,7 +90,8 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
             % Compute control outputs
             Control = controllerrecovery(tStep, Pose, Twist, Control);   
             Control.type = 'recovery';
-        else
+            
+        else %Setpoint recovery
             Control.pose.posn = [0;0;2];
             Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
             
@@ -111,7 +103,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         recoveryStage = 0;
         Control.desEuler = IC.attEuler;
         Control.pose.posn(3) = Trajectory(end).posn(3);
-        Control = controlleratt2(state,iSim,SimParams.timeInit,tStep,Control);
+        Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Control,[]);
         Control.type = 'att';
     end
     
@@ -182,22 +174,5 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 end
 
 toc
-
-% % Get impact info
-% if SimParams.recordContTime == 0
-%     for iBumper = 1:4
-%         ImpactInfo.bumperInfos(iBumper) = getsiminfo(Hist,iBumper, Trajectory(1).head);
-%     end
-% else
-%     for iBumper = 1:4
-%         ImpactInfo.bumperInfos(iBumper) = getsiminfo(ContHist,iBumper,Trajectory(1).head);
-%     end
-% end
-% 
-% cellBumperInfos = struct2cell(ImpactInfo.bumperInfos);
-% 
-% ImpactInfo.maxNormalForce = max([cellBumperInfos{find(strcmp(fieldnames(ImpactInfo.bumperInfos),'maxNormalForces')),:}]);
-% ImpactInfo.maxDefl = max([cellBumperInfos{find(strcmp(fieldnames(ImpactInfo.bumperInfos),'maxDefls')),:}]);
-% ImpactInfo.numContacts = sum([cellBumperInfos{find(strcmp(fieldnames(ImpactInfo.bumperInfos),'numContacts')),:}]);
 
 Plot = hist2plot(Hist);

@@ -35,5 +35,11 @@ for iSim = 1:numel(Batch)
     copy2excel(iSim,13) = Batch(iSim).angVels_avg(3);
 end
 
+%% table
+
+
+
+
+
         
         

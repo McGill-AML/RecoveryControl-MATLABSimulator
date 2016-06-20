@@ -4,7 +4,7 @@ switch sideview
     case 'XZ'
         view([0 0]); %view XZ plane
     case 'ZX'
-        view(-180,0);       
+        view([-180,0]);       
     case 'YZ'
         view(90, 0); %view YZ plane
     case 'ZY'

@@ -8,7 +8,7 @@ global timeImpact
 global globalFlag
 
 %% Initialize Simulation Parameters
-ImpactParams = initparams_spiriwithnavibumpers;
+ImpactParams = initparams_spiri;%initparams_spiriwithnavibumpers;
 
 SimParams.recordContTime = 1;
 SimParams.useRecovery = 0;
@@ -18,7 +18,7 @@ tStep = 1/200;%1/200;
 ImpactParams.wallLoc = 1.5;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5;
-ImpactParams.frictionModel.muSliding = 0.1;
+ImpactParams.frictionModel.muSliding = 0; %0.1
 ImpactParams.frictionModel.velocitySliding = 1e-4; %5e-2 m/s
 timeImpact = 10000;
 
@@ -32,7 +32,7 @@ Setpoint = initsetpoint;
 localFlag = initflags;
 
 %% Match initial conditions to experiment
-expCrash = 'VI-03';
+expCrash = 'I-10';
 [Control.twist.posnDeriv(1), IC.attEuler, IC.posn(3), Setpoint.posn(3), xAcc, Experiment] = matchexperimentIC(expCrash);
 
 
@@ -85,8 +85,12 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
         Control.type = 'posn';
     else
-        Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Setpoint.posn(3), ... 
-                                IC.attEuler,Control,ImpactInfo.firstImpactOccured,timeImpact, Experiment.manualCmds);
+        Control.pose.posn(3) = Setpoint.posn(3);
+        Control.desEuler = IC.attEuler;
+%         Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Setpoint.posn(3), ... 
+%                                 IC.attEuler,Control,ImpactInfo.firstImpactOccured,timeImpact, Experiment.manualCmds);
+        
+        Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Control,Experiment.manualCmds);                    
         Control.type = 'att';
     end
        
@@ -166,11 +170,11 @@ else
         ImpactInfo.bumperInfos(iBumper) = getsiminfo(ContHist,iBumper,Trajectory(1).head);
     end
 end
-
-cellBumperInfos = struct2cell(ImpactInfo.bumperInfos);
-
-ImpactInfo.maxNormalForce = max([cellBumperInfos{find(strcmp(fieldnames(ImpactInfo.bumperInfos),'maxNormalForces')),:}]);
-ImpactInfo.maxDefl = max([cellBumperInfos{find(strcmp(fieldnames(ImpactInfo.bumperInfos),'maxDefls')),:}]);
-ImpactInfo.numContacts = sum([cellBumperInfos{find(strcmp(fieldnames(ImpactInfo.bumperInfos),'numContacts')),:}]);
+% 
+% cellBumperInfos = struct2cell(ImpactInfo.bumperInfos);
+% 
+% ImpactInfo.maxNormalForce = max([cellBumperInfos{find(strcmp(fieldnames(ImpactInfo.bumperInfos),'maxNormalForces')),:}]);
+% ImpactInfo.maxDefl = max([cellBumperInfos{find(strcmp(fieldnames(ImpactInfo.bumperInfos),'maxDefls')),:}]);
+% ImpactInfo.numContacts = sum([cellBumperInfos{find(strcmp(fieldnames(ImpactInfo.bumperInfos),'numContacts')),:}]);
 
 Plot = hist2plot(Hist);

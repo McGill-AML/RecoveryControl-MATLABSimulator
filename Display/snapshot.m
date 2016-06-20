@@ -42,8 +42,6 @@ axisYBody = [0;0.1;0];
 axisZBody = [0;0;0.1];
 
 %%  Calculate axes ranges for plotting
-% axisMin = min([min(stateHist(:,7))-0.4,min(stateHist(:,8))-0.4,min(stateHist(:,9))-0.4]);
-% axisMax = max([max(stateHist(:,7))+0.4,max(stateHist(:,8))+0.4,max(stateHist(:,9))+0.4]);
 
 axisWidth = 1;
 
@@ -122,9 +120,9 @@ for iBumper = 1:4
 end
 
 %% Plot wall
-fill3(wallPts(1,:)',wallPts(2,:)',wallPts(3,:)','r','FaceAlpha',0.4);
-%    plot3(wallLines(1,1:2)',wallLines(2,1:2)',wallLines(3,1:2)','r-');
-%    plot3(wallLines(1,3:4)',wallLines(2,3:4)',wallLines(3,3:4)','r-');
+fill3(wallPts(1,:)',wallPts(2,:)',wallPts(3,:)','r','FaceAlpha',0.4,'LineWidth',2,'EdgeColor','r');
+   plot3(wallLines(1,1:2)',wallLines(2,1:2)',wallLines(3,1:2)','r-');
+   plot3(wallLines(1,3:4)',wallLines(2,3:4)',wallLines(3,3:4)','r-');
 
 %% Figure settings
 axis([xAxisMin,xAxisMax,yAxisMin,yAxisMax,zAxisMin,zAxisMax]);
@@ -134,11 +132,11 @@ zlhand = zlabel('Z(m)','Interpreter','LaTex');
 set(xlhand,'fontsize',14);
 set(ylhand,'fontsize',14);
 set(zlhand,'fontsize',14);
-% title(strcat('t = ',num2str(t(frame),'%.2f'),' s'));
+title(strcat('t = ',num2str(t(frame),'%.2f'),' s'));
 
 setsimulationview(sideview);
 
-grid on;
+% grid on;
 axis square;
 drawnow;
 hold off;

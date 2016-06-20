@@ -60,7 +60,7 @@ BETA = 0;
 % Bumper things
 % BUMP_RADIUS = 0.11;
 % BUMP_ANGLE = deg2rad(11);
-BUMP_RADIUS = 0.12;
+BUMP_RADIUS = 0.125;
 BUMP_ANGLE = deg2rad(5);
 
 BUMP_NORMS(:,1) = invar2rotmat('Z',deg2rad(45))'*invar2rotmat('Y',BUMP_ANGLE + deg2rad(90))'* [1;0;0];
@@ -73,6 +73,7 @@ BUMP_TANGS(:,2) = invar2rotmat('Z',deg2rad(135))'*invar2rotmat('Y',BUMP_ANGLE)'*
 BUMP_TANGS(:,3) = invar2rotmat('Z',deg2rad(-135))'*invar2rotmat('Y',BUMP_ANGLE)'*[1;0;0];
 BUMP_TANGS(:,4) = invar2rotmat('Z',deg2rad(-45))'*invar2rotmat('Y',BUMP_ANGLE)'*[1;0;0];
 
+% This is slightly wrong
 BUMP_POSNS = PROP_POSNS;
 
 ImpactParams.compliantModel.e = 0.9;

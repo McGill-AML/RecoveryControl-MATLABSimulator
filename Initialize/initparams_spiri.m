@@ -39,6 +39,7 @@ Kt = 8.7e-8; %Calculated from thrust needed for Spiri to hover w/ white 8" props
 
 %Drag Torque factor of coaxial rotor pairs
 Dt = 9.61e-10; %Calculated from 8x4.5 APC Prop
+% Dt = 3.47e-9; %Measured by Thomas
 
 
 u2RpmMat = inv([-Kt -Kt -Kt -Kt;...
@@ -58,10 +59,8 @@ ALPHA = 0;
 BETA = 0;
 
 % Bumper things
-% BUMP_RADIUS = 0.11;
-% BUMP_ANGLE = deg2rad(11);
-BUMP_RADIUS = 0.12;
-BUMP_ANGLE = deg2rad(5);
+BUMP_RADIUS = 0.11;
+BUMP_ANGLE = deg2rad(11);
 
 BUMP_NORMS(:,1) = invar2rotmat('Z',deg2rad(45))'*invar2rotmat('Y',BUMP_ANGLE + deg2rad(90))'* [1;0;0];
 BUMP_NORMS(:,2) = invar2rotmat('Z',deg2rad(135))'*invar2rotmat('Y',BUMP_ANGLE + deg2rad(90))'* [1;0;0];

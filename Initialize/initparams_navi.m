@@ -57,8 +57,6 @@ ALPHA = 0;
 BETA = 0;
 
 % Bumper things
-% BUMP_RADIUS = 0.11;
-% BUMP_ANGLE = deg2rad(11);
 BUMP_RADIUS = 0.125;
 BUMP_ANGLE = deg2rad(5);
 

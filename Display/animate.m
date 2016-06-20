@@ -58,9 +58,11 @@ impactYPosn = stateHist(vlookup(t,timeImpact),8);
 impactZPosn = stateHist(vlookup(t,timeImpact),9);
 [wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,roundn(impactZPosn,-1)-(axisMax-axisMin)/2,roundn(impactYPosn,-1)+0.5,(axisMax-axisMin),2);
                                                   %bottom,center, height, width  
+% [wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,-0.5,roundn(impactYPosn,-1)+0.5,(axisMax-axisMin),2);
+                                                  
 
 %% Animate!
-for iFrame = 1:4:size(t,1)
+for iFrame = 1:1:size(t,1)
     %% Rotate body-fixed points to world-frame points
     q = [stateHist(iFrame,10);stateHist(iFrame,11);stateHist(iFrame,12);stateHist(iFrame,13)];
     q = q/norm(q);
@@ -97,8 +99,8 @@ for iFrame = 1:4:size(t,1)
     bumperNormalWorld3 = rotMat'*bumperNormalBody3;
     bumperNormalWorld4 = rotMat'*bumperNormalBody4;
 
-    plotCircle3D(bumperCenterWorld1,bumperNormalWorld1,BUMP_RADIUS,1);
-    plotCircle3D(bumperCenterWorld2,bumperNormalWorld2,BUMP_RADIUS,1);
+    plotCircle3D(bumperCenterWorld1,bumperNormalWorld1,BUMP_RADIUS,2);
+    plotCircle3D(bumperCenterWorld2,bumperNormalWorld2,BUMP_RADIUS,2);
     plotCircle3D(bumperCenterWorld3,bumperNormalWorld3,BUMP_RADIUS,2);
     plotCircle3D(bumperCenterWorld4,bumperNormalWorld4,BUMP_RADIUS,2);
 
@@ -119,11 +121,12 @@ for iFrame = 1:4:size(t,1)
 
     %% Plot wall
     fill3(wallPts(1,:)',wallPts(2,:)',wallPts(3,:)','r','FaceAlpha',0.4);
-    %    plot3(wallLines(1,1:2)',wallLines(2,1:2)',wallLines(3,1:2)','r-');
-    %    plot3(wallLines(1,3:4)',wallLines(2,3:4)',wallLines(3,3:4)','r-');
+%        plot3(wallLines(1,1:2)',wallLines(2,1:2)',wallLines(3,1:2)','r-','LineWidth',3);
+%        plot3(wallLines(1,3:4)',wallLines(2,3:4)',wallLines(3,3:4)','r-','LineWidth',3);
 
     %% Figure settings
     axis([axisMin,axisMax,axisMin,axisMax,axisMin,axisMax]);
+
     xlhand = xlabel('X(m)','Interpreter','LaTex');
     ylhand = ylabel('Y(m)','Interpreter','LaTex');
     zlhand = zlabel('Z(m)','Interpreter','LaTex');
@@ -134,10 +137,16 @@ for iFrame = 1:4:size(t,1)
     
     setsimulationview(sideview);
     
+%     ax = gca;
+%     set(ax,'XTick',[0 0.5 1 1.5 2]);
+%     set(ax,'YTick',[-1 -0.5 0 0.5 1]);
+%     set(ax,'ZTick',[-0.5 0 0.5 1 1.5]);
+    
     grid on;
     axis square;
 
     drawnow;
+%     pause(0.05);
 
     if recordAnimation == 1
         frame = getframe;

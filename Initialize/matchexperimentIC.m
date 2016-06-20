@@ -57,6 +57,21 @@ switch crash
         rawManualCmd.thrusts = [-m*g;-m*g];
 
         inputData = load('crash6_motorslopes.mat');
+
+%     case 'I-06' % ---- Crash 6 ---- %
+%         posnDeriv = 1.15;%1.17;
+%         attEuler = [deg2rad(4); deg2rad(5.35); -pi + deg2rad(11)];
+%         altitude = 0.7;
+%         setpointAltitude = 1.37; %roll0 = -6: 2.1
+%         xAcc = 1.2595;%1.4896; %pitch0 = 6.3: 1.4896
+% 
+%         rawManualCmd.times = [0;0.4];
+%         rawManualCmd.rolls = [deg2rad(3);0];
+%         rawManualCmd.pitches = [deg2rad(5.5);0];
+%         rawManualCmd.yawDerivs = [deg2rad(-1);0];
+%         rawManualCmd.thrusts = [-m*g;-m*g];
+% 
+%         inputData = load('crash6_motorslopes.mat');
         
     case 'I-07' % ---- Crash 7 ---- %
         posnDeriv = 1.351;
