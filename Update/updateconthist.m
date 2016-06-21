@@ -1,4 +1,4 @@
-function ContHist = updateconthist(ContHist, stateDeriv, Pose, Twist, Control, PropState, Contact, globalFlag)
+function ContHist = updateconthist(ContHist, stateDeriv, Pose, Twist, Control, PropState, Contact, globalFlag, Sensor)
                     
     ContHist.stateDerivs = [ContHist.stateDerivs, stateDeriv];
     
@@ -10,5 +10,7 @@ function ContHist = updateconthist(ContHist, stateDeriv, Pose, Twist, Control, P
     ContHist.propStates = [ContHist.propStates; PropState];     
     ContHist.globalFlag.contact.initialNormalVels = [ContHist.globalFlag.contact.initialNormalVels, globalFlag.contact.initialNormalVel];
     ContHist.globalFlag.contact.isContacts = [ContHist.globalFlag.contact.isContacts, globalFlag.contact.isContact];
+    
+    ContHist.sensors = [ContHist.sensors; Sensor];
 
 end 

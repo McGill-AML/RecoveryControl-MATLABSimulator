@@ -109,9 +109,9 @@ for iFrame = 1:1:size(t,1)
     axisYWorldPts = [comWorld axisYWorld];
     axisZWorldPts = [comWorld axisZWorld];   
 
-    plot3(axisXWorldPts(1,:),axisXWorldPts(2,:),axisXWorldPts(3,:),'r-','LineWidth',1);
+    plot3(axisXWorldPts(1,:),axisXWorldPts(2,:),axisXWorldPts(3,:),'b-','LineWidth',1);
     plot3(axisYWorldPts(1,:),axisYWorldPts(2,:),axisYWorldPts(3,:),'g-','LineWidth',1);
-    plot3(axisZWorldPts(1,:),axisZWorldPts(2,:),axisZWorldPts(3,:),'b-','LineWidth',1);
+    plot3(axisZWorldPts(1,:),axisZWorldPts(2,:),axisZWorldPts(3,:),'r-','LineWidth',1);
 
     %% Plot contact points
     for iBumper = 1:4

@@ -1,4 +1,4 @@
-function Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, recoveryStage)
+function Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, recoveryStage, Sensor)
     
     Hist.times = [Hist.times;t];
     Hist.states = [Hist.states, state];
@@ -14,5 +14,7 @@ function Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, Pro
     Hist.localFlag.contact.isContacts = [Hist.localFlag.contact.isContacts,localFlag.contact.isContact];
  
     Hist.recoveryStages = [Hist.recoveryStages; recoveryStage];
+    
+    Hist.sensors = [Hist.sensors; Sensor];
 
 end

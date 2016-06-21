@@ -1,6 +1,6 @@
 tic
 
-clearvars -except Hist_mu0 Plot_mu0 Hist_mu1 Plot_mu1 Hist_mu2 Plot_mu2 Hist_mu3 Plot_mu3 Hist_mu4 Plot_mu4
+% clearvars -except Hist_mu0 Plot_mu0 Hist_mu1 Plot_mu1 Hist_mu2 Plot_mu2 Hist_mu3 Plot_mu3 Hist_mu4 Plot_mu4
 
 global m g Kt 
 global timeImpact
@@ -12,7 +12,7 @@ ImpactParams = initparams_navi;
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 0;%Use Faessler recovery
 SimParams.useRecovery = 0; 
-SimParams.timeFinal = 3;
+SimParams.timeFinal = 1;
 tStep = 1/200;%1/200;
 
 ImpactParams.wallLoc = 1.5;%1.5;
@@ -34,10 +34,10 @@ localFlag = initflags;
 %% Set initial Conditions
 
 Control.twist.posnDeriv(1) = 1.3; %World X Velocity at impact
-IC.attEuler = [deg2rad(0);-deg2rad(15);0];
+IC.attEuler = [deg2rad(0);deg2rad(15);deg2rad(45)];
 IC.posn = [0;0;1];
 Setpoint.posn(3) = IC.posn(3);
-xAcc = 0;
+xAcc = 1.2;
 
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 
@@ -64,25 +64,40 @@ PropState.rpm = IC.rpm;
 [state, stateDeriv] = initstate(IC);
 [Pose, Twist] = updatekinematics(state, stateDeriv);
 
+%% Initialize sensors
+Sensor = initsensor(rotMat, stateDeriv, Twist);
 
 %% Initialize History Arrays
 
 % Initialize history 
-Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag);
+Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 
 % Initialize Continuous History
 if SimParams.recordContTime == 1 
     ContHist = initconthist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, ...
-                            PropState, Contact, globalFlag);
+                            PropState, Contact, globalFlag, Sensor);
 end
 
 
 %% Simulation Loop
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     display(iSim)    
-   
-  
-    if ImpactInfo.firstImpactOccured*SimParams.useRecovery == 1 %recovery control        
+    
+    %% Sensors
+    rotMat = quat2rotmat(Pose.attQuat);
+    Sensor.accelerometer = (rotMat*[0;0;g] + stateDeriv(1:3) + cross(Twist.angVel,Twist.linVel))/g; %in g's
+    Sensor.gyro = Twist.angVel;
+    
+    %% Impact Detection
+    if ImpactInfo.firstImpactDetected == 0
+        if norm(Sensor.accelerometer(1:2)) >= 0.5 %Horizontal Accel data
+            ImpactInfo.firstImpactDetected = 1;
+            timeImpactDetected = iSim;
+        end
+    end
+    
+    %% Control
+    if ImpactInfo.firstImpactDetected*SimParams.useRecovery == 1 %recovery control        
         if SimParams.useFaesslerRecovery == 1        
             recoveryStage = checkrecoverystage(Pose, Twist) ;
 
@@ -109,7 +124,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     
 
     
-    %Propagate Dynamics
+    %% Propagate Dynamics
     options = getOdeOptions();
     [tODE,stateODE] = ode45(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
                                                             tStep,Control.rpm,ImpactParams,PropState.rpm, ...
@@ -145,7 +160,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
                 end
             end     
                       
-            ContHist = updateconthist(ContHist,stateDeriv, Pose, Twist, Control, PropState, Contact, globalFlag); 
+            ContHist = updateconthist(ContHist,stateDeriv, Pose, Twist, Control, PropState, Contact, globalFlag, Sensor); 
         end
     ContHist.times = [ContHist.times;tODE];
     ContHist.states = [ContHist.states,stateODE'];    
@@ -157,9 +172,9 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     [Pose, Twist] = updatekinematics(state, stateDeriv);
 
     %Discrete Time recording @ 200 Hz
-    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, recoveryStage);
+    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, recoveryStage, Sensor);
 
-    %End loop if Spiri has crashed
+    %% End loop if Spiri has crashed
     if state(9) <= 0
         display('Navi has hit the floor :(');
         ImpactInfo.isStable = 0;
@@ -175,4 +190,5 @@ end
 
 toc
 
+%% Generate plottable arrays
 Plot = hist2plot(Hist);

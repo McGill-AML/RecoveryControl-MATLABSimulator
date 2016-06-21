@@ -69,17 +69,23 @@ temp2 = [temp{2,:}]; %Control.twist
 temp3 = struct2cell(temp2');
 Plot.controlAngVels = [temp3{4,:}];
 
-%% Simulate accelerometer data
-% Reference: "Small Unmanned Aircraft: Theory and Practice" - Beard &
-% McLain, 2012 - 7.1 Accelerometers
-global g
-Plot.accelerometers = zeros(3,numel(Plot.times));
-Plot.worldAccs = zeros(3,numel(Plot.times));
-for iData = 1:numel(Plot.times)    
-    rotMat = quat2rotmat(Plot.quaternions(:,iData));
-    Plot.accelerometers(:,iData) = invar2rotmat('x',pi)*(rotMat*[0;0;g] + Plot.bodyAccs(:,iData) + cross(Plot.angVels(:,iData),Plot.linVels(:,iData)))/g;
-    Plot.worldAccs(:,iData) = rotMat'*Plot.bodyAccs(:,iData);
-end
+temp = struct2cell(Hist.sensors);
+Plot.accelerometers = [temp{1,:}];
+Plot.gyros = [temp{2,:}];
+
+
+
+% %% Simulate accelerometer data
+% % Reference: "Small Unmanned Aircraft: Theory and Practice" - Beard &
+% % McLain, 2012 - 7.1 Accelerometers
+% global g
+% Plot.accelerometers = zeros(3,numel(Plot.times));
+% Plot.worldAccs = zeros(3,numel(Plot.times));
+% for iData = 1:numel(Plot.times)    
+%     rotMat = quat2rotmat(Plot.quaternions(:,iData));
+%     Plot.accelerometers(:,iData) = invar2rotmat('x',pi)*(rotMat*[0;0;g] + Plot.bodyAccs(:,iData) + cross(Plot.angVels(:,iData),Plot.linVels(:,iData)))/g;
+%     Plot.worldAccs(:,iData) = rotMat'*Plot.bodyAccs(:,iData);
+% end
 
 % %% Add noise to accelerometer data
 % load('/home/thread/fmchui/Spiri/Collison Experiments/2016_02_25/MATLAB_processed_data/sensor_covs.mat');
