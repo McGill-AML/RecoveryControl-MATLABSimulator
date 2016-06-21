@@ -83,7 +83,7 @@ end
 
 % compute first two desired body rates (p and q) by scaling error
 % quaternion terms q1 and q2
-ERROR_TO_DESIRED_BODYRATES = 10;    %this is p_{rp} of Faessler's control,20
+ERROR_TO_DESIRED_BODYRATES = 15;    %this is p_{rp} of Faessler's control,20
 Control.twist.angVel(1:2) = ERROR_TO_DESIRED_BODYRATES*Control.errQuat(2:3);
 
 % if the error is negative, make the desired body rates negative
@@ -97,7 +97,7 @@ Control.twist.angVel(3) = 0;
 %% Perform PD control on actual and desired body rates
     
 % define gains
-propPQ  = 15; % proportional for p and q, 20
+propPQ  = 20; % proportional for p and q, 20
 propR   = 2.0;  % proportional only for r
 
 % compute desired boy frame accelerations with P control on the body rates

@@ -8,14 +8,14 @@ global globalFlag
 ImpactParams = initparams_navi;
 
 SimParams.recordContTime = 0;
-SimParams.useFaesslerRecovery = 0;%Use Faessler recovery
-SimParams.useRecovery = 0; 
-SimParams.timeFinal = 0.1;
+SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
+SimParams.useRecovery = 1; 
+SimParams.timeFinal = 1;
 tStep = 1/200;%1/200;
 
-ImpactParams.wallLoc = 1.5;%1.5;
+ImpactParams.wallLoc = 1.5;
 ImpactParams.wallPlane = 'YZ';
-ImpactParams.timeDes = 0.2;
+ImpactParams.timeDes = 0.5;
 ImpactParams.frictionModel.muSliding = 0;
 ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
@@ -31,11 +31,11 @@ localFlag = initflags;
 
 %% Set initial Conditions
 
-Control.twist.posnDeriv(1) = 1.3; %World X Velocity at impact
-IC.attEuler = [deg2rad(0);deg2rad(15);deg2rad(45)];
-IC.posn = [0;0;1];
+Control.twist.posnDeriv(1) = 2; %World X Velocity at impact
+IC.attEuler = [deg2rad(0);deg2rad(-15);deg2rad(0)];
+IC.posn = [0;0;2];
 Setpoint.posn(3) = IC.posn(3);
-xAcc = 1.2;
+xAcc = 0;
 
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 
@@ -76,10 +76,11 @@ if SimParams.recordContTime == 1
                             PropState, Contact, globalFlag, Sensor);
 end
 
+recoveryStage = 1;
 
 %% Simulation Loop
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
-    display(iSim)    
+%     display(iSim);   
     
     %% Sensors
     rotMat = quat2rotmat(Pose.attQuat);
@@ -93,11 +94,10 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
             timeImpactDetected = iSim;
         end
     end
-    
     %% Control
-    if ImpactInfo.firstImpactDetected*SimParams.useRecovery == 1 %recovery control        
+    if ImpactInfo.firstImpactDetected*SimParams.useRecovery == 1 
         if SimParams.useFaesslerRecovery == 1        
-            recoveryStage = checkrecoverystage(Pose, Twist) ;
+            recoveryStage = checkrecoverystage(Pose, Twist, recoveryStage)
 
             Control = computedesiredacceleration(Control, Pose, Twist, recoveryStage);    
             % Compute control outputs
@@ -113,7 +113,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 %             Control = controlleratt(state,iSim,SimParams.timeInit,tStep,2,[0;deg2rad(20);0],Control,timeImpact, manualCmds)
         end
     else %normal posn control
-        recoveryStage = 0;
+%         recoveryStage = 0;
         Control.desEuler = IC.attEuler;
         Control.pose.posn(3) = Trajectory(end).posn(3);
         Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Control,[]);
@@ -190,3 +190,8 @@ toc
 
 %% Generate plottable arrays
 Plot = hist2plot(Hist);
+
+animate(0,Hist,'VV',ImpactParams,timeImpact,[])
+
+%  Plot.posnDerivs(:,vlookup(Plot.times,timeImpact))
+

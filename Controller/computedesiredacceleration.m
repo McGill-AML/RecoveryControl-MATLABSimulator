@@ -1,48 +1,24 @@
 function [Control] = computedesiredacceleration(Control, Pose, Twist, recoveryStage)
 
     % Computes the desired acceleration vector. 
-%     global g pZ pXY dZ dXY;
-    global g
- 
-    recoveryPosn = [0;0;2];
-    recoveryPosnDeriv = [0; 0; 0];
-    accRef = [0;0;0];
-    accDesMax = 1.86*9.81; %1.86g
-    
+    global g pZ pXY dZ dXY;
+
     % TODO: why would c be set to gravity? I thought it was zero
     % TODO: sort out negatives positives
-    pXY = 0;
-    pZ = 0;
-    dXY = 0;
-    dZ = 0;    
-    
-    if recoveryStage > 2
-        recoveryStage = 2;
-    end    
-    
-    if recoveryStage >= 2
-        dZ = 5;
-    end
-    
-    if recoveryStage >= 3
-        pZ = 5;
-        dXY = 3;
-    end
-    
-    if recoveryStage >=4
-        pXY = 3;     
-    end
-      
-    Control.acc = [pXY    0    0; ...
-                    0   pXY    0; ...
-                    0     0   pZ] * (recoveryPosn - Pose.posn) ...
-                + [dXY    0    0; ...
-                    0   dXY    0; ...
-                    0     0   dZ] * (recoveryPosnDeriv - Twist.posnDeriv) ...
-                + accRef ...
-                - [0; 0; -g] ;
-    if norm(Control.acc) > aDesMax
-        warning('a_des is greater than bound');        
-    end
+    switch recoveryStage
+        case 1
+            % Initialize attitude control.
+        case 2
+            % Set vertical velocity gain.
+            dZ = 5; 
+        case 3
+            % no change if vertical velocity has converged
+            dZ = 5; 
+        otherwise 
+            error('Invalid value for recoveryStage');
+    end  
 
+    % Compute desired acceleration as combination of position and velocity
+    % controls plus a gravity term
+    Control.acc = [0; 0; dZ*(- Twist.posnDeriv(3))] + [-g; 0; g];
 end
