@@ -1,7 +1,5 @@
 tic
 
-% clearvars -except Hist_mu0 Plot_mu0 Hist_mu1 Plot_mu1 Hist_mu2 Plot_mu2 Hist_mu3 Plot_mu3 Hist_mu4 Plot_mu4
-
 global m g Kt 
 global timeImpact
 global globalFlag
@@ -12,7 +10,7 @@ ImpactParams = initparams_navi;
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 0;%Use Faessler recovery
 SimParams.useRecovery = 0; 
-SimParams.timeFinal = 1;
+SimParams.timeFinal = 0.1;
 tStep = 1/200;%1/200;
 
 ImpactParams.wallLoc = 1.5;%1.5;

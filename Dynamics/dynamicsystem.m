@@ -43,13 +43,7 @@ stateDeriv = zeros(13,1);
 
 %% Control Signal
 % rpm = rpmControl;
-maxRPM = 8000;
-minRPM = 3000;
 maxRPMDeriv = 14000; % in rpm/s
-
-rpmMagnitude = abs(rpmControl);
-rpmSaturated = [-1;1;-1;1].*max(min(rpmMagnitude,maxRPM),minRPM); %saturate motor speeds
-% rpm = rpmSaturated;
 
 maxDifference = maxRPMDeriv*tStep;
 % rpmDifference = rpmSaturated - rpmPrev;
@@ -57,10 +51,10 @@ maxDifference = maxRPMDeriv*tStep;
 % rpm = rpmDifferenceSaturated + rpmPrev;
 rpm = zeros(4,1);
 for iBumper = 1:4
-    if abs(rpmSaturated(iBumper)-rpmPrev(iBumper)) > maxDifference
-        rpm(iBumper) = sign(rpmSaturated(iBumper)-rpmPrev(iBumper))*maxDifference + rpmPrev(iBumper);
+    if abs(rpmControl(iBumper)-rpmPrev(iBumper)) > maxDifference
+        rpm(iBumper) = sign(rpmControl(iBumper)-rpmPrev(iBumper))*maxDifference + rpmPrev(iBumper);
     else
-        rpm(iBumper) = rpmSaturated(iBumper);
+        rpm(iBumper) = rpmControl(iBumper);
     end
 end
 
