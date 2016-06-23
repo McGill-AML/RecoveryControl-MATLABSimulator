@@ -10,7 +10,7 @@ ImpactParams = initparams_navi;
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
 SimParams.useRecovery = 1; 
-SimParams.timeFinal = 10;
+SimParams.timeFinal = 2;
 tStep = 1/200;%1/200;
 
 ImpactParams.wallLoc = 1.5;
