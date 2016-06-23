@@ -1,7 +1,6 @@
 function [recoveryStage] = checkrecoverystage(Pose, Twist, recoveryStage)
 
 % Change to check quaternion error roll pitch elements
-
 attitudeStable = Pose.attEuler(1) < 0.2 && Pose.attEuler(2) < 0.2 ...
             && Twist.angVel(1) < 0.2  && Twist.angVel(2) < 0.2 && Twist.angVel(3) < 0.2;
         
