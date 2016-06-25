@@ -38,10 +38,10 @@ IC.posn = [0;0;5];
 IC.linVel = [0;0;0];
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 
-Setpoint.head = 0;
-Setpoint.time = 0;
-Setpoint.posn = [4;0;2]; %1.4
-Trajectory = Setpoint;
+% Setpoint.head = 0;
+% Setpoint.time = 0;
+% Setpoint.posn = [4;0;2]; %1.4
+% Trajectory = Setpoint;
 
 Experiment.propCmds = [];
 Experiment.manualCmds = [];
@@ -95,11 +95,8 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
             
             % will be output of fuzzy logic
             tPost = t - timeImpact;
-            if tPost < 0.5
-                accRef = [-g+0.0*g*tPost; 0; 0]
-            else 
-                accRef = [0; 0; 0]
-            end
+            if 
+            accRef = [-g+g*tPost; 0; 0]
             
             recoveryStage = checkrecoverystage(Pose, Twist, recoveryStage);
 

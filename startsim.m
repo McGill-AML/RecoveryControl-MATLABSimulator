@@ -32,13 +32,13 @@ Setpoint = initsetpoint;
 localFlag = initflags;
 
 %% Match initial conditions to experiment
-expCrash = 'I-10';
-[Control.twist.posnDeriv(1), IC.attEuler, IC.posn(3), Setpoint.posn(3), xAcc, Experiment] = matchexperimentIC(expCrash);
+% expCrash = 'I-10';
+% [Control.twist.posnDeriv(1), IC.attEuler, IC.posn(3), Setpoint.posn(3), xAcc, Experiment] = matchexperimentIC(expCrash);
 
 
-rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
+% rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 
-[IC.posn(1), initialLinVel, SimParams.timeInit ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
+% [IC.posn(1), initialLinVel, SimParams.timeInit ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
 
 Setpoint.head = IC.attEuler(3);
 Setpoint.time = SimParams.timeInit;
@@ -52,11 +52,11 @@ IC.rpm = [-1;1;-1;1].*repmat(sqrt(m*g/(4*Kt)),4,1);  %Start with hovering RPM
 PropState.rpm = IC.rpm;
 
 % %only to test controller:
-% IC.posn = [0;0;0];    
-% IC.angVel = [0;0;0];
-% IC.attEuler = [0;0;0];
-% IC.linVel = [0;0;0];
-% SimParams.timeInit = 0;
+IC.posn = [0;0;0];    
+IC.angVel = [0;0;0];
+IC.attEuler = [0;0;0];
+IC.linVel = [0;0;0];
+SimParams.timeInit = 0;
 
 %% Initialize state and kinematics structs from ICs
 [state, stateDeriv] = initstate(IC);

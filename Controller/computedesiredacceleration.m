@@ -1,4 +1,4 @@
-function [Control] = computedesiredacceleration(Control, Pose, Twist, recoveryStage)
+function [Control] = computedesiredacceleration(Control, Pose, Twist, recoveryStage, accRef)
 
     % Computes the desired acceleration vector. 
     global g pZ pXY dZ dXY;
@@ -20,5 +20,6 @@ function [Control] = computedesiredacceleration(Control, Pose, Twist, recoverySt
 
     % Compute desired acceleration as combination of position and velocity
     % controls plus a gravity term
-    Control.acc = [0; 0; dZ*(- Twist.posnDeriv(3))] + [-g; 0; g];
+    Control.acc = [0; 0; dZ*(- Twist.posnDeriv(3))] + [0; 0; g] ...
+        + accRef;
 end

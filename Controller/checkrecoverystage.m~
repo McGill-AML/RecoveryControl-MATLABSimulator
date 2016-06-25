@@ -15,13 +15,8 @@ function [recoveryStage] = checkrecoverystage(Pose, Twist, recoveryStage)
     % but I think it should be continuous. Try out accRef converging
     % linearly to zero
     % once accRef == zero we have the desired convergence maneuver - like 1
-    % second.
+    % second. 
     
-    % stage one: recovery maneuver has begun
-    % stage two: accRef has gone to zero and attitude has converged
-    % stage three: height converged - returned to normal flight. 
-    
-    % change stage two's condition to include that accRef = 0
     
     if recoveryStage == 1
         if (attitudeStable && zVelocityStable)
