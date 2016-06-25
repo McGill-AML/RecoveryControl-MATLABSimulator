@@ -38,16 +38,16 @@ IC.posn = [0;0;5];
 IC.linVel = [0;0;0];
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 
-Setpoint.head = 0;
-Setpoint.time = 0;
-Setpoint.posn = [4;0;2]; %1.4
-Trajectory = Setpoint;
+% Setpoint.head = 0;
+% Setpoint.time = 0;
+% Setpoint.posn = [4;0;2]; %1.4
+% Trajectory = Setpoint;
 
-Experiment.propCmds = [];
-Experiment.manualCmds = [];
-
-globalFlag.experiment.rpmChkpt = zeros(4,1);
-globalFlag.experiment.rpmChkptIsPassed = zeros(1,4);
+% Experiment.propCmds = [];
+% Experiment.manualCmds = [];
+% 
+% globalFlag.experiment.rpmChkpt = zeros(4,1);
+% globalFlag.experiment.rpmChkptIsPassed = zeros(1,4);
 
 IC.rpm = [-1;1;-1;1].*repmat(sqrt(m*g/(4*Kt)),4,1);  %Start with hovering RPM
 
@@ -90,39 +90,44 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         end
     end
     %% Control
-    if ImpactInfo.firstImpactOccured*SimParams.useRecovery == 1 
-        if SimParams.useFaesslerRecovery == 1   
-            
-            % will be output of fuzzy logic
-            tPost = t - timeImpact;
-            if tPost < 0.5
-                accRef = [-g+0.0*g*tPost; 0; 0]
-            else 
-                accRef = [0; 0; 0]
-            end
-            
-            recoveryStage = checkrecoverystage(Pose, Twist, recoveryStage);
 
-            Control = computedesiredacceleration(Control, Pose, Twist, recoveryStage, accRef);    
-            % Compute control outputs
-            Control = controllerrecovery(tStep, Pose, Twist, Control);   
-            Control.type = 'recovery';
-            
-        else %Setpoint recovery
-            Control.pose.posn = [0;0;2];
-            Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
-            
-            Control.type = 'posn';
-            
-%             Control = controlleratt(state,iSim,SimParams.timeInit,tStep,2,[0;deg2rad(20);0],Control,timeImpact, manualCmds)
+    %check if impact has occured yet
+    if ImpactInfo.firstImpactOccured == 0
+        % go into wall at some angle
+        accRef = [g/4; 0; 0];
+        Control = computedesiredacceleration(Control, Pose, Twist, recoveryStage, accRef); 
+        Control = controllerrecovery_preimpact(tStep, Pose, Twist, Control);   
+    else            
+        % will be output of fuzzy logic
+        tPost = t - timeImpact;
+        if tPost < 0.5
+            accRef = [-g+0.0*g*tPost; 0; 0]
+        else 
+            accRef = [0; 0; 0]
         end
-    else %normal posn control
-%         recoveryStage = 0;
-        Control.desEuler = IC.attEuler;
-        Control.pose.posn(3) = IC.posn(3);%Trajectory(end).posn(3);
-        Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Control,[]);
-        Control.type = 'att';
+        recoveryStage = checkrecoverystage(Pose, Twist, recoveryStage);
+        Control = computedesiredacceleration(Control, Pose, Twist, recoveryStage, accRef);    
+        Control = controllerrecovery(tStep, Pose, Twist, Control);   
     end
+
+%         % Compute control outputs
+%         Control.type = 'recovery';
+%     
+%         else %Setpoint recovery
+%             Control.pose.posn = [0;0;2];
+%             Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
+%             
+%             Control.type = 'posn';
+            
+% %             Control = controlleratt(state,iSim,SimParams.timeInit,tStep,2,[0;deg2rad(20);0],Control,timeImpact, manualCmds)
+%         end
+%     else %normal posn control
+% %         recoveryStage = 0;
+%         Control.desEuler = IC.attEuler;
+%         Control.pose.posn(3) = IC.posn(3);%Trajectory(end).posn(3);
+%         Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Control,[]);
+%         Control.type = 'att';
+%     end
     
 
     

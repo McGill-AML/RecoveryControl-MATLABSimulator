@@ -43,11 +43,11 @@ rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(
 % Setpoint.posn = [4;0;2]; %1.4
 % Trajectory = Setpoint;
 
-Experiment.propCmds = [];
-Experiment.manualCmds = [];
-
-globalFlag.experiment.rpmChkpt = zeros(4,1);
-globalFlag.experiment.rpmChkptIsPassed = zeros(1,4);
+% Experiment.propCmds = [];
+% Experiment.manualCmds = [];
+% 
+% globalFlag.experiment.rpmChkpt = zeros(4,1);
+% globalFlag.experiment.rpmChkptIsPassed = zeros(1,4);
 
 IC.rpm = [-1;1;-1;1].*repmat(sqrt(m*g/(4*Kt)),4,1);  %Start with hovering RPM
 
@@ -90,21 +90,27 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         end
     end
     %% Control
-    if ImpactInfo.firstImpactOccured*SimParams.useRecovery == 1 
-        if SimParams.useFaesslerRecovery == 1   
-            
-            % will be output of fuzzy logic
-            tPost = t - timeImpact;
-            if 
-            accRef = [-g+g*tPost; 0; 0]
-            
-            recoveryStage = checkrecoverystage(Pose, Twist, recoveryStage);
 
-            Control = computedesiredacceleration(Control, Pose, Twist, recoveryStage, accRef);    
-            % Compute control outputs
-            Control = controllerrecovery(tStep, Pose, Twist, Control);   
-            Control.type = 'recovery';
-            
+    if ImpactInfo.firstImpactOccured == 0
+        accRef = [g; 0; 0];
+        Control = computedesiredacceleration(Control, Pose, Twist, recoveryStage, accRef);    
+    else            
+        % will be output of fuzzy logic
+        tPost = t - timeImpact;
+        if tPost < 0.5
+            accRef = [-g+0.0*g*tPost; 0; 0]
+        else 
+            accRef = [0; 0; 0]
+        end
+    end
+
+        recoveryStage = checkrecoverystage(Pose, Twist, recoveryStage);
+        Control = computedesiredacceleration(Control, Pose, Twist, recoveryStage, accRef);    
+
+        % Compute control outputs
+        Control = controllerrecovery(tStep, Pose, Twist, Control);   
+        Control.type = 'recovery';
+    
         else %Setpoint recovery
             Control.pose.posn = [0;0;2];
             Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
