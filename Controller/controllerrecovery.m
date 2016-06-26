@@ -122,7 +122,7 @@ Control.rpm = real(sqrt(rpmSquared));
 % saturate commands
 rpmSaturation = 8000;
 Control.rpm (Control.rpm > rpmSaturation) = rpmSaturation;
-Control.rpm (Control.rpm < 0) = 0;
+Control.rpm (Control.rpm < 1000) = 1000;
 
 % set negatives for CW and CCW rotations
 Control.rpm(1) = -Control.rpm(1);

@@ -42,6 +42,7 @@ function [Control] = initcontrol()
     % controllerrecovery: 'recovery'
     Control.type = 'na';
     
-    
+    Control.recoveryStage = 0; 
+    Control.accelRef = [0; 0; 0];
     
 end

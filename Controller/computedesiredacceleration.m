@@ -1,13 +1,17 @@
-function [Control] = computedesiredacceleration(Control, Pose, Twist, recoveryStage, accRef)
+function [Control] = computedesiredacceleration(Control, Twist)
 
     % Computes the desired acceleration vector. 
-    global g pZ pXY dZ dXY;
+    global g dZ 
 
     % TODO: why would c be set to gravity? I thought it was zero
     % TODO: sort out negatives positives
-    switch recoveryStage
+    switch Control.recoveryStage
+        case 0
+            % pre-impact control
+            dZ = 0;
         case 1
             % Initialize attitude control.
+            dZ = 0;
         case 2
             % Set vertical velocity gain.
             dZ = 5; 
@@ -20,6 +24,5 @@ function [Control] = computedesiredacceleration(Control, Pose, Twist, recoverySt
 
     % Compute desired acceleration as combination of position and velocity
     % controls plus a gravity term
-    Control.acc = [0; 0; dZ*(- Twist.posnDeriv(3))] + [0; 0; g] ...
-        + accRef;
+    Control.acc = [0; 0; -dZ*Twist.posnDeriv(3)] + [0; 0; g] + Control.accelRef; 
 end

@@ -1,37 +1,25 @@
-function [recoveryStage] = checkrecoverystage(Pose, Twist, recoveryStage)
+function [Control] = checkrecoverystage(Pose, Twist, Control)
 
-% Change to check quaternion error roll pitch elements
-    attitudeStable = Pose.attEuler(1) < 0.2 && Pose.attEuler(2) < 0.2 ...
-            && Twist.angVel(1) < 0.2  && Twist.angVel(2) < 0.2 && Twist.angVel(3) < 0.2;
+    attitudeStable = ...
+        Pose.attEuler(1) < 0.2 && Pose.attEuler(2) < 0.2 ...                            % check roll and pitch elements
+        && Twist.angVel(1) < 0.2  && Twist.angVel(2) < 0.2 ... % && yawrate ... % check body rates are small enough
+        && norm(Control.accelRef) < 0.01;                                               % check if accelRef has gone to zero
         
-    zVelocityStable = Twist.linVel(3) < 0.1;
+    zVelocityStable = Twist.linVel(3) < 0.2;
     
-    % accRef will follow fuzzy logic until errQuat converges to zero -
-    % stage 3
-    % then accRef is put to zero and once errQuat reconverges to zero stage
-    % 4 is entered, and once height converges stage 5 is reached. 
+    % Stage 1: impact detected, recovery control engaged
+    % Stage 2: converged to hover and accelRef = 0
+    % Stage 3: vertical velocity stabilized
     
-    % this design decision assumes a discrete movement of accRef to zero
-    % but I think it should be continuous. Try out accRef converging
-    % linearly to zero
-    % once accRef == zero we have the desired convergence maneuver - like 1
-    % second.
-    
-    % stage one: recovery maneuver has begun
-    % stage two: accRef has gone to zero and attitude has converged
-    % stage three: height converged - returned to normal flight. 
-    
-    % change stage two's condition to include that accRef = 0
-    
-    if recoveryStage == 1
+    if Control.recoveryStage == 1
         if (attitudeStable && zVelocityStable)
-            recoveryStage = 3;
+            Control.recoveryStage = 3;
         elseif attitudeStable
-            recoveryStage = 2;
+            Control.recoveryStage = 2;
         end
-    elseif recoveryStage == 2
+    elseif Control.recoveryStage == 2
         if zVelocityStable
-            recoveryStage = 3;
+            Control.recoveryStage = 3;
         end
     end
 end
