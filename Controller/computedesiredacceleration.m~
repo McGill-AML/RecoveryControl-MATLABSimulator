@@ -9,7 +9,7 @@ function [Control] = computedesiredacceleration(Control, Twist)
         case 1
             Control.accelRef = [-g; 0; 0];
         case 2
-            Control.accelRef = [0; 0; 0];
+            Control.accelRef = [0; 0; g/2];
         case 3
             dZ = 5;
             Control.accelRef = [0; 0; 0];
