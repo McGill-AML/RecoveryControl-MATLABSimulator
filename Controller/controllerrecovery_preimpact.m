@@ -1,4 +1,4 @@
-function [Control] = controllerrecovery(dt, Pose, Twist, Control)
+function [Control] = controllerrecovery_preimpact(tStep, Pose, Twist, Control)
 % Performs collision recovery control.
 %
 % Inputs: 
@@ -30,7 +30,7 @@ function [Control] = controllerrecovery(dt, Pose, Twist, Control)
 global m Ixx Iyy Izz u2RpmMat;
 
 if sum(abs(Control.acc)) == 0
-    error('Desired acceleration is non-zero');
+    error('Desired acceleration must be non-zero');
 end
 
 %% 1. Compute thrust
@@ -75,7 +75,7 @@ else
     % rotate into body frame
     nBody = quatrotate(quatinv(Pose.attQuat)',n);
     % compute desired quaternion
-    Control.errQuat = real([cos(theta/2)         ; nBody(1)*sin(theta/2); ...
+    Control.errQuat = real([cos(theta/2)    ; nBody(1)*sin(theta/2); ...
                        nBody(2)*sin(theta/2); nBody(3)*sin(theta/2)]);
 end
 
@@ -91,7 +91,7 @@ if Control.errQuat(1) < 0
     Control.twist.angVel(1:2) = -Control.twist.angVel(1:2);
 end
 
-% set thired desired body rate (r) always go to zero
+% set initial body rate 'r'
 Control.twist.angVel(3) = 0;
 
 %% Perform PD control on actual and desired body rates
@@ -129,4 +129,3 @@ Control.rpm(1) = -Control.rpm(1);
 Control.rpm(3) = -Control.rpm(3);
 
 end
-

@@ -65,6 +65,9 @@ Plot.desEulers = [temp{13,:}];
 Plot.desYawDerivs = [temp{14,:}];
 Plot.controlAccDes = [temp{3,:}];
 
+Plot.recoveryStage = [temp{21,:}];
+Plot.accelRef = [temp{22,:}];
+
 temp2 = [temp{2,:}]; %Control.twist
 temp3 = struct2cell(temp2');
 Plot.controlAngVels = [temp3{4,:}];

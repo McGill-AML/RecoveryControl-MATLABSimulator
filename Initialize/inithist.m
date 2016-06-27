@@ -15,8 +15,6 @@ Hist.propStates = PropState;
 Hist.localFlag.contact.isContacts = localFlag.contact.isContact;
 Hist.localFlag.contact.initialNormalVels = localFlag.contact.initialNormalVel;
 
-Hist.recoveryStages = 0;
-
 Hist.sensors = Sensor;
 
 end

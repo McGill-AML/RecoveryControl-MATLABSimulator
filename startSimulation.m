@@ -1,8 +1,6 @@
 tic
-
-global m g Kt 
-global timeImpact
-global globalFlag
+clear all
+global m g Kt timeImpact globalFlag
 
 %% Initialize Simulation Parameters
 ImpactParams = initparams_navi;
@@ -11,12 +9,13 @@ SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
 SimParams.useRecovery = 1; 
 SimParams.timeFinal = 2;
-tStep = 1/200;%1/200;
+SimParams.timeInit = 0;
+tStep = 1/200;
 
 ImpactParams.wallLoc = 1.5;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5;
-ImpactParams.frictionModel.muSliding = 0.1;
+ImpactParams.frictionModel.muSliding = 0.0;
 ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
 
@@ -30,23 +29,19 @@ Setpoint = initsetpoint;
 localFlag = initflags;
 
 %% Set initial Conditions
-IC.attEuler = [0;deg2rad(-45);0];
-IC.posn = [0;0;10];
-IC.linVel = [0;0;0];
+IC.attEuler = [0;deg2rad(0);deg2rad(0)];
+IC.posn = [0;0;5];
+IC.linVel = [1;0;0];
+rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 
-% Setpoint.head = 0;
-% Setpoint.time = 0;
-% Setpoint.posn = [4;0;2]; %1.4
-% Trajectory = Setpoint;
-
+% not used --->
 Experiment.propCmds = [];
-Experiment.manualCmds = [];
-
+Experiment.manualCmds = []; 
 globalFlag.experiment.rpmChkpt = zeros(4,1);
-globalFlag.experiment.rpmChkptIsPassed = zeros(1,4);
+globalFlag.experiment.rpmChkptIsPassed = zeros(1,4); % <-------
 
-IC.rpm = [-1;1;-1;1].*repmat(sqrt(m*g/(4*Kt)),4,1);  %Start with hovering RPM
-
+%Start with hovering RPM ---- is this overkill now?
+IC.rpm = [-1;1;-1;1].*repmat(sqrt(m*g/(4*Kt)),4,1);  
 PropState.rpm = IC.rpm;
 
 %% Initialize state and kinematics structs from ICs
@@ -67,78 +62,73 @@ if SimParams.recordContTime == 1
                             PropState, Contact, globalFlag, Sensor);
 end
 
-recoveryStage = 1;
-
 %% Simulation Loop
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
-%     display(iSim);   
-    
+%     display(iSim);
     %% Sensors
+    
+    % ! not using  ------>
     rotMat = quat2rotmat(Pose.attQuat);
     Sensor.accelerometer = (rotMat*[0;0;g] + stateDeriv(1:3) + cross(Twist.angVel,Twist.linVel))/g; %in g's
-    Sensor.gyro = Twist.angVel;
+    Sensor.gyro = Twist.angVel; % <------
     
     %% Impact Detection
     if ImpactInfo.firstImpactDetected == 0
         if norm(Sensor.accelerometer(1:2)) >= 0.5 %Horizontal Accel data
             ImpactInfo.firstImpactDetected = 1;
             timeImpactDetected = iSim;
+            Control.recoveryStage = 1;
         end
     end
     %% Control
-    if ImpactInfo.firstImpactOccured*SimParams.useRecovery == 1 
-        if SimParams.useFaesslerRecovery == 1        
-            recoveryStage = checkrecoverystage(Pose, Twist, recoveryStage)
 
-            Control = computedesiredacceleration(Control, Pose, Twist, recoveryStage);    
-            % Compute control outputs
-            Control = controllerrecovery(tStep, Pose, Twist, Control);   
-            Control.type = 'recovery';
-            
-        else %Setpoint recovery
-            Control.pose.posn = [0;0;2];
-            Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
-            
-            Control.type = 'posn';
-            
-%             Control = controlleratt(state,iSim,SimParams.timeInit,tStep,2,[0;deg2rad(20);0],Control,timeImpact, manualCmds)
+    % Before impact
+    if ImpactInfo.firstImpactOccured == 0
+        % go into wall at some angle
+        Control.accelRef = [g/4; 0; 0];
+        Control = computedesiredacceleration(Control, Twist); 
+        %use recovery controller to impact the wall
+        Control = controllerrecovery_preimpact(tStep, Pose, Twist, Control);  
+        
+    % After impact
+    else            
+        tPost = iSim - timeImpact;
+        % go away from the wall for some amount of time
+        if tPost < 0.5
+            Control.accelRef = [-g; 0; 0];
+        else 
+            % then hover
+            Control.accelRef = [0; 0; 0];
         end
-    else %normal posn control
-%         recoveryStage = 0;
-        Control.desEuler = IC.attEuler;
-        Control.pose.posn(3) = IC.posn(3);%Trajectory(end).posn(3);
-        Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Control,[]);
-        Control.type = 'att';
+        Control = checkrecoverystage(Pose, Twist, Control);
+        Control.recoveryStage
+        Control = computedesiredacceleration(Control, Twist);    
+        Control = controllerrecovery(tStep, Pose, Twist, Control);   
     end
     
-
-    
-    %% Propagate Dynamics
+    %% Propagate dynamics
     options = getOdeOptions();
     [tODE,stateODE] = ode45(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
                                                             tStep,Control.rpm,ImpactParams,PropState.rpm, ...
                                                             Experiment.propCmds),[iSim iSim+tStep],state,options);
+    %% Contact recording
     
     % Reset contact flags for continuous time recording        
     globalFlag.contact = localFlag.contact;
     
-    
+    % if NOT recording contact times
     if SimParams.recordContTime == 0
-        
         [stateDeriv, Contact, PropState] = dynamicsystem(tODE(end),stateODE(end,:), ...
-                                                         tStep,Control.rpm,ImpactParams, PropState.rpm, ...
-                                                         Experiment.propCmds);        
+                                                        tStep,Control.rpm,ImpactParams, PropState.rpm, ...
+                                                        Experiment.propCmds);        
         if sum(globalFlag.contact.isContact)>0
             Contact.hasOccured = 1;
             if ImpactInfo.firstImpactOccured == 0
                 ImpactInfo.firstImpactOccured = 1;
             end
         end
-
     else  
-    
-        % Continuous time recording
-        for j = 1:size(stateODE,1)
+         for j = 1:size(stateODE,1)
             [stateDeriv, Contact, PropState] = dynamicsystem(tODE(j),stateODE(j,:), ...
                                                              tStep,Control.rpm,ImpactParams, PropState.rpm, ...
                                                              Experiment.propCmds);            
@@ -148,41 +138,25 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
                     ImpactInfo.firstImpactOccured = 1;
                 end
             end     
-                      
             ContHist = updateconthist(ContHist,stateDeriv, Pose, Twist, Control, PropState, Contact, globalFlag, Sensor); 
         end
-    ContHist.times = [ContHist.times;tODE];
-    ContHist.states = [ContHist.states,stateODE'];    
+        ContHist.times = [ContHist.times;tODE];
+        ContHist.states = [ContHist.states,stateODE'];    
     end
     
     localFlag.contact = globalFlag.contact;     
     state = stateODE(end,:)';
     t = tODE(end);
-    [Pose, Twist] = updatekinematics(state, stateDeriv);
-
-    %Discrete Time recording @ 200 Hz
-    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, recoveryStage, Sensor);
-
-    %% End loop if Spiri has crashed
-    if state(9) <= 0
-        display('Navi has hit the floor :(');
-        ImpactInfo.isStable = 0;
-        break;
-    end  
     
-    if state(7) <= -10
-        display('Navi has left the building');
-        ImpactInfo.isStable = 1;
-        break;
-    end
+    [Pose, Twist] = updatekinematics(state, stateDeriv);
+    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 end
-
-toc
 
 %% Generate plottable arrays
 Plot = hist2plot(Hist);
 
-animate(0,Hist,'VV',ImpactParams,timeImpact,[])
+animate(0,Hist,'ZX',ImpactParams,timeImpact,[])
 
+% compute speed at impact 
 %  Plot.posnDerivs(:,vlookup(Plot.times,timeImpact))
 
