@@ -1,4 +1,4 @@
-function [Control] = controllerrecovery(dt, Pose, Twist, Control)
+function [Control] = controllerrecovery(dt, Pose, Twist, Control, Hist)
 % Performs collision recovery control.
 %
 % Inputs: 
@@ -29,7 +29,7 @@ function [Control] = controllerrecovery(dt, Pose, Twist, Control)
 
 global m Ixx Iyy Izz u2RpmMat;
 
-if sum(abs(Control.acc)) == 0
+if sum(Control.acc) == 0
     error('Desired acceleration is non-zero');
 end
 
@@ -83,7 +83,7 @@ end
 
 % compute first two desired body rates (p and q) by scaling error
 % quaternion terms q1 and q2
-ERROR_TO_DESIRED_BODYRATES = 10;    %this is p_{rp} of Faessler's control,20
+ERROR_TO_DESIRED_BODYRATES = 20;    %this is p_{rp} of Faessler's control
 Control.twist.angVel(1:2) = ERROR_TO_DESIRED_BODYRATES*Control.errQuat(2:3);
 
 % if the error is negative, make the desired body rates negative
@@ -97,7 +97,7 @@ Control.twist.angVel(3) = 0;
 %% Perform PD control on actual and desired body rates
     
 % define gains
-propPQ  = 15; % proportional for p and q, 20
+propPQ  = 20.0; % proportional for p and q
 propR   = 2.0;  % proportional only for r
 
 % compute desired boy frame accelerations with P control on the body rates
@@ -122,7 +122,7 @@ Control.rpm = real(sqrt(rpmSquared));
 % saturate commands
 rpmSaturation = 8000;
 Control.rpm (Control.rpm > rpmSaturation) = rpmSaturation;
-Control.rpm (Control.rpm < 0) = 0;
+Control.rpm (Control.rpm < 1500) = 1500;
 
 % set negatives for CW and CCW rotations
 Control.rpm(1) = -Control.rpm(1);

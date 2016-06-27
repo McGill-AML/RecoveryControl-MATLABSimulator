@@ -13,10 +13,10 @@ global u2RpmMat BUMP_NORMS BUMP_TANGS BUMP_POSNS
 
 g = 9.81;
 
-%Mass Properties
+%% Mass Properties
 m = 1.095; %kg
 
-%Inertia Properties in body fixed frame
+%% Inertia Properties in body fixed frame
 Ixx = 0.01121976;
 Iyy = 0.01122668;
 Izz = 0.021082335;
@@ -24,7 +24,8 @@ Ixy = -5.62297e-05;
 Iyz = -4.4954e-06;
 Izx = -1.418e-08;
 
-load('proplocations_navi');
+%% Propeller Parameters
+load('proplocations_navi'); %thruster locations
 
 PROP_POSNS = [p1, p2, p3, p4] - repmat(CoM,1,4); %prop locations relative to CoM
 
@@ -37,7 +38,7 @@ Kt = 8.7e-8; %Calculated from thrust needed for Spiri to hover w/ white 8" props
 %Kt = 7.015e-8; %Calculated from 8x4.5 APC Prop
 
 %Drag Torque factor of coaxial rotor pairs
-Dt = 9.61e-10; %Calculated from 8x4.5 APC Prop
+Dt = 0.1*Kt; %9.61e-10; %Calculated from 8x4.5 APC Prop
 
 
 u2RpmMat = inv([-Kt -Kt -Kt -Kt;...
@@ -45,7 +46,7 @@ u2RpmMat = inv([-Kt -Kt -Kt -Kt;...
     Kt*PROP_POSNS(1,1) Kt*PROP_POSNS(1,2) Kt*PROP_POSNS(1,3) Kt*PROP_POSNS(1,4);...
     -Dt Dt -Dt Dt]);
 
-%Aerodynamic Drag
+%% Aerodynamic Drag
 AERO_AREA = 0; %Area seen by relative velocity vector
 AERO_DENS = 0; %Air density
 Cd = 0; %Drag coefficient
@@ -53,12 +54,12 @@ Tv = zeros(3); %Wind to body rotation matrix
 Kp = 0; %Aerodynamic drag constant
 Kq = 0; %Aerodynamic drag constant
 Kr = 0; %Aerodynamic drag constant
-ALPHA = 0;
+ALPHA = 0;things
 BETA = 0;
 
-% Bumper things
+%% Bumper Parameters
 BUMP_RADIUS = 0.125;
-BUMP_ANGLE = deg2rad(5);
+BUMP_ANGLE = deg2rad(5); %angle bumpers are tilted towards body center
 
 BUMP_NORMS(:,1) = invar2rotmat('Z',deg2rad(45))'*invar2rotmat('Y',BUMP_ANGLE + deg2rad(90))'* [1;0;0];
 BUMP_NORMS(:,2) = invar2rotmat('Z',deg2rad(135))'*invar2rotmat('Y',BUMP_ANGLE + deg2rad(90))'* [1;0;0];
@@ -70,11 +71,11 @@ BUMP_TANGS(:,2) = invar2rotmat('Z',deg2rad(135))'*invar2rotmat('Y',BUMP_ANGLE)'*
 BUMP_TANGS(:,3) = invar2rotmat('Z',deg2rad(-135))'*invar2rotmat('Y',BUMP_ANGLE)'*[1;0;0];
 BUMP_TANGS(:,4) = invar2rotmat('Z',deg2rad(-45))'*invar2rotmat('Y',BUMP_ANGLE)'*[1;0;0];
 
-load('bumperlocations_navi');
+load('bumperlocations_navi'); %bumper center locations
 
 BUMP_POSNS = [b1, b2, b3, b4] - repmat(CoM,1,4); %bumper center locations relative to CoM
 
-% Ribbon stiffness params
+% Bumper stiffness params
 ImpactParams.compliantModel.e = 0.9;
 ImpactParams.compliantModel.k = 372;
 ImpactParams.compliantModel.n = 0.66;

@@ -17,5 +17,6 @@ function [Contact, ImpactInfo] = initcontactstructs
     ImpactInfo.bumperInfos = repmat(bumperInfo,4,1);
     
     ImpactInfo.firstImpactDetected = 0;
-    
+    ImpactInfo.firstImpactDetected2 = 0;
+    ImpactInfo.accelRefCalculated = 0;
 end

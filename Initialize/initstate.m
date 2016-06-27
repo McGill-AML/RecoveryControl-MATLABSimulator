@@ -1,4 +1,4 @@
-function [state, stateDeriv] = initstate(IC)
+function [state, stateDeriv] = initstate(IC, xAcc)
 
     % Initialize full state of quadrotor 
     % Index map:
@@ -6,10 +6,15 @@ function [state, stateDeriv] = initstate(IC)
     % [u v w p q r x y z q0 q1 q2 q3]
     state = zeros(13,1);
     % The derivative of the state
-    stateDeriv = zeros(13,1);  
+    stateDeriv = zeros(13,1);
+   
     
     state(1:3) = IC.linVel; % u v w
     state(4:6) = IC.angVel;   % p q r
     state(7:9) = IC.posn;   % x y z
     state(10:13) = angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')';
+    
+    rotMat = quat2rotmat(state(10:13));
+    stateDeriv(1:3) = rotMat*[xAcc;0;0];
+    stateDeriv(7:9) = rotMat'*state(1:3);
 end

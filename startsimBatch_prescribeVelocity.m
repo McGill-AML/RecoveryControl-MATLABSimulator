@@ -31,26 +31,17 @@ Setpoint = initsetpoint;
 [Contact, ImpactInfo] = initcontactstructs;
 localFlag = initflags;
 
-%% Match initial conditions to experiment
-% IC.attEuler = [0;0;0];
-% IC.posn = [0;0;2];
-% IC.linVel = [0;0;0];
-% SimParams.timeInit = 0;
-% 
-% Setpoint.head = 0;
-% Setpoint.time = 0;
-% Setpoint.posn = [4;0;2]; %1.4
-% Trajectory = Setpoint;
+%% Set initial Conditions
 
-Control.twist.posnDeriv(1) = VxImpact;%World X Velocity at impact
-IC.attEuler = [0;deg2rad(pitchImpact);0];
-IC.posn = [0;0;2];
+Control.twist.posnDeriv(1) = VxImpact; %World X Velocity at impact
+IC.attEuler = [deg2rad(0);deg2rad(pitchImpact);deg2rad(45)];
+IC.posn = [0;0;1];
 Setpoint.posn(3) = IC.posn(3);
 xAcc = 0;
 
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 
-[IC.posn(1), initialLinVel, SimParams.timeInit ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
+[IC.posn(1), initialLinVel, SimParams.timeInit, xAcc ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
 
 Setpoint.head = IC.attEuler(3);
 Setpoint.time = SimParams.timeInit;
@@ -65,24 +56,27 @@ Experiment.manualCmds = [];
 globalFlag.experiment.rpmChkpt = zeros(4,1);
 globalFlag.experiment.rpmChkptIsPassed = zeros(1,4);
 
-IC.rpm = [-1;1;-1;1].*repmat(sqrt(m*g/(4*Kt)),4,1);  %Start with hovering RPM
+[IC.rpm, Control.u] = initrpm(rotMat, [xAcc;0;0]); %Start with hovering RPM
+
 
 PropState.rpm = IC.rpm;
 
 %% Initialize state and kinematics structs from ICs
-[state, stateDeriv] = initstate(IC);
+[state, stateDeriv] = initstate(IC, xAcc);
 [Pose, Twist] = updatekinematics(state, stateDeriv);
 
+%% Initialize sensors
+Sensor = initsensor(rotMat, stateDeriv, Twist);
 
 %% Initialize History Arrays
 
 % Initialize history 
-Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag);
+Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 
 % Initialize Continuous History
 if SimParams.recordContTime == 1 
     ContHist = initconthist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, ...
-                            PropState, Contact, globalFlag);
+                            PropState, Contact, globalFlag, Sensor);
 end
 
 
@@ -90,7 +84,12 @@ end
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     display(iSim)    
    
+    %% Sensors
+    rotMat = quat2rotmat(Pose.attQuat);
+    Sensor.accelerometer = (rotMat*[0;0;g] + stateDeriv(1:3) + cross(Twist.angVel,Twist.linVel))/g; %in g's
+    Sensor.gyro = Twist.angVel;
   
+    %% Control
     if ImpactInfo.firstImpactOccured*SimParams.useRecovery == 1 %recovery control        
         if SimParams.useFaesslerRecovery == 1        
             recoveryStage = checkrecoverystage(Pose, Twist) ;
@@ -111,13 +110,13 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         recoveryStage = 0;
         Control.desEuler = IC.attEuler;
         Control.pose.posn(3) = Trajectory(end).posn(3);
-        Control = controlleratt2(state,iSim,SimParams.timeInit,tStep,Control);
+        Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Control,[]);
         Control.type = 'att';
     end
     
 
     
-    %Propagate Dynamics
+    %% Propagate Dynamics
     options = getOdeOptions();
     [tODE,stateODE] = ode45(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
                                                             tStep,Control.rpm,ImpactParams,PropState.rpm, ...
@@ -153,7 +152,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
                 end
             end     
                       
-            ContHist = updateconthist(ContHist,stateDeriv, Pose, Twist, Control, PropState, Contact, globalFlag); 
+            ContHist = updateconthist(ContHist,stateDeriv, Pose, Twist, Control, PropState, Contact, globalFlag, Sensor); 
         end
     ContHist.times = [ContHist.times;tODE];
     ContHist.states = [ContHist.states,stateODE'];    
@@ -165,7 +164,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     [Pose, Twist] = updatekinematics(state, stateDeriv);
 
     %Discrete Time recording @ 200 Hz
-    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, recoveryStage);
+    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, recoveryStage, Sensor);
 
     %End loop if Spiri has crashed
     if state(9) <= 0

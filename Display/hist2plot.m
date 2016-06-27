@@ -69,9 +69,12 @@ temp2 = [temp{2,:}]; %Control.twist
 temp3 = struct2cell(temp2');
 Plot.controlAngVels = [temp3{4,:}];
 
+Plot.errQuats = [temp{4,:}];
+
 temp = struct2cell(Hist.sensors);
 Plot.accelerometers = [temp{1,:}];
 Plot.gyros = [temp{2,:}];
+
 
 
 

@@ -1,79 +1,66 @@
-% function [stateDeriv, defl1, Contact.normalForceMag(iBumper), pc_w1, defl_rate1, defl2, Fc_mag2, pc_w2, defl_rate2, defl3, Fc_mag3, pc_w3, defl_rate3, defl4, Fc_mag4, pc_w4, defl_rate4,rpm,prop_accel] = spiridynamics(t,state,tStep,rpm,ImpactParams,prop_speed_prev,propCmds)
 function [stateDeriv, Contact, PropState] = dynamicsystem(t,state,tStep,rpmControl,ImpactParams,rpmPrev,propCmds)
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
+%Continuous dynamics of quadrotor, including:
+%         - normal flight dynamics based on control input rpm
+%         - wall contact dynamics (normal force & friction force)
+%         - propeller rpm rate saturation
+%     Inputs:
+%         - t: time required for using ode numerical integration functions
+%         - state: quadrotor state (u,v,w,p,q,r,X,Y,Z,q0,q1,q2,q3)
+%         - tStep: controller time step
+%         - rpmControl: control input rpm
+%         - ImpactParams: parameters for calculating impact normal and friction forces
+%         - rpmPrev: previous motor/propeller rpm, needed for rpm rate saturation
+%         - propCmds: used to match simulation propeller speeds to experiments
+%     Outputs:
+%         - stateDeriv: state rates
+%         - Contact: struct containing contact dynamics calculated variables
+%         - PropState: actual propeller rpm (different from controller input rpm)
 
-global g m I Kt Dt Jr PROP_POSNS;
-
-global AERO_AREA AERO_DENS Cd Tv Kp Kq Kr
-
-global timeImpact
-
-global globalFlag
+global g m I Kt Dt Jr PROP_POSNS %Inertial and Geometric Parameters
+global AERO_AREA AERO_DENS Cd Tv Kp Kq Kr %Aerodynamic Parameters
+global timeImpact globalFlag %Simulation global variables
 
 %% Save Global Variables locally
+
+% Needed to match simulation propeller speeds to experiments
 rpmChkpt = globalFlag.experiment.rpmChkpt;
 rpmChkptIsPassed = globalFlag.experiment.rpmChkptIsPassed;
 
-%% Contact Parameters
-kContact = ImpactParams.compliantModel.k;    
-eContact = ImpactParams.compliantModel.e;
-nContact = ImpactParams.compliantModel.n;
+%% Set Contact Parameters and Variables
+[kContact, eContact, nContact, wallLoc, wallPlane, velocitySliding] = setimpactparams(ImpactParams);
 
-wallLoc = ImpactParams.wallLoc;
-wallPlane = ImpactParams.wallPlane;
-
-velocitySliding = ImpactParams.frictionModel.velocitySliding;
-
-%% Initialize Local Contact Vars
+% Initialize contact variables
 Contact = initcontact(0);
 normalForceWorld = zeros(3,4);
 normalForceBody = zeros(3,4);
 contactMomentBody = zeros(3,4);
-%tangentialForceWorld = zeros(3,4);
 tangentialForceBody = zeros(3,4);
 
-%% 
+%% State Initialization
 q = [state(10);state(11);state(12);state(13)]/norm(state(10:13));
 rotMat = quat2rotmat(q);
 
-state = reshape(state,[max(size(state)),1]);
+state = reshape(state,[max(size(state)),1]); %make sure state is column vector
+stateDeriv = zeros(13,1); %initialize stateDeriv
 
-stateDeriv = zeros(13,1);
-
-%% Control Signal
-% rpm = rpmControl;
-maxRPM = 8000;
-minRPM = 3000;
-maxRPMDeriv = 14000; % in rpm/s
-
-rpmMagnitude = abs(rpmControl);
-rpmSaturated = [-1;1;-1;1].*max(min(rpmMagnitude,maxRPM),minRPM); %saturate motor speeds
-% rpm = rpmSaturated;
-
+%% Saturate Control RPM Rate Signal
+maxRPMDeriv = 50000; % in rpm/s
 maxDifference = maxRPMDeriv*tStep;
-% rpmDifference = rpmSaturated - rpmPrev;
-% rpmDifferenceSaturated = sign(rpmDifference).*max(abs(rpmDifference),maxDifference);
-% rpm = rpmDifferenceSaturated + rpmPrev;
+
 rpm = zeros(4,1);
 for iBumper = 1:4
-    if abs(rpmSaturated(iBumper)-rpmPrev(iBumper)) > maxDifference
-        rpm(iBumper) = sign(rpmSaturated(iBumper)-rpmPrev(iBumper))*maxDifference + rpmPrev(iBumper);
+    if abs(rpmControl(iBumper)-rpmPrev(iBumper)) > maxDifference
+        rpm(iBumper) = sign(rpmControl(iBumper)-rpmPrev(iBumper))*maxDifference + rpmPrev(iBumper);
     else
-        rpm(iBumper) = rpmSaturated(iBumper);
+        rpm(iBumper) = rpmControl(iBumper);
     end
 end
 
+%% Contact Detection and Force Calculation
 
-% rpmDerivDesired = (rpmSaturated - rpmPrev)/tStep;
-% rpmDerivSaturated = max(abs(rpmDerivDesired),maxRPMDeriv).*sign(rpmDerivDesired);
-% rpm = rpmPrev + rpmDerivSaturated*tStep;
-
-%% Contact Detection
-
-if abs(wallLoc - state(7)) <= 0.3 %BUMP_RADIUS + sqrt(max(abs(PROP_POSNS(1,:)))^2 + max(abs(PROP_POSNS(2,:)))^2)
+if abs(wallLoc - state(7)) <= 0.3 
     if (sum(wallPlane == 'YZ')==2 || sum(wallPlane == 'ZY')==2)
-        Contact = findcontact(rotMat, state, wallLoc);
+        Contact = findcontact(rotMat, state, wallLoc); %find contact points
         
         for iBumper = 1:4
             if Contact.defl(iBumper) > 0
@@ -132,9 +119,7 @@ if abs(wallLoc - state(7)) <= 0.3 %BUMP_RADIUS + sqrt(max(abs(PROP_POSNS(1,:)))^
     end
 end
 
-
-%% Calculate contact force and moment
-
+%% Match simulation propeller speeds to experiments
 % uncomment after friction is added
 if timeImpact == 10000
     if sum(globalFlag.contact.isContact) > 0
@@ -144,7 +129,7 @@ if timeImpact == 10000
     end
 end
 
-if isempty(propCmds) == 0
+if isempty(propCmds) == 0 %propCmds = [] if not a experiment match simulation
     for iCmds = max(size(propCmds)):-1:1
         if t >= timeImpact + propCmds(iCmds).rpmTime   
             if rpmChkptIsPassed(iCmds) == 0        
@@ -154,7 +139,6 @@ if isempty(propCmds) == 0
 
             for iMotor = 1:4
                   rpm(iMotor) = (propCmds(iCmds,1).rpmDeriv(iMotor)~=0)*(sign(rpm(iMotor))*(propCmds(iCmds,1).rpmDeriv(iMotor)*(t - timeImpact - propCmds(iCmds,1).rpmTime)+abs(rpmChkpt(iMotor))));
-
             end
 
             break    
@@ -167,44 +151,28 @@ globalFlag.experiment.rpmChkptIsPassed = rpmChkptIsPassed;
 
 rpmDeriv = (rpm2rad(rpm) - rpm2rad(rpmPrev))/tStep; %in rad/s^2
 
+%% Save rate saturated, experiment-matched rpm
 PropState.rpm = rpm;
 PropState.rpmDeriv = rpmDeriv;
 
-Fg = rotMat*[0;0;-m*g];
+%% Calculate External Forces and Moments
+Fg = rotMat*[0;0;-m*g]; %Gravity 
 V = 0;
-Fa = Tv*[-0.5*AERO_DENS*V^2*AERO_AREA*Cd;0;0];
-Ft = [0;0;-Kt*sum(rpm.^2)];
+Fa = Tv*[-0.5*AERO_DENS*V^2*AERO_AREA*Cd;0;0]; %Aerodynamic
+Ft = [0;0;-Kt*sum(rpm.^2)]; %Thruster
 
 totalContactForce = sum(normalForceBody,2) + sum(tangentialForceBody,2);
-
-% totalNormalForce = [0;0;0]; %sum(normalForceBody,2);
 totalContactMoment = sum(contactMomentBody,2);
 
-%% Status Quo
 Mx = -Kt*PROP_POSNS(2,:)*(rpm.^2)-Kp*state(4)^2-state(5)*Jr*sum(rpm2rad(rpm)) + totalContactMoment(1) ;
 My = Kt*PROP_POSNS(1,:)*(rpm.^2)-Kq*state(5)^2+state(4)*Jr*sum(rpm2rad(rpm)) + totalContactMoment(2) ;
 Mz =  [-Dt Dt -Dt Dt]*(rpm.^2)-Kr*state(6)^2 -Jr*sum(rpmDeriv) + totalContactMoment(3);
 
-% %% No angular acceleration or gyroscopic moment
-% Mx = -Kt*PROP_POSNS(2,:)*(rpm.^2)-Kp*state(4)^2 + totalContactMoment(1) ;
-% My = Kt*PROP_POSNS(1,:)*(rpm.^2)-Kq*state(5)^2 + totalContactMoment(2) ;
-% Mz =  [-Dt Dt -Dt Dt]*(rpm.^2)-Kr*state(6)^2 + totalContactMoment(3);
-
-% %% No angular acceleration only
-% Mx = -Kt*PROP_POSNS(2,:)*(rpm.^2)-Kp*state(4)^2 -state(5)*Jr*sum(rpm2rad(rpm)) + totalContactMoment(1) ;
-% My = Kt*PROP_POSNS(1,:)*(rpm.^2)-Kq*state(5)^2 + state(4)*Jr*sum(rpm2rad(rpm)) + totalContactMoment(2) ;
-% Mz =  [-Dt Dt -Dt Dt]*(rpm.^2)-Kr*state(6)^2 + totalContactMoment(3);
-
-% No gyroscopic moment only
-% Mx = -Kt*PROP_POSNS(2,:)*(rpm.^2)-Kp*state(4)^2 + totalContactMoment(1) ;
-% My = Kt*PROP_POSNS(1,:)*(rpm.^2)-Kq*state(5)^2 + totalContactMoment(2) ;
-% Mz =  [-Dt Dt -Dt Dt]*(rpm.^2)-Kr*state(6)^2 -Jr*sum(rpmDeriv) + totalContactMoment(3);
-
+%% Update State Derivative
 stateDeriv(1:3) = (Fg + Fa + Ft + totalContactForce - m*cross(state(4:6),state(1:3)))/m;
 stateDeriv(4:6) = inv(I)*([Mx;My;Mz]-cross(state(4:6),I*state(4:6)));
 stateDeriv(7:9) = rotMat'*state(1:3);
 stateDeriv(10:13) = -0.5*quatmultiply([0;state(4:6)],q);
-
 
 
 end

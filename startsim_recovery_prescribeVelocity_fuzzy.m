@@ -1,17 +1,56 @@
 tic
 
 % clearvars -except Hist_mu0 Plot_mu0 Hist_mu1 Plot_mu1 Hist_mu2 Plot_mu2 Hist_mu3 Plot_mu3 Hist_mu4 Plot_mu4
+clearvars accelref
 
 global m g
 global timeImpact
 global globalFlag
 
+%% Initialize Fuzzy Logic Process
+intensityFuzzyProcess = initFuzzyLogicProcess();
+
+%% Set up Calculation Delay Times
+% PreImpact Attitude
+PREIMPACT_ATT_CALCSTEPFWD = 2;
+
+% FLP input 1: Accelerometer Horizontal Magnitude
+fuzzyInput.ID = 1;
+% fuzzyInput.isCalculated = 0;
+fuzzyInput.calcStepDelay = 0.010; %10 to 15 ms
+fuzzyInput.value = 0;
+fuzzyInputArray = fuzzyInput;
+
+%FLP input 2: Inclination
+fuzzyInput.ID = 2;
+% fuzzyInput.isCalculated = 0;
+fuzzyInput.calcStepDelay = 0; %available at t_detection
+fuzzyInput.value = 0;
+fuzzyInputArray = [fuzzyInputArray; fuzzyInput];
+
+%FLP input 3: Flipping Direction Angle
+fuzzyInput.ID = 3;
+% fuzzyInput.isCalculated = 0;
+fuzzyInput.calcStepDelay = 0.010; %5 to 10 ms
+fuzzyInput.value = 0;
+fuzzyInputArray = [fuzzyInputArray; fuzzyInput];
+
+%FLP input 4: Gyro Horizontal Magnitude
+fuzzyInput.ID = 4;
+% fuzzyInput.isCalculated = 0;
+fuzzyInput.calcStepDelay = 0.010; %10 to 15 ms
+fuzzyInput.value = 0;
+fuzzyInputArray = [fuzzyInputArray; fuzzyInput];
+
+fuzzyInputsCalculated = [0;0;0;0];
+
+
 %% Initialize Simulation Parameters
 ImpactParams = initparams_navi;
 
 SimParams.recordContTime = 0;
-SimParams.useFaesslerRecovery = 0;%Use Faessler recovery
-SimParams.useRecovery = 0; 
+SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
+SimParams.useRecovery = 1; 
 SimParams.timeFinal = 2;
 tStep = 1/200;%1/200;
 
@@ -21,6 +60,7 @@ ImpactParams.timeDes = 0.5;
 ImpactParams.frictionModel.muSliding = 0;
 ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
+timeStabilized = 10000;
 
 %% Initialize Structures
 IC = initIC;
@@ -33,9 +73,9 @@ localFlag = initflags;
 
 %% Set initial Conditions
 
-Control.twist.posnDeriv(1) = 0.2; %World X Velocity at impact
-IC.attEuler = [deg2rad(0);deg2rad(-20);deg2rad(0)];
-IC.posn = [0;0;1];
+Control.twist.posnDeriv(1) = 1.5; %World X Velocity at impact
+IC.attEuler = [deg2rad(0);deg2rad(-15);deg2rad(0)];
+IC.posn = [0;0;4];
 Setpoint.posn(3) = IC.posn(3);
 xAcc = 0;
 
@@ -100,32 +140,97 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     estForceExternalWorldArray = [estForceExternalWorldArray,estForceExternalWorld];
     
     if ImpactInfo.firstImpactDetected == 0
-        if norm(Sensor.accelerometer(1:2)) >= 0.5 %Horizontal Accel data
+        if norm(estForceExternalBody) >= 1 %External Force estimation
             ImpactInfo.firstImpactDetected = 1;
             timeImpactDetected = iSim;
-        end  
-    end
-    
-    if ImpactInfo.firstImpactDetected2 == 0
-        if norm(estForceExternalBody) >= 1 %External Force estimation
-            ImpactInfo.firstImpactDetected2 = 1;
-            timeImpactDetected2 = iSim;
+            
+            %pre-impact attitude
+            rotMatPreImpact = quat2rotmat(Hist.poses(end-PREIMPACT_ATT_CALCSTEPFWD).attQuat);      
+                        
+            %wall location, i.e. e_n, e_N
+            
+            estWallNormalWorld = estForceExternalWorld/norm(estForceExternalWorld);
+            estWallNormalBody = estForceExternalBody/norm(estForceExternalBody);         
+         
         end
     end
     
+    if SimParams.useRecovery == 1
+    if ImpactInfo.firstImpactDetected == 1 && ImpactInfo.accelRefCalculated == 0%Calculate fuzzy inputs
+        for iInput = 1:4
+            if fuzzyInputsCalculated(iInput) == 0
+                if fuzzyInputArray(iInput).calcStepDelay <= iSim - timeImpactDetected
+                %waited enuff time to calculate
+                    switch iInput 
+                        case 1 %FLP input 1: Accelerometer Horizontal Magnitude
+%                             fuzzyInputArray(iInput).value = norm(a_acc(1:2));
+                            fuzzyInputArray(iInput).value = norm(estForceExternalBody);
+                            disp('input 1 calc');
+                        case 2 %FLP input 2: Inclination
+                            estWallTangentWorld = cross([0;0;1],estWallNormalWorld);
+                            negBodyZ = [0;0;-1];
+                            bodyZProjection = rotMatPreImpact'*negBodyZ - dot((rotMatPreImpact'*negBodyZ),estWallTangentWorld)*estWallTangentWorld;
+                            dotProductWithWorldZ = dot(bodyZProjection,[0;0;1]);
+                            inclinationAngle = acos(dotProductWithWorldZ/norm(bodyZProjection));
+                            
+                            dotProductWithWorldNormal = dot(bodyZProjection,estWallNormalWorld);
+                            angleWithWorldNormal = acos(dotProductWithWorldNormal/(norm(bodyZProjection)*norm(estWallNormalWorld)));                            
+                            inclinationSign = sign(angleWithWorldNormal - pi/2);                            
+                            
+                            fuzzyInputArray(iInput).value = inclinationSign*rad2deg(inclinationAngle); 
+                            disp('input 2 calc');
+                        case 3 %FLP input 3: Flipping Direction Angle
+                            %Try calculating according to world frame:
+                            angVelWorld = rotMat'*Sensor.gyro;
+                            angVelWorldPerp = cross(angVelWorld,[0;0;1]);
+                            angVelWorldPerpHoriz = angVelWorldPerp(1:2);
+                            wallNormalWorldHoriz = estWallNormalWorld(1:2);
+                            fuzzyInputArray(iInput).value = rad2deg(acos(dot(angVelWorldPerpHoriz,wallNormalWorldHoriz)/...
+                                                            (norm(angVelWorldPerpHoriz)*norm(wallNormalWorldHoriz))));
+                            disp('input 3 calc');
+                        case 4 %FLP input 4: Gyro Horizontal Magnitude
+                            fuzzyInputArray(iInput).value = norm(Sensor.gyro(1:2));
+                        disp('input 4 calc');
+                    end
+                    fuzzyInputsCalculated(iInput) = 1;
+                end
+            end
+            
+        end
+        
+        if sum(fuzzyInputsCalculated) == 4 %Inputs complete, now do the fuzzy logic
+            temp = struct2cell(fuzzyInputArray);            
+            inputFLP = [temp{3,:}];
+            outputFLP = evalfis(inputFLP, intensityFuzzyProcess);
+            if abs(outputFLP) <= eps
+                outputFLP = 0;
+            end
+%             fuzzyOutput_array(iBatch) = outputFLP;
 
+            % Calculate accelref in world frame based on outputFLP, estWallNormal
+            accelref = calculaterefacceleration(outputFLP, estWallNormalWorld)
+            ImpactInfo.accelRefCalculated = 1;
+            recoveryStage = 1;
+        end
+    end
+    end
     
     %% Control
-    if ImpactInfo.firstImpactDetected*SimParams.useRecovery == 1 %recovery control        
-        if SimParams.useFaesslerRecovery == 1        
-            recoveryStage = checkrecoverystage(Pose, Twist) ;
+    if ImpactInfo.accelRefCalculated*SimParams.useRecovery == 1 %recovery control       
+        if SimParams.useFaesslerRecovery == 1  
+%             disp('in Faessler control');
+            
+            [recoveryStage] = checkrecoverystage(Pose, Twist, recoveryStage);
 
-            Control = computedesiredacceleration(Control, Pose, Twist, recoveryStage);    
+            [Control] = computedesiredacceleration(Control, Pose, Twist, recoveryStage, accelref);
+
             % Compute control outputs
-            Control = controllerrecovery(tStep, Pose, Twist, Control);   
+            [Control] = controllerrecovery(tStep, Pose, Twist, Control, Hist);            
+            
             Control.type = 'recovery';
             
         else %Setpoint recovery
+            disp('Setpoint recovery');
             Control.pose.posn = [0;0;2];
             Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
             
@@ -141,7 +246,6 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         Control.type = 'att';
     end
     
-
     
     %% Propagate Dynamics
     options = getOdeOptions();

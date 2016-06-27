@@ -1,4 +1,4 @@
-function [ initXPosn, initXVel, timeInit  ] = getinitworldx( ImpactParams, posnDerivX, IC, givenXAcc )
+function [ initXPosn, initXVel, timeInit, xAcc  ] = getinitworldx( ImpactParams, posnDerivX, IC, givenXAcc )
 %UNTITLED6 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -64,9 +64,9 @@ if givenXAcc == 0
 
         elseif abs(yaw) == pi/4 || abs(yaw) == 3*pi/4
             
-            if abs(abs(roll) - abs(pitch)) >= eps*10
-                error('Quadcopter does not move in strictly X direction');
-            end
+%             if abs(abs(roll) - abs(pitch)) >= eps*10
+%                 error('Quadcopter does not move in strictly X direction');
+%             end
 
             fitAngle = [0.084825925596688 0.173822851313807 0.262463069971117 0.350546591578811 0.437854666001268 0.524146996691413];
             fitAcc = [0.831401194164598 1.704934243053496 2.539077514413837 3.380150911758541 4.188051734756724 4.920050077041602];

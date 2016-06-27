@@ -4,7 +4,7 @@ Batch = [];
 
 for iPitch = -30:5:10 % pitchImpact in degrees
     for iVel = 0.5:0.5:2 %m/s
-        videoFileName = strcat('BatchSim_Vel',num2str(iVel),'_Pitch',num2str(iPitch),'.avi');
+        videoFileName = strcat('BatchSim_Yaw45_Vel',num2str(iVel),'_Pitch',num2str(iPitch),'.avi');
         [CrashData.Hist, CrashData.Plot,CrashData.ImpactParams,CrashData.timeImpact,...
             CrashData.accelMagMax,CrashData.accelMagHorizMax,CrashData.accelDir_atPeak,...
             CrashData.angVels_atPeak,CrashData.angVels_avg] = startsimBatch_prescribeVelocity(iVel,iPitch);
