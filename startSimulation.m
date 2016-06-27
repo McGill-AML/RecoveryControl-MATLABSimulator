@@ -15,7 +15,7 @@ tStep = 1/200;
 ImpactParams.wallLoc = 1.5;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5;
-ImpactParams.frictionModel.muSliding = 0.0;
+ImpactParams.frictionModel.muSliding = 0.1;
 ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
 
@@ -77,7 +77,6 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         if norm(Sensor.accelerometer(1:2)) >= 0.5 %Horizontal Accel data
             ImpactInfo.firstImpactDetected = 1;
             timeImpactDetected = iSim;
-            Control.recoveryStage = 1;
         end
     end
     %% Control
@@ -91,17 +90,8 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         Control = controllerrecovery_preimpact(tStep, Pose, Twist, Control);  
         
     % After impact
-    else            
-        tPost = iSim - timeImpact;
-        % go away from the wall for some amount of time
-        if tPost < 0.5
-            Control.accelRef = [-g; 0; 0];
-        else 
-            % then hover
-            Control.accelRef = [0; 0; 0];
-        end
-        Control = checkrecoverystage(Pose, Twist, Control);
-        Control.recoveryStage
+    else
+        Control = checkrecoverystage(Pose, Twist, Control, ImpactInfo);
         Control = computedesiredacceleration(Control, Twist);    
         Control = controllerrecovery(tStep, Pose, Twist, Control);   
     end
