@@ -54,7 +54,7 @@ Tv = zeros(3); %Wind to body rotation matrix
 Kp = 0; %Aerodynamic drag constant
 Kq = 0; %Aerodynamic drag constant
 Kr = 0; %Aerodynamic drag constant
-ALPHA = 0;things
+ALPHA = 0;
 BETA = 0;
 
 %% Bumper Parameters

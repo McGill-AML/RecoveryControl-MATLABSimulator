@@ -1,34 +1,29 @@
-function [Control] = computedesiredacceleration(Control, Pose, Twist, recoveryStage, accelref)
-
+function [Control] = computedesiredacceleration(Control, Twist)
     % Computes the desired acceleration vector. 
-    global g pZ pXY dZ dXY;
- 
-    % TODO: why would c be set to gravity? I thought it was zero
-    % TODO: sort out negatives positives
-    switch recoveryStage
-        case 1
-            % Initialize attitude control.
-        case 2
-            % Set vertical velocity gain.
-            dZ = 5; 
-        case 3
-            % no change if vertical velocity has converged
-            dZ = 5; 
+    global g
+    % Introduce vertical velocity control gain at recovery stage 3
+    switch Control.recoveryStage
+        case 0 % Normal Flight
+            warning('Using recovery controller during Normal Flight');
+            Control.accelRef = [g/4; 0; 0];
+            dZ = 0;
+        case 1 % Stabilize Attitude to "away" orientation with zero yaw rate
+            % Control.accelRef comes from Fuzzy Logic 
+%             display('Fuzzy Logic accelRef:');
+%             display(Control.accelRef)
+            dZ = 0;
+        case 2 %Stabilize Attitude to "hover" orientation
+            Control.accelRef = [0; 0; 0];
+            dZ = 0;
+        case 3 %Stabilize Height
+            dZ = 5;
+            Control.accelRef = [0; 0; 0];
+        case 4 %Stabilize Horizontal Position
+            dZ = 5;
         otherwise 
-            error('Invalid value for recoveryStage');
+            error('Invalid recovery stage!');    
     end
-    
-    % Compute desired acceleration as combination of position and velocity
-    % controls plus a gravity term
-%     
-%     Control.acc = [pXY    0    0; ...
-%                     0   pXY    0; ...
-%                     0     0   pZ] * ([1; 1; 1] - Pose.posn) ...
-%                 + [dXY    0    0; ...
-%                     0   dXY    0; ...
-%                     0     0   dZ] * ([0; 0; 0] - Twist.posnDeriv) ...
-%                 + [0; 0; g];
-
-    Control.acc = accelref + [0;0;g];
-
+    % Desired acceleration is the sum of a 1) gravity, 2) reference acceleration
+    % and 3) vertical velocity control term
+    Control.acc = [0; 0; g] + Control.accelRef + [0; 0; -dZ*Twist.posnDeriv(3)]; 
 end

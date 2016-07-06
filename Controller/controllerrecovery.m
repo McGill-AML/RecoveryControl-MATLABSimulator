@@ -1,4 +1,4 @@
-function [Control] = controllerrecovery(dt, Pose, Twist, Control, Hist)
+function [Control] = controllerrecovery(tStep, Pose, Twist, Control, Hist)
 % Performs collision recovery control.
 %
 % Inputs: 
@@ -29,9 +29,11 @@ function [Control] = controllerrecovery(dt, Pose, Twist, Control, Hist)
 
 global m Ixx Iyy Izz u2RpmMat;
 
-if sum(Control.acc) == 0
-    error('Desired acceleration is non-zero');
+if sum(abs(Control.acc)) == 0
+    error('Desired acceleration must be non-zero');
 end
+
+errQuatPrev = Control.errQuat;
 
 %% 1. Compute thrust
 
@@ -79,12 +81,22 @@ else
                        nBody(2)*sin(theta/2); nBody(3)*sin(theta/2)]);
 end
 
+disp('curr error quat:')
+disp(Control.errQuat)
+disp('----------------')
+
 %% 3. Compute desired body rates 
 
 % compute first two desired body rates (p and q) by scaling error
 % quaternion terms q1 and q2
 ERROR_TO_DESIRED_BODYRATES = 20;    %this is p_{rp} of Faessler's control
-Control.twist.angVel(1:2) = ERROR_TO_DESIRED_BODYRATES*Control.errQuat(2:3);
+% Control.twist.angVel(1:2) = ERROR_TO_DESIRED_BODYRATES*Control.errQuat(2:3);
+
+%% Try PD on errQuat
+errQuatDeriv = (Control.errQuat - errQuatPrev)./tStep;
+ERROR_TO_DESIRED_BODYRATES_D = 1;
+Control.twist.angVel(1:2) = ERROR_TO_DESIRED_BODYRATES*Control.errQuat(2:3) + ERROR_TO_DESIRED_BODYRATES_D*errQuatDeriv(2:3);
+
 
 % if the error is negative, make the desired body rates negative
 if Control.errQuat(1) < 0
