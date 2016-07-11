@@ -15,7 +15,6 @@ function Plot = monte2plot(Monte)
 
     
     %% Performance measures
-    temp = Monte.hist;
     
     % height loss
 %     % recovery bool

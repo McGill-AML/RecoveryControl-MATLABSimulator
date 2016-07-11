@@ -45,7 +45,7 @@ stateDeriv = zeros(13,1);
 % rpm = rpmControl;
 
 % HOW MUCH DO WE NEED TO LIMIT THIS?
-maxRPMDeriv = 30000; % in rpm/s
+maxRPMDeriv = 27000; % in rpm/s
 
 maxDifference = maxRPMDeriv*tStep;
 % rpmDifference = rpmSaturated - rpmPrev;

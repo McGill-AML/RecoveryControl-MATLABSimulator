@@ -8,28 +8,16 @@ ImpactParams = initparams_navi;
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
 SimParams.useRecovery = 1; 
-SimParams.timeFinal = 2;
+SimParams.timeFinal = 1.5;
 SimParams.timeInit = 0;
 tStep = 1/200;
 
-num_iter = 3;
+num_iter = 1;
 
-%% Fake initialize everything for Monte Carlo struct to initialize
 IC = initIC;
-Control = initcontrol;
-PropState = initpropstate;
-Setpoint = initsetpoint;
-[Contact, ImpactInfo] = initcontactstructs;
-localFlag = initflags;
-[state, stateDeriv] = initstate(IC);
-[Pose, Twist] = updatekinematics(state, stateDeriv);
-rotMat = quat2rotmat(Pose.attQuat);
-Sensor = initsensor(rotMat, stateDeriv, Twist);
-Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
-
 % Initialize Monte Carlo Struct which holds all histories of each trial
-Monte = initmontecarlo(0, IC, Hist);
-
+Monte = initmontecarlo(IC);
+tic
 for k = 1:num_iter
     k
     % randomize wall location for 3 angles 
@@ -37,10 +25,10 @@ for k = 1:num_iter
     % g/3 0.45 < wallLoc < 0.9
     % g/4 0.50 < wallLoc < 1.1
     
-    ImpactParams.wallLoc = rand*0.33 + 0.37;
+    ImpactParams.wallLoc = 0.3;%rand*0.33 + 0.37;
     ImpactParams.wallPlane = 'YZ';
     ImpactParams.timeDes = 0.5;
-    ImpactParams.frictionModel.muSliding = 0.3;
+    ImpactParams.frictionModel.muSliding = 0.0; % 0.2 -- 0.3
     ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
     timeImpact = 10000;
 
@@ -55,7 +43,7 @@ for k = 1:num_iter
     %% Set initial Conditions
     IC.attEuler = [0;deg2rad(0);deg2rad(0)];
     IC.posn = [0;0;5];
-    IC.linVel = [0;0;0];
+    IC.linVel = [2;0;0];
     IC.friction = ImpactParams.frictionModel.muSliding;
     rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 
@@ -92,12 +80,15 @@ for k = 1:num_iter
         % Before impact
         if ImpactInfo.firstImpactOccured == 0
             % give all four rpms equal divided by incoming angle cosine
+            Control = checkrecoverystage(Pose, Twist, Control, ImpactInfo);
+            Control = computedesiredacceleration(Control, Twist);    
+            Control = controllerrecovery(tStep, Pose, Twist, Control); 
         else
             Control = checkrecoverystage(Pose, Twist, Control, ImpactInfo);
             Control = computedesiredacceleration(Control, Twist);    
             Control = controllerrecovery(tStep, Pose, Twist, Control);   
         end
-
+        
         %% Propagate dynamics
         options = getOdeOptions();
         [tODE,stateODE] = ode45(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
@@ -143,14 +134,16 @@ for k = 1:num_iter
         [Pose, Twist] = updatekinematics(state, stateDeriv);
         Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
     end
-
+    
     Monte = updatemontecarlo(k, IC, Hist, Monte);
 
 end
+toc
 %%
 Monte.trial = Monte.trial(2:end);
 Monte.IC = Monte.IC(2:end);
-Monte.hist = Monte.hist(2:end);
+Monte.recovery = Monte.recovery(2:end,:);
+Monte.heightLoss = Monte.heightLoss(2:end);
 Plot = monte2plot(Monte);
 
 %%
@@ -160,8 +153,13 @@ Plot = monte2plot(Monte);
 %     plot(Plot.times,Monte(3,:,k))
 % end
 
-% animate(0,Hist,'ZX',ImpactParams,timeImpact,[])
+animate(0,Hist,'na',ImpactParams,timeImpact,[])
 
 % compute speed at impact 
 %  Plot.posnDerivs(:,vlookup(Plot.times,timeImpact))
+
+% REPLAY A GIVEN TRIAL WITH SAME ICs
+
+%% 
+Plot = hist2plot(Hist);
 

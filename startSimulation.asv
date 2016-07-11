@@ -12,24 +12,12 @@ SimParams.timeFinal = 2;
 SimParams.timeInit = 0;
 tStep = 1/200;
 
-num_iter = 2;
+num_iter = 1;
 
-%% Fake initialize everything for Monte Carlo struct to initialize
 IC = initIC;
-Control = initcontrol;
-PropState = initpropstate;
-Setpoint = initsetpoint;
-[Contact, ImpactInfo] = initcontactstructs;
-localFlag = initflags;
-[state, stateDeriv] = initstate(IC);
-[Pose, Twist] = updatekinematics(state, stateDeriv);
-rotMat = quat2rotmat(Pose.attQuat);
-Sensor = initsensor(rotMat, stateDeriv, Twist);
-Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
-
 % Initialize Monte Carlo Struct which holds all histories of each trial
-Monte = initmontecarlo(0, IC, Hist);
-
+Monte = initmontecarlo(IC);
+tic
 for k = 1:num_iter
     k
     % randomize wall location for 3 angles 
@@ -40,7 +28,7 @@ for k = 1:num_iter
     ImpactParams.wallLoc = rand*0.33 + 0.37;
     ImpactParams.wallPlane = 'YZ';
     ImpactParams.timeDes = 0.5;
-    ImpactParams.frictionModel.muSliding = 0.3;
+    ImpactParams.frictionModel.muSliding = 0.3; % 0.2 -- 0.3
     ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
     timeImpact = 10000;
 
@@ -55,7 +43,8 @@ for k = 1:num_iter
     %% Set initial Conditions
     IC.attEuler = [0;deg2rad(0);deg2rad(0)];
     IC.posn = [0;0;5];
-    IC.linVel = [0;0;0];
+    IC.linVel = [2;0;0];
+    IC.friction = ImpactParams.frictionModel.muSliding;
     rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 
     % not used --->
@@ -76,18 +65,8 @@ for k = 1:num_iter
     Sensor = initsensor(rotMat, stateDeriv, Twist);
 
     %% Initialize History Arrays
-
-    % Initialize history 
     Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 
-    % Initialize Monte Carlo Log
-    % struct Monte holds all the desired log data for each trial
-    % 
-%     % Initialize Continuous History
-%     if SimParams.recordContTime == 1 
-%         ContHist = initconthist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, ...
-%                                 PropState, Contact, globalFlag, Sensor);
-%     end
     %% Simulation Loop
     for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 
@@ -101,12 +80,15 @@ for k = 1:num_iter
         % Before impact
         if ImpactInfo.firstImpactOccured == 0
             % give all four rpms equal divided by incoming angle cosine
+            Control = checkrecoverystage(Pose, Twist, Control, ImpactInfo);
+            Control = computedesiredacceleration(Control, Twist);    
+            Control = controllerrecovery(tStep, Pose, Twist, Control); 
         else
             Control = checkrecoverystage(Pose, Twist, Control, ImpactInfo);
             Control = computedesiredacceleration(Control, Twist);    
             Control = controllerrecovery(tStep, Pose, Twist, Control);   
         end
-
+        
         %% Propagate dynamics
         options = getOdeOptions();
         [tODE,stateODE] = ode45(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
@@ -152,20 +134,17 @@ for k = 1:num_iter
         [Pose, Twist] = updatekinematics(state, stateDeriv);
         Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
     end
-
-    Monte = updatemontecarlo(k, IC, Hist, Monte);
-    %% Generate plottable arrays
-%     Plot = hist2plot(Hist);
-%    
-%     %store position information
-%     Monte(:,:,k) = Plot.posns;
     
-end
+    Monte = updatemontecarlo(k, IC, Hist, Monte);
 
-% cut dummy trial 0
-Monte.trial = Monte.trial(2,end);
-Monte.IC = Monte.IC(2,end);
-Monte.Hist = Monte.Hist(2,end);
+end
+toc
+%%
+Monte.trial = Monte.trial(2:end);
+Monte.IC = Monte.IC(2:end);
+Monte.recovery = Monte.recovery(2:end);
+Monte.heightLoss = Monte.heightLoss(2:end);
+Plot = monte2plot(Monte);
 
 %%
 % Plot XZ trajectories
@@ -174,7 +153,7 @@ Monte.Hist = Monte.Hist(2,end);
 %     plot(Plot.times,Monte(3,:,k))
 % end
 
-% animate(0,Hist,'ZX',ImpactParams,timeImpact,[])
+animate(0,Hist,'ZX',ImpactParams,timeImpact,[])
 
 % compute speed at impact 
 %  Plot.posnDerivs(:,vlookup(Plot.times,timeImpact))

@@ -45,4 +45,6 @@ function [Control] = initcontrol()
     Control.recoveryStage = 0; 
     Control.accelRef = [0; 0; 0];
     
+    Control.angVelPrev = [0; 0; 0];
+    
 end

@@ -29,6 +29,8 @@ function [Control] = controllerrecovery(dt, Pose, Twist, Control)
 
 global m Ixx Iyy Izz u2RpmMat;
 
+errQuatPrev = Control.errQuat;
+
 if sum(abs(Control.acc)) == 0
     error('Desired acceleration is non-zero');
 end
@@ -86,6 +88,9 @@ end
 ERROR_TO_DESIRED_BODYRATES = 15;    %this is p_{rp} of Faessler's control,20
 Control.twist.angVel(1:2) = ERROR_TO_DESIRED_BODYRATES*Control.errQuat(2:3);
 
+errQuatDeriv = (Control.errQuat - errQuatPrev)./tStep;
+ERROR_TO_DESIRED_BODYRATES_D = 1;
+Control.twist.angVel(1:2) = ERROR_TO_DESIRED_BODYRATES*Control.errQuat(2:3) + ERROR_TO_DESIRED_BODYRATES_D*errQuatDeriv(2:3);
 % if the error is negative, make the desired body rates negative
 if Control.errQuat(1) < 0
     Control.twist.angVel(1:2) = -Control.twist.angVel(1:2);
@@ -100,16 +105,14 @@ Control.twist.angVel(3) = 0;
 propPQ  = 20; % proportional for p and q, 20
 propR   = 2.0;  % proportional only for r
 
-derivPQ = 5;
+derivPQ = 2;
 derivR = 0.2;
 
-derivError = (Control.twist.angVel - Control.angVelPrev)/dt;
 % compute desired boy frame accelerations with P control on the body rates
-vP = propPQ*(Control.twist.angVel(1) - Twist.angVel(1)) + derivPQ*derivError(1);
-vQ = propPQ*(Control.twist.angVel(2) - Twist.angVel(2)) + derivPQ*derivError(2);
-vR = propR *(Control.twist.angVel(3) - Twist.angVel(3)) +  derivR*derivError(3);
-
-Control.angVelPrev = Control.twist.angVel;
+vP = propPQ*(Control.twist.angVel(1) - Twist.angVel(1)) + 
+     derivPQ*(Control.errQuat - errQuatPrev)/dt
+vQ = propPQ*(Control.twist.angVel(2) - Twist.angVel(2));
+vR = propR *(Control.twist.angVel(3) - Twist.angVel(3)); 
 
 % compute body frame torques from desired body frame accelerations
 Control.u(2) = (vP - Twist.angVel(2)*Twist.angVel(3)*(Iyy-Izz)/Ixx)*Ixx;

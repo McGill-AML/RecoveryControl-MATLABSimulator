@@ -23,8 +23,8 @@ function [Control] = checkrecoverystage(Pose, Twist, Control, ImpactInfo)
 %%%%% CHECK LOGIC %%%%%
     switch Control.recoveryStage
         case 0
-            if ImpactInfo.firstImpactDetected
-                Control.recoveryStage = 1;
+            if ImpactInfo.firstImpactOccured
+                Control.recoveryStage = 1; 
             end
         case 1
             if maneuverStable
