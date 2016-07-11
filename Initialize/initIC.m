@@ -5,6 +5,7 @@ function IC = initIC()
     IC.attEuler = [0;0;0];
     IC.linVel = [0;0;0];
     IC.rpm = [0;0;0;0];
+    IC.friction = 0;
 
 end
 
