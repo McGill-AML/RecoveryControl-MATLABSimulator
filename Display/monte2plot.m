@@ -3,29 +3,31 @@ function Plot = monte2plot(Monte)
     % ICs
     temp = struct2cell(Monte.IC);
     % positions
-    Plot.positions = [temp{1,:}];
+    Plot.initPositions = [temp{1,:}];
     % body rates
-    Plot.bodyrates = [temp{2,:}];
+    Plot.initBodyrates = [temp{2,:}];
     % incoming angles
-    Plot.angles = [temp{3,:}];
+    Plot.initAngles = [temp{3,:}];
     % speed
-    Plot.speeds = [temp{4,:}];   
+    Plot.initSpeeds = [temp{4,:}];   
     % friction
-    Plot.friction = [temp{6,:}];
-
-    
+    Plot.coeffFriction = [temp{6,:}];
+   
     %% Performance measures
+    recoveryStageSwitchTimes = Monte.recovery;
     
-    % height loss
-%     % recovery bool
-    
-    % recovery times
-    
-    % height loss
-    
-    % horizontal loss
-    
+    num_iter = length(Monte.trial);
+    % Extract number of trials that recovered 
+    Plot.fractionReachedStageOne   = sum(recoveryStageSwitchTimes(:,1) > 0)/num_iter;
+    Plot.fractionReachedStageTwo   = sum(recoveryStageSwitchTimes(:,2) > 0)/num_iter;
+    Plot.fractionReachedStageThree = sum(recoveryStageSwitchTimes(:,3) > 0)/num_iter;
+    Plot.fractionReachedStageFour  = sum(recoveryStageSwitchTimes(:,4) > 0)/num_iter;
 
+    % get spectrum of recovery times
+    Plot.timeUntilStageTwo   = recoveryStageSwitchTimes(:,2);
+    Plot.timeUntilStageThree = recoveryStageSwitchTimes(:,3);
 
+    Plot.heightLoss = Monte.heightLoss;
+    Plot.horizLoss = Monte.horizLoss;
     
 end

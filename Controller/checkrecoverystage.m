@@ -11,8 +11,8 @@ function [Control] = checkrecoverystage(Pose, Twist, Control, ImpactInfo)
     % Stage 3 condition is same as for stage 2 with accelRef = 0 
     % (see computedesiredacceleration)
     
-    % Stage 4 condition - 0.2 m/s is arbitrary 
-    zVelocityStable = Twist.linVel(3) < 0.2;
+    % Stage 4 condition - 0.3 m/s is arbitrary 
+    zVelocityStable = Twist.linVel(3) < 0.3;
     
     % Stage 0: pre-impact
     % Stage 1: impact detected

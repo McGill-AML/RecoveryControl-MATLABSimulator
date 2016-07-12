@@ -100,8 +100,8 @@ Control.twist.angVel(3) = 0;
 propPQ  = 20; % proportional for p and q, 20
 propR   = 2.0;  % proportional only for r
 
-derivPQ = 5;
-derivR = 0.2;
+derivPQ = 0;
+derivR = 0.0;
 
 derivError = (Control.twist.angVel - Control.angVelPrev)/dt;
 % compute desired boy frame accelerations with P control on the body rates

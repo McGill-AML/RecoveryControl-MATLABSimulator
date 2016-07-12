@@ -33,19 +33,16 @@ function Monte = updatemontecarlo(k, IC, Hist, Monte)
                 error('Monte Carlo recovery times failed');
         end  
     end
-    
     % later check if a recovery time was zero, this is a failed recovery 
     Monte.recovery = [Monte.recovery; recovered];
-    if recoveryIndex > 0
+    
+    if impactIndex > 0 && recoveryIndex > 0
         Monte.heightLoss = [Monte.heightLoss; Hist.poses(recoveryIndex).posn(3) - Hist.poses(impactIndex).posn(3)];
-    else
-        Monte.heightLoss = [Monte.heightLoss; Hist.poses(end).posn(3) - Hist.poses(impactIndex).posn(3)];
-    end
-    if impactIndex > 0 
         Monte.horizLoss = [Monte.horizLoss; ...
             abs(sqrt( (Hist.poses(recoveryIndex).posn(1)-Hist.poses(impactIndex).posn(1))^2 + ...
                       (Hist.poses(recoveryIndex).posn(2)-Hist.poses(impactIndex).posn(2))^2))];
     else
-        Monte.horizLoss = 0;
+        Monte.heightLoss = [Monte.heightLoss; 0];
+        Monte.horizLoss = [Monte.horizLoss; 0];
     end
 end
