@@ -44,7 +44,7 @@ state = reshape(state,[max(size(state)),1]); %make sure state is column vector
 stateDeriv = zeros(13,1); %initialize stateDeriv
 
 %% Saturate Control RPM Rate Signal
-maxRPMDeriv = 30000; % in rpm/s
+maxRPMDeriv = 27000; % in rpm/s
 maxDifference = maxRPMDeriv*tStep;
 
 rpm = zeros(4,1);

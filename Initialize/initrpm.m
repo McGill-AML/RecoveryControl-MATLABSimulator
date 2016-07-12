@@ -6,7 +6,6 @@ u1 = m*(rotMat(3,3)*g + rotMat(3,:)*worldLinAcc);
 % u1 = m*(rotMat(3,3)*g);
 
 u = [u1;0;0;0];
-disp(u1)
 
 %Propeller RPM Control Signal
 temp = u2RpmMat*u;

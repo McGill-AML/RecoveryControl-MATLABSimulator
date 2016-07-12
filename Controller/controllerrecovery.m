@@ -81,9 +81,6 @@ else
                        nBody(2)*sin(theta/2); nBody(3)*sin(theta/2)]);
 end
 
-disp('curr error quat:')
-disp(Control.errQuat)
-disp('----------------')
 
 %% 3. Compute desired body rates 
 

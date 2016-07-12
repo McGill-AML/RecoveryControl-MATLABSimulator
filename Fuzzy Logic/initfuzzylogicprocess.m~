@@ -31,7 +31,7 @@ flp = addvar(flp, 'input', 'inclination', [-60 60]);
 flp = addmf(flp, 'input', 2, 'inclinedAwayBig', 'trapmf', [-90 -60 -15 -8]);
 flp = addmf(flp, 'input', 2, 'inclinedLevel', 'trimf', [-2 0 2]);
 flp = addmf(flp, 'input', 2, 'inclinedTowardBig', 'trapmf', [8 15 60 90]);
-flp = addmf(flp, 'input', 2, 'inclinedAwaySmall', 'trimf', [-9.5 -5.5 -1.5]);
+flp = addmf(flp, 'input', 2, 'inclinedAwaySmall', 'trimf', [-10.5 -6.5 -2.5]);
 flp = addmf(flp, 'input', 2, 'inclinedTowardSmall', 'trimf', [1.5 5.5 9.5]);
 
 flp = addvar(flp, 'input', 'gamma', [0 180]);

@@ -1,4 +1,5 @@
-function [Hist, Plot,ImpactParams, endTimeImpact, accelMagMax,accelMagHorizMax,accelDir_atPeak,angVels_atPeak,angVels_avg] = startsimBatch_prescribeVelocity(VxImpact,pitchImpact)
+% function [Hist, Plot,ImpactParams, endTimeImpact, accelMagMax,accelMagHorizMax,accelDir_atPeak,angVels_atPeak,angVels_avg] = startsimBatch_prescribeVelocity(VxImpact,pitchImpact)
+function [Hist, Plot,ImpactParams,endTimeImpact] = startsimBatch_prescribeVelocity(VxImpact,pitchImpact,yawImpact)
 
 tic
 
@@ -12,10 +13,10 @@ ImpactParams = initparams_navi;
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 0;%Use Faessler recovery
 SimParams.useRecovery = 0; 
-SimParams.timeFinal = 5;
+SimParams.timeFinal = 2;
 tStep = 1/200;%1/200;
 
-ImpactParams.wallLoc = 1.5;%1.5;
+ImpactParams.wallLoc = 0.5;%1.5;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5;
 ImpactParams.frictionModel.muSliding = 0.1;
@@ -33,22 +34,34 @@ localFlag = initflags;
 
 %% Set initial Conditions
 
+
+%%%--- original way of prescribing velocity
+% Control.twist.posnDeriv(1) = VxImpact; %World X Velocity at impact
+% IC.attEuler = [deg2rad(0);deg2rad(pitchImpact);deg2rad(yawImpact)];
+% IC.posn = [0;0;1];
+% Setpoint.posn(3) = IC.posn(3);
+% xAcc = 0;
+% 
+% rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
+% 
+% [IC.posn(1), initialLinVel, SimParams.timeInit, xAcc ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
+%%%%% - end original way
+
 Control.twist.posnDeriv(1) = VxImpact; %World X Velocity at impact
-IC.attEuler = [deg2rad(0);deg2rad(pitchImpact);deg2rad(45)];
-IC.posn = [0;0;1];
+IC.attEuler = [deg2rad(0);deg2rad(pitchImpact);deg2rad(yawImpact)];
+IC.posn = [ImpactParams.wallLoc-0.3;0;1];
 Setpoint.posn(3) = IC.posn(3);
 xAcc = 0;
 
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 
-[IC.posn(1), initialLinVel, SimParams.timeInit, xAcc ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
-
+SimParams.timeInit = 0;
 Setpoint.head = IC.attEuler(3);
 Setpoint.time = SimParams.timeInit;
 Setpoint.posn(1) = IC.posn(1);
 Trajectory = Setpoint;
 
-IC.linVel =  rotMat*[initialLinVel;0;0];
+IC.linVel =  rotMat*[VxImpact;0;0];
 
 Experiment.propCmds = [];
 Experiment.manualCmds = [];
@@ -82,7 +95,7 @@ end
 
 %% Simulation Loop
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
-    display(iSim)    
+%     display(iSim)    
    
     %% Sensors
     rotMat = quat2rotmat(Pose.attQuat);
@@ -164,7 +177,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     [Pose, Twist] = updatekinematics(state, stateDeriv);
 
     %Discrete Time recording @ 200 Hz
-    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, recoveryStage, Sensor);
+    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 
     %End loop if Spiri has crashed
     if state(9) <= 0
@@ -202,15 +215,15 @@ toc
 Plot = hist2plot(Hist);
 
 % For batch output
-accelMagHoriz = colnorm(Plot.accelerometers(1:2,:));
-accelMag = colnorm(Plot.accelerometers);
-[pks,locs] = findpeaks(accelMagHoriz(vlookup(Plot.times,timeImpact):end),'MINPEAKHEIGHT',0.5,'NPEAKS',1);
-accelPeakLoc = vlookup(Plot.times,timeImpact) + locs - 1;
-accelMagMax = accelMag(accelPeakLoc);
-accelMagHorizMax = pks;
-accelDir_atPeak = Plot.accelerometers(:,accelPeakLoc);
-angVels_atPeak = Plot.angVels(:,accelPeakLoc);
-angVels_avg = mean(Plot.angVels(:,vlookup(Plot.times,timeImpact):accelPeakLoc),2);
+% accelMagHoriz = colnorm(Plot.accelerometers(1:2,:));
+% accelMag = colnorm(Plot.accelerometers);
+% % [pks,locs] = findpeaks(accelMagHoriz(vlookup(Plot.times,timeImpact):end),'MINPEAKHEIGHT',0.5,'NPEAKS',1);
+% accelPeakLoc = vlookup(Plot.times,timeImpact) + locs - 1;
+% accelMagMax = accelMag(accelPeakLoc);
+% accelMagHorizMax = pks;
+% accelDir_atPeak = Plot.accelerometers(:,accelPeakLoc);
+% angVels_atPeak = Plot.angVels(:,accelPeakLoc);
+% angVels_avg = mean(Plot.angVels(:,vlookup(Plot.times,timeImpact):accelPeakLoc),2);
 endTimeImpact = timeImpact;
 
 end
