@@ -31,7 +31,8 @@ tStep = 1/200;
 %% Monte Carlo #1 with 1000 trials
 
 % Random ICs:
-%               -45 deg < pitch < 45 deg
+%               -72 deg < pitch < 18 deg ---- this was initially supposed
+%               to be -45 < pitch < 45
 %               -15 deg < roll  < 15 deg
 %               -45 deg < yaw   < 45 deg
 %             1 m/s < incoming speed < 2 m/s
@@ -82,7 +83,6 @@ for k = 1:num_iter
     localFlag = initflags; % for contact analysis, irrelevant
 
     %% Set initial Conditions
-    % 45 degree incline, 45 degree yaw, 15 degree pitch
     IC.attEuler = [deg2rad(30*(rand-0.5));deg2rad(90*(rand-0.8));deg2rad(90*(rand-0.5))];
     % picked arbitrary height of 5 meters
     IC.posn = [0;0;5];
@@ -198,12 +198,12 @@ Monte.horizLoss = Monte.horizLoss(2:end);
 Plot = monte2plot(Monte);
 
 %% Plot results
-% histogram(Plot.heightLoss,num_iter/2)
+histogram(Plot.heightLoss,num_iter/2)
 % histogram(Plot.horizLoss,num_iter/2)
 
 
 % plot how long each trial took to reach stage three
-% histogram(Plot.timeUntilStageTwo, num_iter/2);
+histogram(Plot.timeUntilStageTwo, num_iter/2);
 % plot how long each trial took to reach stage three
 % histogram(Plot.timeUntilStageThree, num_iter/2);
 
