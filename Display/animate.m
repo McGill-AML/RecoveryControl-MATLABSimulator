@@ -2,7 +2,7 @@ function [ ] =animate( recordAnimation,Hist,sideview,ImpactParams,timeImpact,vid
  
 %UNTITLED6 Summary of this function goes here
 %   Detailed explanation goes here
-global BUMP_RADIUS BUMP_ANGLE BUMP_POSNS
+global BUMP_RADII BUMP_ANGLE BUMP_POSNS
 
 %% Define recording parameters
 if recordAnimation == 1
@@ -62,7 +62,7 @@ impactZPosn = stateHist(vlookup(t,timeImpact),9);
                                                   
 
 %% Animate!
-for iFrame = 1:4:size(t,1)
+for iFrame = 1:2:size(t,1)
     %% Rotate body-fixed points to world-frame points
     q = [stateHist(iFrame,10);stateHist(iFrame,11);stateHist(iFrame,12);stateHist(iFrame,13)];
     q = q/norm(q);
@@ -99,10 +99,10 @@ for iFrame = 1:4:size(t,1)
     bumperNormalWorld3 = rotMat'*bumperNormalBody3;
     bumperNormalWorld4 = rotMat'*bumperNormalBody4;
 
-    plotCircle3D(bumperCenterWorld1,bumperNormalWorld1,BUMP_RADIUS,2);
-    plotCircle3D(bumperCenterWorld2,bumperNormalWorld2,BUMP_RADIUS,2);
-    plotCircle3D(bumperCenterWorld3,bumperNormalWorld3,BUMP_RADIUS,2);
-    plotCircle3D(bumperCenterWorld4,bumperNormalWorld4,BUMP_RADIUS,2);
+    plotCircle3D(bumperCenterWorld1,bumperNormalWorld1,BUMP_RADII(1),2);
+    plotCircle3D(bumperCenterWorld2,bumperNormalWorld2,BUMP_RADII(2),2);
+    plotCircle3D(bumperCenterWorld3,bumperNormalWorld3,BUMP_RADII(3),2);
+    plotCircle3D(bumperCenterWorld4,bumperNormalWorld4,BUMP_RADII(4),2);
 
     %% Plot body-fixed axes
     axisXWorldPts = [comWorld axisXWorld];

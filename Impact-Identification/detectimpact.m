@@ -3,7 +3,7 @@ function [ImpactInfo, ImpactIdentification] = detectimpact(iSim, ImpactInfo,Impa
 %   Detailed explanation goes here
 
     if ImpactInfo.firstImpactDetected == 0
-        if norm(Sensor.accelerometer(1:2))>= 0.5 %Accelerometer horizontal magnitude
+        if norm(Sensor.accelerometer(1:2))>= 0.50 && ImpactInfo.firstImpactOccured %Accelerometer horizontal magnitude
 %         if norm(estForceExternalBody) >= 1 %External Force estimation
             ImpactInfo.firstImpactDetected = 1;
             ImpactIdentification.timeImpactDetected = iSim;

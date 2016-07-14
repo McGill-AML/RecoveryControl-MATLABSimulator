@@ -10,11 +10,12 @@ if outputFLP >= 0 %flipping away from wall
         
     end
 else %flipping towards wall
+%     accelrefmagnitude = -1.5*g;
     if abs(outputFLP) < 0.3
         accelrefmagnitude = -2.5;
     else
 %         accelrefmagnitude = 3*outputFLP;%6.5*outputFLP;
-        accelrefmagnitude = -2*outputFLP^2;%6.5*outputFLP;
+        accelrefmagnitude = -2*outputFLP^2 - 2.5;%6.5*outputFLP;
     end
 end
 

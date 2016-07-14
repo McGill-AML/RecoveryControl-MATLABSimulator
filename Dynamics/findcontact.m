@@ -1,7 +1,7 @@
 function [ Contact ] = findcontact( rotMat,state,wallLoc)
 %Returns contact information based on current state and wall location
 
-global BUMP_RADIUS BUMP_POSNS BUMP_NORMS BUMP_TANGS
+global BUMP_RADII BUMP_POSNS BUMP_NORMS BUMP_TANGS
 
 Contact = initcontact(0);
 ptsIntersection = Contact.point.intersection;
@@ -17,8 +17,8 @@ for iBumper = 1:4
     % Solve for intersection angle
     bumperCrossProduct = cross(bumperNormalWorld,bumperTangentWorld);
 
-    anglesIntersection(1,iBumper) = -log((wallLoc - bumperCenterWorld(1) + (bumperCenterWorld(1)^2 - 2*bumperCenterWorld(1)*wallLoc - BUMP_RADIUS^2*bumperTangentWorld(1)^2 - BUMP_RADIUS^2*bumperCrossProduct(1)^2 + wallLoc^2)^(1/2))/(BUMP_RADIUS*(bumperTangentWorld(1) - bumperCrossProduct(1)*1i)))*1i;
-    anglesIntersection(2,iBumper) = -log(-(bumperCenterWorld(1) - wallLoc + (bumperCenterWorld(1)^2 - 2*bumperCenterWorld(1)*wallLoc - BUMP_RADIUS^2*bumperTangentWorld(1)^2 - BUMP_RADIUS^2*bumperCrossProduct(1)^2 + wallLoc^2)^(1/2))/(BUMP_RADIUS*(bumperTangentWorld(1) - bumperCrossProduct(1)*1i)))*1i;
+    anglesIntersection(1,iBumper) = -log((wallLoc - bumperCenterWorld(1) + (bumperCenterWorld(1)^2 - 2*bumperCenterWorld(1)*wallLoc - BUMP_RADII(iBumper)^2*bumperTangentWorld(1)^2 - BUMP_RADII(iBumper)^2*bumperCrossProduct(1)^2 + wallLoc^2)^(1/2))/(BUMP_RADII(iBumper)*(bumperTangentWorld(1) - bumperCrossProduct(1)*1i)))*1i;
+    anglesIntersection(2,iBumper) = -log(-(bumperCenterWorld(1) - wallLoc + (bumperCenterWorld(1)^2 - 2*bumperCenterWorld(1)*wallLoc - BUMP_RADII(iBumper)^2*bumperTangentWorld(1)^2 - BUMP_RADII(iBumper)^2*bumperCrossProduct(1)^2 + wallLoc^2)^(1/2))/(BUMP_RADII(iBumper)*(bumperTangentWorld(1) - bumperCrossProduct(1)*1i)))*1i;
 
     if abs(imag(anglesIntersection(1,iBumper))) <= 1e-5
         anglesIntersection(1,iBumper) = real(anglesIntersection(1,iBumper));
@@ -31,8 +31,8 @@ for iBumper = 1:4
         else %2 pts of intersection
 
             % Find points of intersection
-            ptsIntersection(1:3,iBumper) = BUMP_RADIUS*cos(anglesIntersection(1,iBumper))*bumperTangentWorld + BUMP_RADIUS*sin(anglesIntersection(1,iBumper))*bumperCrossProduct + bumperCenterWorld;
-            ptsIntersection(4:6,iBumper) = BUMP_RADIUS*cos(anglesIntersection(2,iBumper))*bumperTangentWorld + BUMP_RADIUS*sin(anglesIntersection(2,iBumper))*bumperCrossProduct + bumperCenterWorld;
+            ptsIntersection(1:3,iBumper) = BUMP_RADII(iBumper)*cos(anglesIntersection(1,iBumper))*bumperTangentWorld + BUMP_RADII(iBumper)*sin(anglesIntersection(1,iBumper))*bumperCrossProduct + bumperCenterWorld;
+            ptsIntersection(4:6,iBumper) = BUMP_RADII(iBumper)*cos(anglesIntersection(2,iBumper))*bumperTangentWorld + BUMP_RADII(iBumper)*sin(anglesIntersection(2,iBumper))*bumperCrossProduct + bumperCenterWorld;
 
             % Find point of contact
             contactAxisWorld = (ptsIntersection(1:3,iBumper)+ptsIntersection(4:6,iBumper))/2 - bumperCenterWorld; %axis pc lies on
@@ -40,9 +40,9 @@ for iBumper = 1:4
             contactAxisBody = contactAxisBody/norm(contactAxisBody);
 
             if ptsIntersection(1,iBumper) >= bumperCenterWorld(1)
-                Contact.point.contactBody(:,iBumper) = BUMP_POSNS(:,iBumper) + BUMP_RADIUS*contactAxisBody;
+                Contact.point.contactBody(:,iBumper) = BUMP_POSNS(:,iBumper) + BUMP_RADII(iBumper)*contactAxisBody;
             else
-                Contact.point.contactBody(:,iBumper) = BUMP_POSNS(:,iBumper) - BUMP_RADIUS*contactAxisBody;
+                Contact.point.contactBody(:,iBumper) = BUMP_POSNS(:,iBumper) - BUMP_RADII(iBumper)*contactAxisBody;
             end
 
             Contact.point.contactWorld(:,iBumper) = real(rotMat'*Contact.point.contactBody(:,iBumper) + state(7:9));

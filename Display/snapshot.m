@@ -2,7 +2,7 @@ function [ ] =snapshot( frame,Hist,sideview,ImpactParams,timeImpact)
  
 %UNTITLED6 Summary of this function goes here
 %   Detailed explanation goes here
-global BUMP_POSNS BUMP_RADIUS BUMP_ANGLE
+global BUMP_POSNS BUMP_RADII BUMP_ANGLE
 
 %% Save inputs to arrays
 t = Hist.times;
@@ -100,10 +100,10 @@ bumperNormalWorld2 = rotMat'*bumperNormalBody2;
 bumperNormalWorld3 = rotMat'*bumperNormalBody3;
 bumperNormalWorld4 = rotMat'*bumperNormalBody4;
 
-plotCircle3D(bumperCenterWorld1,bumperNormalWorld1,BUMP_RADIUS,1);
-plotCircle3D(bumperCenterWorld2,bumperNormalWorld2,BUMP_RADIUS,1);
-plotCircle3D(bumperCenterWorld3,bumperNormalWorld3,BUMP_RADIUS,2);
-plotCircle3D(bumperCenterWorld4,bumperNormalWorld4,BUMP_RADIUS,2);
+plotCircle3D(bumperCenterWorld1,bumperNormalWorld1,BUMP_RADII(1),2);
+plotCircle3D(bumperCenterWorld2,bumperNormalWorld2,BUMP_RADII(2),2);
+plotCircle3D(bumperCenterWorld3,bumperNormalWorld3,BUMP_RADII(3),2);
+plotCircle3D(bumperCenterWorld4,bumperNormalWorld4,BUMP_RADII(4),2);
 
 %% Plot body-fixed axes
 axisXWorldPts = [comWorld axisXWorld];

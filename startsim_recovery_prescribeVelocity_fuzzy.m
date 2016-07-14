@@ -3,6 +3,10 @@ tic
 % clearvars accelref
 clear all;
 
+VxImpact = 2;
+pitchImpact = -35; 
+yawImpact = 0;
+
 global m g
 global timeImpact
 global globalFlag
@@ -19,9 +23,9 @@ SimParams.useRecovery = 1;
 SimParams.timeFinal = 2;
 tStep = 1/200;%1/200;
 
-ImpactParams.wallLoc = 1.5;%1.5;
+ImpactParams.wallLoc = 0.5;%1.5;
 ImpactParams.wallPlane = 'YZ';
-ImpactParams.timeDes = 0.5; %Desired time of impact
+ImpactParams.timeDes = 0.5; %Desired time of impact. Does nothing
 ImpactParams.frictionModel.muSliding = 0.3;
 ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
@@ -40,24 +44,25 @@ ImpactIdentification = initimpactidentification;
 
 %% Set initial Conditions
 
-%%%%%%%%%%%% ***** SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%
-Control.twist.posnDeriv(1) = 2; %World X Velocity at impact    %%%
-IC.attEuler = [deg2rad(0);deg2rad(-20);deg2rad(0)];            %%%
-IC.posn = [0;0;10];                                            %%%
-Setpoint.posn(3) = IC.posn(3);                                 %%%
-xAcc = 0;                                                      %%%
-%%%%%%%%%%% ***** END SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%
+%%%%%%%%%%%% ***** SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%%%%
+Control.twist.posnDeriv(1) = VxImpact; %World X Velocity at impact      %%%
+IC.attEuler = [deg2rad(0);deg2rad(pitchImpact);deg2rad(yawImpact)];     %%%
+IC.posn = [ImpactParams.wallLoc-0.3;0;5];                               %%%
+Setpoint.posn(3) = IC.posn(3);                                          %%%
+xAcc = 0;                                                               %%%
+%%%%%%%%%%% ***** END SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%
 
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 
-[IC.posn(1), initialLinVel, SimParams.timeInit, xAcc ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
+% [IC.posn(1), VxImpact, SimParams.timeInit, xAcc ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
+SimParams.timeInit = 0; %% comment out if using getinitworldx()
 
 Setpoint.head = IC.attEuler(3);
 Setpoint.time = SimParams.timeInit;
 Setpoint.posn(1) = IC.posn(1);
 Trajectory = Setpoint;
 
-IC.linVel =  rotMat*[initialLinVel;0;0];
+IC.linVel =  rotMat*[VxImpact;0;0];
 
 Experiment.propCmds = [];
 Experiment.manualCmds = [];
@@ -103,8 +108,10 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
                                     Sensor, Hist.poses(end), SimParams, Control, FuzzyInfo);
                                 
     % Calculate accelref in world frame based on FuzzyInfo.output, estWallNormal
-    if sum(FuzzyInfo.InputsCalculated) == 4
+    if sum(FuzzyInfo.InputsCalculated) == 4 && Control.accelRefCalculated == 0;
+            disp(FuzzyInfo.output);
             Control.accelRef = calculaterefacceleration(FuzzyInfo.output, ImpactIdentification.wallNormalWorld);
+            disp(Control.accelRef);
             Control.accelRefCalculated = 1;
     end
     

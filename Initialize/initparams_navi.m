@@ -4,7 +4,7 @@ function [ImpactParams]= initparams_navi()
 
 global g m I Ixx Iyy Izz
 
-global Jr Dt Kt PROP_POSNS BUMP_RADIUS BUMP_ANGLE
+global Jr Dt Kt PROP_POSNS BUMP_RADII BUMP_ANGLE
 
 global AERO_AREA AERO_DENS Cd Tv Kp Kq Kr ALPHA BETA
 
@@ -58,7 +58,7 @@ ALPHA = 0;
 BETA = 0;
 
 %% Bumper Parameters
-BUMP_RADIUS = 0.125;
+BUMP_RADII = [0.125; 0.125; 0.125; 0.125];
 BUMP_ANGLE = deg2rad(5); %angle bumpers are tilted towards body center
 
 BUMP_NORMS(:,1) = invar2rotmat('Z',deg2rad(45))'*invar2rotmat('Y',BUMP_ANGLE + deg2rad(90))'* [1;0;0];
@@ -74,6 +74,11 @@ BUMP_TANGS(:,4) = invar2rotmat('Z',deg2rad(-45))'*invar2rotmat('Y',BUMP_ANGLE)'*
 load('bumperlocations_navi'); %bumper center locations
 
 BUMP_POSNS = [b1, b2, b3, b4] - repmat(CoM,1,4); %bumper center locations relative to CoM
+
+% BUMP_RADII(3) = 0.04; %change one of bumpers to top of Navi's head
+% BUMP_NORMS(:,3) = [0;0;1];
+% BUMP_TANGS(:,3) = [1;0;0];
+% BUMP_POSNS(:,3) = [0;0;-0.061];
 
 % Bumper stiffness params
 ImpactParams.compliantModel.e = 0.9;
