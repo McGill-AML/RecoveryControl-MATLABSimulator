@@ -53,7 +53,7 @@ tStep = 1/200;
 % Analysis to include identification of correlations between specific
 % ICs and failure cases
 
-num_iter = 1000;
+num_iter = 10;
 
 % Initialize Monte Carlo Struct which holds all histories of each trial
 IC = initIC; % dummy initialization
