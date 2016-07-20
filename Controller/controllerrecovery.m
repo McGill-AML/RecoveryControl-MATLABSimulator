@@ -33,8 +33,6 @@ if sum(abs(Control.acc)) == 0
     error('Desired acceleration must be non-zero');
 end
 
-errQuatPrev = Control.errQuat;
-
 %% 1. Compute thrust
 
 % compute body z-axis direction, -1 because quad z-axis points down
@@ -87,13 +85,7 @@ end
 % compute first two desired body rates (p and q) by scaling error
 % quaternion terms q1 and q2
 ERROR_TO_DESIRED_BODYRATES = 20;    %this is p_{rp} of Faessler's control
-% Control.twist.angVel(1:2) = ERROR_TO_DESIRED_BODYRATES*Control.errQuat(2:3);
-
-%% Try PD on errQuat
-errQuatDeriv = (Control.errQuat - errQuatPrev)./tStep;
-ERROR_TO_DESIRED_BODYRATES_D = 1;
-Control.twist.angVel(1:2) = ERROR_TO_DESIRED_BODYRATES*Control.errQuat(2:3) + ERROR_TO_DESIRED_BODYRATES_D*errQuatDeriv(2:3);
-
+Control.twist.angVel(1:2) = ERROR_TO_DESIRED_BODYRATES*Control.errQuat(2:3);
 
 % if the error is negative, make the desired body rates negative
 if Control.errQuat(1) < 0
@@ -131,7 +123,7 @@ Control.rpm = real(sqrt(rpmSquared));
 % saturate commands
 rpmSaturation = 8000;
 Control.rpm (Control.rpm > rpmSaturation) = rpmSaturation;
-Control.rpm (Control.rpm < 1500) = 1500;
+Control.rpm (Control.rpm < 1000) = 1000;
 
 % set negatives for CW and CCW rotations
 Control.rpm(1) = -Control.rpm(1);

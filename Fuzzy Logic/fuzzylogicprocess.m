@@ -16,7 +16,7 @@ if SimParams.useRecovery == 1 && Control.recoveryStage == 0
                             estWallTangentWorld = cross([0;0;1],ImpactIdentification.wallNormalWorld);
                             negBodyZ = [0;0;-1];
                             bodyZProjection = ImpactIdentification.rotMatPreImpact'*negBodyZ - dot((ImpactIdentification.rotMatPreImpact'*negBodyZ),estWallTangentWorld)*estWallTangentWorld;
-                            dotProductWithWorldZ = dot(bodyZProjection,[0;0;1]);
+                            dotProductWithWorldZ = dot(bodyZProjection,[0;0;1]); %make sure worldZ vector is pointing upwards
                             inclinationAngle = acos(dotProductWithWorldZ/norm(bodyZProjection));
                             
                             dotProductWithWorldNormal = dot(bodyZProjection,ImpactIdentification.wallNormalWorld);

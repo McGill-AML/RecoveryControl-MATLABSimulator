@@ -1,26 +1,35 @@
 tic
 
-% clear all
-clearvars -except Hist_mu0 Plot_mu0 Hist_mu1 Plot_mu1 Hist_mu2 Plot_mu2 Hist_mu3 Plot_mu3 Hist_mu4 Plot_mu4
+% clearvars accelref
+clear all;
 
-global m g Kt 
+VxImpact = 1.5;
+pitchImpact = -15; 
+yawImpact = 0;
+
+global m g
 global timeImpact
 global globalFlag
 
-%% Initialize Simulation Parameters
-ImpactParams = initparams_spiri;%initparams_spiriwithnavibumpers;
+%% Initialize Fuzzy Logic Process
+[FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
 
-SimParams.recordContTime = 1;
-SimParams.useRecovery = 0;
-SimParams.timeFinal = 5;
+%% Initialize Simulation Parameters
+ImpactParams = initparams_navi;
+
+SimParams.recordContTime = 0;
+SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
+SimParams.useRecovery = 1; 
+SimParams.timeFinal = 2;
 tStep = 1/200;%1/200;
 
-ImpactParams.wallLoc = 1.5;
+ImpactParams.wallLoc = 0.5;%1.5;
 ImpactParams.wallPlane = 'YZ';
-ImpactParams.timeDes = 0.5;
-ImpactParams.frictionModel.muSliding = 0; %0.1
-ImpactParams.frictionModel.velocitySliding = 1e-4; %5e-2 m/s
+ImpactParams.timeDes = 0.5; %Desired time of impact. Does nothing
+ImpactParams.frictionModel.muSliding = 0.3;
+ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
+timeStabilized = 10000;
 
 %% Initialize Structures
 IC = initIC;
@@ -31,82 +40,116 @@ Setpoint = initsetpoint;
 [Contact, ImpactInfo] = initcontactstructs;
 localFlag = initflags;
 
-%% Match initial conditions to experiment
-expCrash = 'I-10';
-[Control.twist.posnDeriv(1), IC.attEuler, IC.posn(3), Setpoint.posn(3), xAcc, Experiment] = matchexperimentIC(expCrash);
+ImpactIdentification = initimpactidentification;
 
+%% Set initial Conditions
+
+%%%%%%%%%%%% ***** SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%%%%
+Control.twist.posnDeriv(1) = VxImpact; %World X Velocity at impact      %%%
+IC.attEuler = [deg2rad(0);deg2rad(pitchImpact);deg2rad(yawImpact)];     %%%
+IC.posn = [ImpactParams.wallLoc-0.3;0;5];                               %%%
+Setpoint.posn(3) = IC.posn(3);                                          %%%
+xAcc = 0; %don't change                                                 %%%
+%%%%%%%%%%% ***** END SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%
 
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 
-[IC.posn(1), initialLinVel, SimParams.timeInit ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
+% [IC.posn(1), VxImpact, SimParams.timeInit, xAcc ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
+SimParams.timeInit = 0; %% comment out if using getinitworldx()
 
 Setpoint.head = IC.attEuler(3);
 Setpoint.time = SimParams.timeInit;
 Setpoint.posn(1) = IC.posn(1);
 Trajectory = Setpoint;
 
-IC.linVel =  rotMat*[initialLinVel;0;0];
+IC.linVel =  rotMat*[VxImpact;0;0];
 
-IC.rpm = [-1;1;-1;1].*repmat(sqrt(m*g/(4*Kt)),4,1);  %Start with hovering RPM
+Experiment.propCmds = [];
+Experiment.manualCmds = [];
+
+globalFlag.experiment.rpmChkpt = zeros(4,1);
+globalFlag.experiment.rpmChkptIsPassed = zeros(1,4);
+
+[IC.rpm, Control.u] = initrpm(rotMat, [xAcc;0;0]); %Start with hovering RPM
 
 PropState.rpm = IC.rpm;
 
-% %only to test controller:
-% IC.posn = [0;0;0];    
-% IC.angVel = [0;0;0];
-% IC.attEuler = [0;0;0];
-% IC.linVel = [0;0;0];
-% SimParams.timeInit = 0;
-
 %% Initialize state and kinematics structs from ICs
-[state, stateDeriv] = initstate(IC);
+[state, stateDeriv] = initstate(IC, xAcc);
 [Pose, Twist] = updatekinematics(state, stateDeriv);
 
+%% Initialize sensors
+Sensor = initsensor(rotMat, stateDeriv, Twist);
 
 %% Initialize History Arrays
 
 % Initialize history 
-Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag);
+Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 
 % Initialize Continuous History
 if SimParams.recordContTime == 1 
     ContHist = initconthist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, ...
-                            PropState, Contact, globalFlag);
+                            PropState, Contact, globalFlag, Sensor);
 end
-
 
 %% Simulation Loop
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
-    display(iSim)    
-   
-  
-    if ImpactInfo.firstImpactOccured*SimParams.useRecovery == 1 %normal setpoint recovery        
-        Control.pose.posn = [0 Trajectory(end).posn(2:3)];
-        Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
-        Control.type = 'posn';
-    else
-        Control.pose.posn(3) = Setpoint.posn(3);
+%     display(iSim)    
+    
+    %% Update Sensors
+    rotMat = quat2rotmat(Pose.attQuat);
+    Sensor.accelerometer = (rotMat*[0;0;g] + stateDeriv(1:3) + cross(Twist.angVel,Twist.linVel))/g; %in g's
+    Sensor.gyro = Twist.angVel;
+    
+    %% Impact Detection    
+    [ImpactInfo, ImpactIdentification] = detectimpact(iSim, ImpactInfo, ImpactIdentification,...
+                                                      Sensor,Hist.poses,PREIMPACT_ATT_CALCSTEPFWD);
+    [FuzzyInfo] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
+                                    Sensor, Hist.poses(end), SimParams, Control, FuzzyInfo);
+                                
+    % Calculate accelref in world frame based on FuzzyInfo.output, estWallNormal
+    if sum(FuzzyInfo.InputsCalculated) == 4 && Control.accelRefCalculated == 0;
+            disp(FuzzyInfo.output);
+            Control.accelRef = calculaterefacceleration(FuzzyInfo.output, ImpactIdentification.wallNormalWorld);
+            disp(Control.accelRef);
+            Control.accelRefCalculated = 1;
+    end
+    
+    %% Control
+    if Control.accelRefCalculated*SimParams.useRecovery == 1 %recovery control       
+        if SimParams.useFaesslerRecovery == 1  
+            
+            Control = checkrecoverystage(Pose, Twist, Control, ImpactInfo);
+            [Control] = computedesiredacceleration(Control, Twist);
+
+            % Compute control outputs
+            [Control] = controllerrecovery(tStep, Pose, Twist, Control);       
+            Control.type = 'recovery';
+            
+        else %Setpoint recovery
+            disp('Setpoint recovery');
+            Control.pose.posn = [0;0;Trajectory(end).posn(3)];
+            Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
+            Control.type = 'posn';            
+        end
+    else %normal posn control
+        Control.recoveryStage = 0;
         Control.desEuler = IC.attEuler;
-%         Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Setpoint.posn(3), ... 
-%                                 IC.attEuler,Control,ImpactInfo.firstImpactOccured,timeImpact, Experiment.manualCmds);
-        
-        Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Control,Experiment.manualCmds);                    
+        Control.pose.posn(3) = Trajectory(end).posn(3);
+        Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Control,[]);
         Control.type = 'att';
     end
-       
-    %Propagate Dynamics
+    
+    
+    %% Propagate Dynamics
     options = getOdeOptions();
-%     [tODE,stateODE] = ode45(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
-%                                                             tStep,Control.rpm,ImpactParams,PropState.rpm, ...
-%                                                             Experiment.propCmds),[iSim iSim+tStep],state,options);
-    [tODE,stateODE] = ode113(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
+    [tODE,stateODE] = ode45(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
                                                             tStep,Control.rpm,ImpactParams,PropState.rpm, ...
                                                             Experiment.propCmds),[iSim iSim+tStep],state,options);
-
-                                                        
     
     % Reset contact flags for continuous time recording        
-    globalFlag.contact = localFlag.contact;  
+    globalFlag.contact = localFlag.contact;
+    
     
     if SimParams.recordContTime == 0
         
@@ -118,16 +161,14 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
             if ImpactInfo.firstImpactOccured == 0
                 ImpactInfo.firstImpactOccured = 1;
             end
-        end  
+        end
 
-    else  
-    
+    else      
         % Continuous time recording
         for j = 1:size(stateODE,1)
             [stateDeriv, Contact, PropState] = dynamicsystem(tODE(j),stateODE(j,:), ...
                                                              tStep,Control.rpm,ImpactParams, PropState.rpm, ...
-                                                             Experiment.propCmds);
-            
+                                                             Experiment.propCmds);            
             if sum(globalFlag.contact.isContact)>0
                 Contact.hasOccured = 1;
                 if ImpactInfo.firstImpactOccured == 0
@@ -135,10 +176,11 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
                 end
             end     
                       
-            ContHist = updateconthist(ContHist,stateDeriv, Pose, Twist, Control, PropState, Contact, globalFlag); 
+            ContHist = updateconthist(ContHist,stateDeriv, Pose, Twist, Control, PropState, Contact, globalFlag, Sensor); 
         end
-    ContHist.times = [ContHist.times;tODE];
-    ContHist.states = [ContHist.states,stateODE'];    
+        
+        ContHist.times = [ContHist.times;tODE];
+        ContHist.states = [ContHist.states,stateODE'];    
     end
     
     localFlag.contact = globalFlag.contact;     
@@ -147,34 +189,33 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     [Pose, Twist] = updatekinematics(state, stateDeriv);
 
     %Discrete Time recording @ 200 Hz
-    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag,[]);
+    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 
-    %End loop if Spiri has crashed
+    %% End loop conditions
+    % Navi has crashed:
     if state(9) <= 0
         display('Navi has hit the floor :(');
         ImpactInfo.isStable = 0;
         break;
     end  
     
+    % Navi has drifted very far away from wall:
+    if state(7) <= -10
+        display('Navi has left the building');
+        ImpactInfo.isStable = 1;
+        break;
+    end
+    
+    % Recovery control has worked, altitude stabilized:
+    if Control.recoveryStage == 4
+        display('Altitude has been stabilized');
+        ImpactInfo.isStable = 1;
+        timeStabilized = iSim;
+        break;
+    end
 end
 
 toc
 
-% Get impact info
-if SimParams.recordContTime == 0
-    for iBumper = 1:4
-        ImpactInfo.bumperInfos(iBumper) = getsiminfo(Hist,iBumper, Trajectory(1).head);
-    end
-else
-    for iBumper = 1:4
-        ImpactInfo.bumperInfos(iBumper) = getsiminfo(ContHist,iBumper,Trajectory(1).head);
-    end
-end
-% 
-% cellBumperInfos = struct2cell(ImpactInfo.bumperInfos);
-% 
-% ImpactInfo.maxNormalForce = max([cellBumperInfos{find(strcmp(fieldnames(ImpactInfo.bumperInfos),'maxNormalForces')),:}]);
-% ImpactInfo.maxDefl = max([cellBumperInfos{find(strcmp(fieldnames(ImpactInfo.bumperInfos),'maxDefls')),:}]);
-% ImpactInfo.numContacts = sum([cellBumperInfos{find(strcmp(fieldnames(ImpactInfo.bumperInfos),'numContacts')),:}]);
-
+%% Generate plottable arrays
 Plot = hist2plot(Hist);

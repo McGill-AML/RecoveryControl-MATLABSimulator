@@ -125,17 +125,18 @@ for iFrame = 1:2:size(t,1)
        plot3(wallLines(1,3:4)',wallLines(2,3:4)',wallLines(3,3:4)','r-','LineWidth',3);
     
     
-%     %% Color Overlay for Recovery Stage
-%     recoverystage = Hist.controls(iFrame).recoveryStage;    
-%     if recoverystage == 1 %Stabilize Attitude to "away" orientation with zero yaw rate
-%         fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'r','FaceAlpha',0.4);
-%     elseif recoverystage == 2 %Stabilize Attitude to "hover" orientation
-%         fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'y','FaceAlpha',0.4);
-%     elseif recoverystage == 3 %Stabilize Height
-%         fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'b','FaceAlpha',0.4);
-%     elseif recoverystage == 4 %stabilize position
-%         fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'g','FaceAlpha',0.4);
-%     end
+    %% Color Overlay for Recovery Stage
+    recoverystage = Hist.controls(iFrame).recoveryStage;    
+    if recoverystage == 1 %Stabilize Attitude to "away" orientation with zero yaw rate
+        fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'r','FaceAlpha',0.4);
+    elseif recoverystage == 2 %Stabilize Attitude to "hover" orientation
+        fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'y','FaceAlpha',0.4);
+    elseif recoverystage == 3 %Stabilize Height
+        fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'b','FaceAlpha',0.4);
+    elseif recoverystage == 4 %stabilize position
+        fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'g','FaceAlpha',0.4);
+    end
+
     %% Figure settings
     axis([axisMin,axisMax,axisMin,axisMax,axisMin,axisMax]);
 
