@@ -44,12 +44,21 @@ flp = addmf(flp, 'input', 4, 'gyroLow', 'trapmf', [0 0 0.5 1.5]);
 flp = addmf(flp, 'input', 4, 'gyroMedium', 'trapmf', [1 1.5 3 3.5]);
 flp = addmf(flp, 'input', 4, 'gyroHigh', 'trapmf', [3 4.5 10 10]);
 
+% flp = addvar(flp, 'output', 'responseIntensity', [-1 1]);
+% flp = addmf(flp, 'output', 1, 'towardBig', 'trapmf', [-1 -1 -0.9 -0.6]);
+% flp = addmf(flp, 'output', 1, 'towardSmall', 'trapmf', [-0.9 -0.6 -0.4 -0.1]);
+% flp = addmf(flp, 'output', 1, 'level', 'trapmf', [-0.4 -0.1 0.1 0.4]);
+% flp = addmf(flp, 'output', 1, 'awaySmall', 'trapmf', [0.1 0.4 0.6 0.9]);
+% flp = addmf(flp, 'output', 1, 'awayBig', 'trapmf', [0.6 0.9 1 1]);
+
+%flip response Intensity (negative = flipping away from wall, positive = flipping
+%towards wall)
 flp = addvar(flp, 'output', 'responseIntensity', [-1 1]);
-flp = addmf(flp, 'output', 1, 'towardBig', 'trapmf', [-1 -1 -0.9 -0.6]);
-flp = addmf(flp, 'output', 1, 'towardSmall', 'trapmf', [-0.9 -0.6 -0.4 -0.1]);
+flp = addmf(flp, 'output', 1, 'towardBig', 'trapmf', [0.6 0.9 1 1]);
+flp = addmf(flp, 'output', 1, 'towardSmall', 'trapmf', [0.1 0.4 0.6 0.9]);
 flp = addmf(flp, 'output', 1, 'level', 'trapmf', [-0.4 -0.1 0.1 0.4]);
-flp = addmf(flp, 'output', 1, 'awaySmall', 'trapmf', [0.1 0.4 0.6 0.9]);
-flp = addmf(flp, 'output', 1, 'awayBig', 'trapmf', [0.6 0.9 1 1]);
+flp = addmf(flp, 'output', 1, 'awaySmall', 'trapmf', [-0.9 -0.6 -0.4 -0.1]);
+flp = addmf(flp, 'output', 1, 'awayBig', 'trapmf', [-1 -1 -0.9 -0.6]);
 
 
 % Rule Set 1
@@ -158,7 +167,7 @@ ruleList = [ruleList1;ruleList2];
 % ruleList = [ruleList2;ruleList5];
 flp = addrule(flp,ruleList);
 
-% %% Plot membership functions
+%% Plot membership functions
 % figure();
 % plotmf(flp,'input',1);
 % figure();
