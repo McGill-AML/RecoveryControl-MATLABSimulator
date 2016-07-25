@@ -3,9 +3,10 @@ tic
 % clearvars accelref
 clear all;
 
-VxImpact = 2;
-pitchImpact = -20; 
-yawImpact = 0;
+VxImpact = 0.5; %0.5 to 2
+pitchImpact = -60; %-60 to 60
+%roll +/- 60 
+yawImpact = 0; %0 to 45
 
 global m g
 global timeImpact
@@ -206,13 +207,13 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 %         break;
 %     end
 %     
-    % Recovery control has worked, altitude stabilized:
-%     if Control.recoveryStage == 4
-%         display('Altitude has been stabilized');
-%         ImpactInfo.isStable = 1;
-%         timeStabilized = iSim;
-%         break;
-%     end
+%     Recovery control has worked, altitude stabilized:
+    if Control.recoveryStage == 4
+        display('Altitude has been stabilized');
+        ImpactInfo.isStable = 1;
+        timeStabilized = iSim;
+        break;
+    end
 end
 
 toc
