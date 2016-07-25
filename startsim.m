@@ -3,8 +3,8 @@ tic
 % clearvars accelref
 clear all;
 
-VxImpact = 1.5;
-pitchImpact = -15; 
+VxImpact = 2;
+pitchImpact = 45; 
 yawImpact = 0;
 
 global m g
@@ -109,7 +109,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
                                 
     % Calculate accelref in world frame based on FuzzyInfo.output, estWallNormal
     if sum(FuzzyInfo.InputsCalculated) == 4 && Control.accelRefCalculated == 0;
-            disp(FuzzyInfo.output);
+%             disp(FuzzyInfo.output);
             Control.accelRef = calculaterefacceleration(FuzzyInfo.output, ImpactIdentification.wallNormalWorld);
             disp(Control.accelRef);
             Control.accelRefCalculated = 1;
@@ -191,21 +191,21 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     %Discrete Time recording @ 200 Hz
     Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 
-    %% End loop conditions
-    % Navi has crashed:
-    if state(9) <= 0
-        display('Navi has hit the floor :(');
-        ImpactInfo.isStable = 0;
-        break;
-    end  
-    
-    % Navi has drifted very far away from wall:
-    if state(7) <= -10
-        display('Navi has left the building');
-        ImpactInfo.isStable = 1;
-        break;
-    end
-    
+%     %% End loop conditions
+%     % Navi has crashed:
+%     if state(9) <= 0
+%         display('Navi has hit the floor :(');
+%         ImpactInfo.isStable = 0;
+%         break;
+%     end  
+%     
+%     % Navi has drifted very far away from wall:
+%     if state(7) <= -10
+%         display('Navi has left the building');
+%         ImpactInfo.isStable = 1;
+%         break;
+%     end
+%     
     % Recovery control has worked, altitude stabilized:
     if Control.recoveryStage == 4
         display('Altitude has been stabilized');
@@ -219,3 +219,4 @@ toc
 
 %% Generate plottable arrays
 Plot = hist2plot(Hist);
+animate(0,Hist,'ZX',ImpactParams,timeImpact)

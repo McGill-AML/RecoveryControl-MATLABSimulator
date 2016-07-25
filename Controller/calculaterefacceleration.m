@@ -11,7 +11,7 @@ else %flipping towards wall
     if abs(outputFLP) < 0.3
         accelrefmagnitude = 2.5; %so Navi will stabilize away from wall, not next to it
     else
-        accelrefmagnitude = 9.81*outputFLP-0.3;
+        accelrefmagnitude = 0.3*outputFLP-0.3;
     end
 end
 

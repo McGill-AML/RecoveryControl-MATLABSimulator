@@ -11,7 +11,7 @@ if SimParams.useRecovery == 1 && Control.recoveryStage == 0
                         case 1 %FLP input 1: Accelerometer Horizontal Magnitude
                             FuzzyInfo.InputArray(iInput).value = norm(Sensor.accelerometer(1:2));
 %                             FuzzyInfo.InputArray(iInput).value = norm(estForceExternalBody);
-                            disp('input 1 calc');
+                            %disp('input 1 calc');
                         case 2 %FLP input 2: Inclination
                             estWallTangentWorld = cross([0;0;1],ImpactIdentification.wallNormalWorld);
                             negBodyZ = [0;0;-1];
@@ -24,7 +24,7 @@ if SimParams.useRecovery == 1 && Control.recoveryStage == 0
                             inclinationSign = sign(angleWithWorldNormal - pi/2);                            
                             
                             FuzzyInfo.InputArray(iInput).value = inclinationSign*rad2deg(inclinationAngle); 
-                            disp('input 2 calc');
+                            %disp('input 2 calc');
                         case 3 %FLP input 3: Flipping Direction Angle
                             %Try calculating according to world frame:
                             rotMat = quat2rotmat(currentPose.attQuat); 
@@ -34,10 +34,10 @@ if SimParams.useRecovery == 1 && Control.recoveryStage == 0
                             wallNormalWorldHoriz = ImpactIdentification.wallNormalWorld(1:2);
                             FuzzyInfo.InputArray(iInput).value = rad2deg(acos(dot(angVelWorldPerpHoriz,wallNormalWorldHoriz)/...
                                                             (norm(angVelWorldPerpHoriz)*norm(wallNormalWorldHoriz))));
-                            disp('input 3 calc');
+                            %disp('input 3 calc');
                         case 4 %FLP input 4: Gyro Horizontal Magnitude
                             FuzzyInfo.InputArray(iInput).value = norm(Sensor.gyro(1:2));
-                        disp('input 4 calc');
+                        %disp('input 4 calc');
                     end
                     FuzzyInfo.InputsCalculated(iInput) = 1;
                 end
