@@ -15,6 +15,6 @@ global g
 % %     end
 % end
 
-accelref = 3*outputFLP*wallNormalWorld;
+accelref = 9.81*outputFLP*wallNormalWorld;
 
 end

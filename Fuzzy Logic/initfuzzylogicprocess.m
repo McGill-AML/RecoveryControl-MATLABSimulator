@@ -4,11 +4,11 @@ function [ flp ] =initfuzzylogicprocess( )
 %%
 flp = newfis('responseIntensity');
 
-flp = addvar(flp, 'input', 'accMagHoriz', [0 8]);
+flp = addvar(flp, 'input', 'accMagHoriz', [0 10]);
 flp = addmf(flp, 'input', 1, 'accVeryLow', 'trimf', [0 0 2]);
 flp = addmf(flp, 'input', 1, 'accLow', 'trimf', [0 2 4]);
 flp = addmf(flp, 'input', 1, 'accMedium', 'trimf', [2 4 6]);
-flp = addmf(flp, 'input', 1, 'accHigh', 'trapmf', [4 6 8 8]);
+flp = addmf(flp, 'input', 1, 'accHigh', 'trapmf', [4 6 8 10]);
 
 % flp = addvar(flp, 'input', 'forceExternalMag', [0 40]);
 % flp = addmf(flp, 'input', 1, 'forceVeryLow', 'trapmf', [0 0 10 15]);

@@ -4,7 +4,7 @@ tic
 clear all;
 
 VxImpact = 2;
-pitchImpact = -15; 
+pitchImpact = -20; 
 yawImpact = 0;
 
 global m g
