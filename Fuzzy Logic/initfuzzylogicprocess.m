@@ -27,7 +27,7 @@ flp = addmf(flp, 'input', 1, 'accHigh', 'trapmf', [4 6 10 10]);
 % flp = addmf(flp, 'input', 2, 'inclinedLevel', 'trimf', [-5 0 5]);
 % flp = addmf(flp, 'input', 2, 'inclinedTowardBig', 'trapmf', [2.5 8 60 60]);
 
-flp = addvar(flp, 'input', 'inclination', [-60 60]);
+flp = addvar(flp, 'input', 'inclination', [-90 90]);
 flp = addmf(flp, 'input', 2, 'inclinedAwayBig', 'trapmf', [-90 -60 -15 -8]);
 flp = addmf(flp, 'input', 2, 'inclinedLevel', 'trimf', [-2 0 2]);
 flp = addmf(flp, 'input', 2, 'inclinedTowardBig', 'trapmf', [8 15 60 90]);

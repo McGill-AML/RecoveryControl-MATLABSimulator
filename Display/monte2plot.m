@@ -10,8 +10,6 @@ function Plot = monte2plot(Monte)
     Plot.initAngles = [temp{3,:}];
     % speed
     Plot.initSpeeds = [temp{4,:}];   
-    % friction
-    Plot.coeffFriction = [temp{6,:}];
    
     %% Performance measures
     recoveryStageSwitchTimes = Monte.recovery;
