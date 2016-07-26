@@ -5,14 +5,14 @@ function [Control] = checkrecoverystage(Pose, Twist, Control, ImpactInfo)
 
     % Stage 2 condition
     % limits 0.1 and 0.2 are arbitrary
-    maneuverStable = abs(Control.errQuat(2)) < 0.08 && abs(Control.errQuat(3)) < 0.08 ... % error quaternion elements 2 and 3
-        && abs(Twist.angVel(1)) < 0.3  && abs(Twist.angVel(2)) < 0.3;    % roll/pitch rates   
+    maneuverStable = abs(Control.errQuat(2)) < 0.3 && abs(Control.errQuat(3)) < 0.3 ... % error quaternion elements 2 and 3
+        && abs(Twist.angVel(1)) < 0.5  && abs(Twist.angVel(2)) < 0.5;    % roll/pitch rates   
 
     % Stage 3 condition is same as for stage 2 with accelRef = 0 
     % (see computedesiredacceleration)
     
     % Stage 4 condition - 0.2 m/s is arbitrary 
-    zVelocityStable = Twist.linVel(3) < 0.2;
+    zVelocityStable = Twist.linVel(3) < 0.3;
     
     % Stage 0: pre-impact
     % Stage 1: impact detected

@@ -1,5 +1,5 @@
 %% Plot Monte Carlo Results
-load('pitch_60_roll_60.mat');
+load('Monte_test.mat');
 %%
 % Monte.trial = trial;
 % Monte.IC = IC;
@@ -12,28 +12,29 @@ Plot = monte2plot(Monte);
 num_iter = 1000;
  
 %% Height Loss
-histogram(Plot.heightLoss,num_iter/10);
+histogram(Monte.heightLoss(Monte.heightLoss~=0),num_iter/10);
 title('Height loss for 1000 trials');
 xlabel('Height loss (meters)');
 ylabel('Number of trials');
  
 %% Horizontal Loss
-histogram(Plot.horizLoss,num_iter/10);
+% histogram(Plot.horizLoss,num_iter/10);
+histogram(Monte.horizLoss(Monte.horizLoss~=0),num_iter/10)
 title('Horizontal loss for 1000 trials');
 xlabel('Horizontal loss (meters)');
 ylabel('Number of trials');
  
 %% How long each trial took to reach stages two and three
-histogram(Plot.timeUntilStageTwo, num_iter/10);
+histogram(Plot.timeUntilStageTwo(Plot.timeUntilStageTwo~=0), num_iter/10);
 hold on
 % plot how long each trial took to reach stage three
-histogram(Plot.timeUntilStageThree, num_iter/10);
+histogram(Plot.timeUntilStageThree(Plot.timeUntilStageThree~=0), num_iter/10);
 title('Time to reach stages two and three');
 xlabel('Time(seconds)');
 ylabel('Number of trials');
 %% Matching ICs of trials with stage two time in second peak
  
-secondWaveTrials = Plot.trial(Plot.timeUntilStageTwo >1.2);
+secondWaveTrials = Plot.trial(Plot.timeUntilStageTwo > 1.2);
  
 incomingRoll = rad2deg(Plot.initAngles(1,:));
 incomingPitch = rad2deg(Plot.initAngles(2,:));

@@ -1,4 +1,4 @@
-function Monte = updatemontecarlo(k, IC, Hist, Monte)
+function Monte = updatemontecarlo(k, IC, Hist, Monte, FuzzyInfo)
     Monte.trial = [Monte.trial; k];
     Monte.IC = [Monte.IC; IC];
     
@@ -45,4 +45,7 @@ function Monte = updatemontecarlo(k, IC, Hist, Monte)
         Monte.heightLoss = [Monte.heightLoss; 0];
         Monte.horizLoss = [Monte.horizLoss; 0];
     end
+    
+    inclination = FuzzyInfo.InputArray(2).value;
+    Monte.inclination = [Monte.inclination; inclination];
 end

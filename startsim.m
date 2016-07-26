@@ -6,7 +6,7 @@
 % ICs:
 %   -pitch +/- 60 deg
 %   -roll  +/- 60 deg
-%   -0 < yaw < 45 deg
+%   -45 < yaw < 45 deg
 %   Notes: weird correlation to failure with positive high roll.
 %   Saved file: 'pitch_60_roll_60.mat'
 
@@ -14,7 +14,7 @@
 % ICs:
 %   -pitch +/- 60 deg
 %   -roll  +/- 15 deg
-%   -0 < yaw < 45 deg
+%   -45 < yaw < 45 deg
 %   Saved file: 'pitch_60_roll_15.mat'
 
 % For sets 1 and 2:
@@ -25,7 +25,7 @@
 % Set 3:
 %   -pitch +/- 60 deg
 %   -roll  +/- 15 deg
-%   -0 < yaw < 45 deg
+%   -45 < yaw < 45 deg
 
 %   RPM max acceleration 27,000 rpm/s, other conditions same. 
 
@@ -35,7 +35,10 @@
 %   Friction coefficient: 0.3
 %   Angle error to body rate gain: 15.0
 %   Proportional gains only for body rate control (20 for {p,q}, 2 for {r})
-%   Fuzzy logic output between -1 and 1 multiplied by 9.81 for Control.accelRef
+%   Fuzzy logic output between -1 and 1 
+%       -multiplied by 9.81 for Control.accelRef if TOWARD the wall
+%       -multiplied by 9.81/2 if AWAY from the wall
+
 
 % See /Controller/checkrecoverystage.m for recovery stage switch conditions
 % See /Controller/controllerrecovery.m for recovery method
@@ -52,10 +55,10 @@ ImpactParams = initparams_navi;
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
 SimParams.useRecovery = 1; 
-SimParams.timeFinal = 2;
+SimParams.timeFinal = 1.5;
 tStep = 1/200;
  
-num_iter = 1000;
+num_iter = 1;
  
 IC = initIC; % dummy initialization
 Monte = initmontecarlo(IC);
@@ -88,9 +91,10 @@ for k = 1:num_iter
     % World X velocity at impact
     x_velocity = rand*1.5 + 0.5;
     Control.twist.posnDeriv(1) = x_velocity;  
-    % Incoming pitch +/- 50 deg, roll +/- 60 deg, incoming yaw 0 to 45 deg
-    IC.attEuler = [deg2rad(120*(rand-0.5));deg2rad(100*(rand-0.5));deg2rad(45*rand)];     %%%
-    % starts next to the wall 5 meter up
+    % Incoming pitch +/- 60 deg, roll +/- 15 deg, incoming yaw 0 to 45 deg
+    IC.attEuler = [deg2rad(30*(rand-0.5));deg2rad(120*(rand-0.5));deg2rad(90*(rand-0.5))];     %%%
+    
+% starts next to the wall 5 meter up
     IC.posn = [-0.32; 0; 5];                             
     Setpoint.posn(3) = IC.posn(3);                                        
     xAcc = 0; %don't change                                                
@@ -151,6 +155,8 @@ for k = 1:num_iter
     %             disp(FuzzyInfo.output);
                 Control.accelRef = calculaterefacceleration(FuzzyInfo.output, ImpactIdentification.wallNormalWorld);
 %                 disp(Control.accelRef);
+
+
                 Control.accelRefCalculated = 1;
         end
  
@@ -164,6 +170,7 @@ for k = 1:num_iter
                 % Compute control outputs
                 [Control] = controllerrecovery(tStep, Pose, Twist, Control);       
                 Control.type = 'recovery';
+               
  
             else %Setpoint recovery
                 disp('Setpoint recovery');
@@ -237,7 +244,7 @@ for k = 1:num_iter
 %             break;
 %         end
     end
-    Monte = updatemontecarlo(k, IC, Hist, Monte);
+    Monte = updatemontecarlo(k, IC, Hist, Monte, FuzzyInfo);
 end
 toc
 
@@ -247,6 +254,7 @@ Monte.IC = Monte.IC(2:end);
 Monte.recovery = Monte.recovery(2:end,:);
 Monte.heightLoss = Monte.heightLoss(2:end);
 Monte.horizLoss = Monte.horizLoss(2:end);
+Monte.inclination = Monte.inclination(2:end);
 %% Convert to plottable info
 Plot = monte2plot(Monte);
 
