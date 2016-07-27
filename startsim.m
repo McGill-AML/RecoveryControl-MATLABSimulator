@@ -91,7 +91,7 @@ for k = 1:num_iter
     % World X velocity at impact
     x_velocity = rand*1.5 + 0.5;
     Control.twist.posnDeriv(1) = x_velocity;  
-    % Incoming pitch +/- 60 deg, roll +/- 15 deg, incoming yaw 0 to 45 deg
+    % Incoming pitch +/- 60 deg, roll +/- 15 deg, incoming yaw -45 to 45 deg
     IC.attEuler = [deg2rad(30*(rand-0.5));deg2rad(120*(rand-0.5));deg2rad(90*(rand-0.5))];     %%%
     
 % starts next to the wall 5 meter up
@@ -154,8 +154,9 @@ for k = 1:num_iter
         if sum(FuzzyInfo.InputsCalculated) == 4 && Control.accelRefCalculated == 0;
     %             disp(FuzzyInfo.output);
                 Control.accelRef = calculaterefacceleration(FuzzyInfo.output, ImpactIdentification.wallNormalWorld);
-%                 disp(Control.accelRef);
-
+                
+                % OVERRIDE HERE
+                Control.accelRef = [-g; 0; 0];
 
                 Control.accelRefCalculated = 1;
         end
