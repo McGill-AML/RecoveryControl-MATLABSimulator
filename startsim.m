@@ -58,7 +58,7 @@ SimParams.useRecovery = 1;
 SimParams.timeFinal = 1.5;
 tStep = 1/200;
  
-num_iter = 1;
+num_iter = 1000;
  
 IC = initIC; % dummy initialization
 Monte = initmontecarlo(IC);
