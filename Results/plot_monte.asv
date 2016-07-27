@@ -27,18 +27,19 @@ hold on
 histogram(rad2deg(Plot.initAngles(2,(Monte.recovery(:,1)==0))),num_iter/10)
 histogram(rad2deg(Plot.initAngles(2,(failure))),num_iter/10);
 
+
 % trials that didn't crash into the wall: 112 of them
 axis([-60 60 0 5]);
 title('No Crash and No Recovery Initial Pitch Angles');
 xlabel('Initial Pitch Angle (deg)');
 ylabel('Number of trials');
+legend('No crash','No recovery pitch','No recovery inclina
+
+%% Alternately Inclination angle
 histogram(-1*Monte.inclination(failure),num_iter/10);
 
-legend('No crash','No recovery pitch','No recovery inclination');
-% Alternately Inclination angle
-
-% Note: no correspondance between roll/yaw and failure cases
-
+%%
+Monte.trial(
 %% Height Loss
 histogram(Monte.heightLoss(Monte.heightLoss~=0),num_iter/10);
 title('Height loss for 1000 trials');
