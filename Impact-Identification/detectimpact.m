@@ -1,10 +1,11 @@
-function [ImpactInfo, ImpactIdentification] = detectimpact(iSim, ImpactInfo,ImpactIdentification, Sensor,Histposes,PREIMPACT_ATT_CALCSTEPFWD)
+function [ImpactInfo, ImpactIdentification, timeCalc] = detectimpact(iSim, ImpactInfo,ImpactIdentification, Sensor,Histposes,PREIMPACT_ATT_CALCSTEPFWD)
 %DETECTIMPACT Summary of this function goes here
 %   Detailed explanation goes here
-
+    timeCalc = [0;0;0;0];
     if ImpactInfo.firstImpactDetected == 0
-        if norm(Sensor.accelerometer(1:2))>= 0.50 && ImpactInfo.firstImpactOccured %Accelerometer horizontal magnitude
+        if norm(Sensor.accelerometer(1:2))>= 1.0 %&& ImpactInfo.firstImpactOccured %Accelerometer horizontal magnitude
 %         if norm(estForceExternalBody) >= 1 %External Force estimation
+            tic;
             ImpactInfo.firstImpactDetected = 1;
             ImpactIdentification.timeImpactDetected = iSim;
             
@@ -16,8 +17,11 @@ function [ImpactInfo, ImpactIdentification] = detectimpact(iSim, ImpactInfo,Impa
             ImpactIdentification.inertialAcc = rotMat'*Sensor.accelerometer + [0;0;-1]; %in g's
             wallNormalDirWorld = [ImpactIdentification.inertialAcc(1:2);0];
             ImpactIdentification.wallNormalWorld = wallNormalDirWorld/norm(wallNormalDirWorld);          
+            timeCalc(1) = toc;
         end
     end
+    
+   
 
 
 end

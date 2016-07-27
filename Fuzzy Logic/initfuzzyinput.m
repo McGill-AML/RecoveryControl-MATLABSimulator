@@ -1,11 +1,11 @@
 function [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput()
 
 % Number of previous steps to calculate pre-impact attitude at
-PREIMPACT_ATT_CALCSTEPFWD = 0; %2
+PREIMPACT_ATT_CALCSTEPFWD = 2; %2
 
 %% FLP input 1: External Force Estimation Magnitude
 FuzzyInput.ID = 1;
-FuzzyInput.calcStepDelay = 0.015; %10 to 15 ms
+FuzzyInput.calcStepDelay = 0.010; %10 to 15 ms
 FuzzyInput.value = 0;
 FuzzyInfo.InputArray = FuzzyInput;
 
@@ -32,3 +32,6 @@ FuzzyInfo.InputsCalculated = [0;0;0;0];
 
 %% Fuzzy Output
 FuzzyInfo.output = 0;
+
+%% Initialize FLP
+FuzzyInfo.intensityFuzzyProcess = initfuzzylogicprocess();

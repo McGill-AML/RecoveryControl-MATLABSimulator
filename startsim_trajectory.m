@@ -1,13 +1,8 @@
 tic
 
-% clearvars accelref
 clear all;
 
-VxImpact = 2;
-pitchImpact = -35; 
-yawImpact = 0;
-
-global m g
+global g
 global timeImpact
 global globalFlag
 
@@ -20,10 +15,10 @@ ImpactParams = initparams_navi;
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
 SimParams.useRecovery = 1; 
-SimParams.timeFinal = 2;
-tStep = 1/200;%1/200;
+SimParams.timeFinal = 10;
+tStep = 1/100;%1/200;
 
-ImpactParams.wallLoc = 0.5;%1.5;
+ImpactParams.wallLoc = 5;%1.5;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5; %Desired time of impact. Does nothing
 ImpactParams.frictionModel.muSliding = 0.3;
@@ -43,26 +38,12 @@ localFlag = initflags;
 ImpactIdentification = initimpactidentification;
 
 %% Set initial Conditions
-
-%%%%%%%%%%%% ***** SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%%%%
-Control.twist.posnDeriv(1) = VxImpact; %World X Velocity at impact      %%%
-IC.attEuler = [deg2rad(0);deg2rad(pitchImpact);deg2rad(yawImpact)];     %%%
-IC.posn = [ImpactParams.wallLoc-0.3;0;5];                               %%%
-Setpoint.posn(3) = IC.posn(3);                                          %%%
-xAcc = 0;                                                               %%%
-%%%%%%%%%%% ***** END SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%
-
+IC.posn = [0;0;2];  
+IC.angVel = [0;0;0];
+IC.attEuler = [0;0;0];
+IC.linVel = [0;0;0];
+SimParams.timeInit = 0;
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
-
-% [IC.posn(1), VxImpact, SimParams.timeInit, xAcc ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
-SimParams.timeInit = 0; %% comment out if using getinitworldx()
-
-Setpoint.head = IC.attEuler(3);
-Setpoint.time = SimParams.timeInit;
-Setpoint.posn(1) = IC.posn(1);
-Trajectory = Setpoint;
-
-IC.linVel =  rotMat*[VxImpact;0;0];
 
 Experiment.propCmds = [];
 Experiment.manualCmds = [];
@@ -70,12 +51,45 @@ Experiment.manualCmds = [];
 globalFlag.experiment.rpmChkpt = zeros(4,1);
 globalFlag.experiment.rpmChkptIsPassed = zeros(1,4);
 
-[IC.rpm, Control.u] = initrpm(rotMat, [xAcc;0;0]); %Start with hovering RPM
+[IC.rpm, Control.u] = initrpm(rotMat, [0;0;0]); %Start with hovering RPM
 
 PropState.rpm = IC.rpm;
 
+%% Waypoint Trajectory
+% Setpt 1
+Setpoint.head = 0;
+Setpoint.time = 0;
+Setpoint.posn = [0;0;2];
+Trajectory = Setpoint;
+
+% Setpt 2
+Setpoint.head = 0;
+Setpoint.time = Setpoint.time + 5;
+Setpoint.posn = [1;0;2];
+Trajectory = [Trajectory;Setpoint];
+
+% Setpt 3
+Setpoint.head = 0;
+Setpoint.time = Setpoint.time + 5;
+Setpoint.posn = [1;1;2];
+Trajectory = [Trajectory;Setpoint];
+
+% Setpt 4
+Setpoint.head = 0;
+Setpoint.time = Setpoint.time + 5;
+Setpoint.posn = [0;1;2];
+Trajectory = [Trajectory;Setpoint];
+
+% Setpt 5
+Setpoint.head = 0;
+Setpoint.time = Setpoint.time + 5;
+Setpoint.posn = [0;0;2];
+Trajectory = [Trajectory;Setpoint];
+
+iTrajectory = 1;
+
 %% Initialize state and kinematics structs from ICs
-[state, stateDeriv] = initstate(IC, xAcc);
+[state, stateDeriv] = initstate(IC, 0);
 [Pose, Twist] = updatekinematics(state, stateDeriv);
 
 %% Initialize sensors
@@ -95,7 +109,12 @@ end
 %% Simulation Loop
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 %     display(iSim)    
-    
+    %% Loop through waypoints
+    if iSim > Trajectory(iTrajectory).time
+        if iTrajectory + 1 <= numel(Trajectory)
+            iTrajectory = iTrajectory + 1;            
+        end
+    end  
     %% Update Sensors
     rotMat = quat2rotmat(Pose.attQuat);
     Sensor.accelerometer = (rotMat*[0;0;g] + stateDeriv(1:3) + cross(Twist.angVel,Twist.linVel))/g; %in g's
@@ -136,11 +155,11 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 %             Control = controlleratt(state,iSim,SimParams.timeInit,tStep,2,[0;deg2rad(20);0],Control,timeImpact, manualCmds)
         end
     else %normal posn control
+        Control.pose.posn = Trajectory(iTrajectory).posn;
         Control.recoveryStage = 0;
-        Control.desEuler = IC.attEuler;
-        Control.pose.posn(3) = Trajectory(end).posn(3);
-        Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Control,[]);
-        Control.type = 'att';
+        Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
+        
+        Control.type = 'posn';
     end
     
     

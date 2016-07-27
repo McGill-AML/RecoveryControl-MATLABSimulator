@@ -6,7 +6,7 @@ global BUMP_RADII BUMP_ANGLE BUMP_POSNS
 
 %% Define recording parameters
 if recordAnimation == 1
-    recordRate = 200/4; %Hz
+    recordRate = 200; %Hz %set to same as tStep
     writerObj = VideoWriter(videoFileName);
     writerObj.FrameRate = recordRate;
     open(writerObj);
@@ -62,7 +62,7 @@ impactZPosn = stateHist(vlookup(t,timeImpact),9);
                                                   
 
 %% Animate!
-for iFrame = 1:2:size(t,1)
+for iFrame = 1:2:size(t,1) %set step to 1 for recording
     %% Rotate body-fixed points to world-frame points
     q = [stateHist(iFrame,10);stateHist(iFrame,11);stateHist(iFrame,12);stateHist(iFrame,13)];
     q = q/norm(q);
@@ -93,7 +93,7 @@ for iFrame = 1:2:size(t,1)
     plot3(translation(1),translation(2),translation(3),'rx','MarkerSize',8); %Centre of mass
 
     
-    %% Plot Spiri 2-d bumpers
+    %% Plot Spiri 3-d bumpers
     bumperNormalWorld1 = rotMat'*bumperNormalBody1;
     bumperNormalWorld2 = rotMat'*bumperNormalBody2;
     bumperNormalWorld3 = rotMat'*bumperNormalBody3;
@@ -113,11 +113,11 @@ for iFrame = 1:2:size(t,1)
     plot3(axisYWorldPts(1,:),axisYWorldPts(2,:),axisYWorldPts(3,:),'g-','LineWidth',1);
     plot3(axisZWorldPts(1,:),axisZWorldPts(2,:),axisZWorldPts(3,:),'r-','LineWidth',1);
 
-    %% Plot contact points
-    for iBumper = 1:4
-       pointContactWorld = Hist.contacts(iFrame).point.contactWorld(:,iBumper);
-       plot3(pointContactWorld(1),pointContactWorld(2),pointContactWorld(3),'mX','MarkerSize',10);
-    end
+%     %% Plot contact points
+%     for iBumper = 1:4
+%        pointContactWorld = Hist.contacts(iFrame).point.contactWorld(:,iBumper);
+%        plot3(pointContactWorld(1),pointContactWorld(2),pointContactWorld(3),'mX','MarkerSize',10);
+%     end
 
     %% Plot wall
     fill3(wallPts(1,:)',wallPts(2,:)',wallPts(3,:)','r','FaceAlpha',0.4);

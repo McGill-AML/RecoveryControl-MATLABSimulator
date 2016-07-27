@@ -1,6 +1,6 @@
 function Control = controllerposn(state,iSim,timeInit,tStep,yawDes,Control)
 % [control,errAltitude,errAltitudeDeriv,evx,evy,errAttYaw,errAttRoll,errAttPitch,errAttYawDeriv,omega,roll_des,pitch_des,attYawDerivDes,u1,u2,u3,u4] = controllerposn(state,iSim,timeInit,tStep,posnDes,attYawDes,errAltitudePrev,errAltitudeDerivPrev,errAttRollPrev,errAttPitchPrev,errAttYawPrev,errAttYawDerivPrev)
-global m g Ixx Iyy Izz Kt Dt PROP_POSNS u2RpmMat
+global m g Ixx Iyy Izz u2RpmMat
 
 
 %% Save inputs 

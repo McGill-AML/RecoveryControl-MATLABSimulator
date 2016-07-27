@@ -114,11 +114,11 @@ plot3(axisXWorldPts(1,:),axisXWorldPts(2,:),axisXWorldPts(3,:),'b-','LineWidth',
 plot3(axisYWorldPts(1,:),axisYWorldPts(2,:),axisYWorldPts(3,:),'g-','LineWidth',1);
 plot3(axisZWorldPts(1,:),axisZWorldPts(2,:),axisZWorldPts(3,:),'r-','LineWidth',1);
 
-%% Plot contact points
-for iBumper = 1:4
-   pointContactWorld = Hist.contacts(frame).point.contactWorld(:,iBumper);
-   plot3(pointContactWorld(1),pointContactWorld(2),pointContactWorld(3),'mX','MarkerSize',10);
-end
+% %% Plot contact points
+% for iBumper = 1:4
+%    pointContactWorld = Hist.contacts(frame).point.contactWorld(:,iBumper);
+%    plot3(pointContactWorld(1),pointContactWorld(2),pointContactWorld(3),'mX','MarkerSize',10);
+% end
 
 %% Plot wall
 fill3(wallPts(1,:)',wallPts(2,:)',wallPts(3,:)','r','FaceAlpha',0.4,'LineWidth',2,'EdgeColor','r');
