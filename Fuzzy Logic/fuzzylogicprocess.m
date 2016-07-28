@@ -1,7 +1,7 @@
 function [FuzzyInfo] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
                                     Sensor,currentPose, SimParams, Control, FuzzyInfo)
 
-if SimParams.useRecovery == 1 && Control.recoveryStage == 0
+if SimParams.useRecovery == 1
     if ImpactInfo.firstImpactDetected == 1 && Control.accelRefCalculated == 0%Calculate fuzzy inputs
         for iInput = 1:4
             if FuzzyInfo.InputsCalculated(iInput) == 0
