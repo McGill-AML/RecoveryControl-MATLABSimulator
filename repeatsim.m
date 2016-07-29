@@ -2,14 +2,7 @@
 % % Monte Carlo Simulation of Crash Recovery using Fuzzy Logic  %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
-% % Set 1:
-% % ICs:
-% %   -pitch +/- 60 deg
-% %   -roll  +/- 60 deg
-% %   -45 < yaw < 45 deg
-% %   Notes: weird correlation to failure with positive high roll.
-% %   Saved file: 'pitch_60_roll_60.mat'
-% 
+
 % % Set 2:
 % % ICs:
 % %   -pitch +/- 60 deg
@@ -57,7 +50,7 @@ SimParams.useRecovery = 1;
 SimParams.timeFinal = 2.0;
 tStep = 1/200;
  
-load('monte_save.mat');
+load('with_more_info.mat');
  
 IC = initIC;
  
@@ -101,7 +94,7 @@ Setpoint.time = SimParams.timeInit;
 Setpoint.posn(1) = IC.posn(1);
 Trajectory = Setpoint;
 
-IC = Monte.IC(2);
+IC = Monte.IC(66);
 
 k = 1;
 

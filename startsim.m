@@ -186,7 +186,7 @@ for k = 1:num_iter
     Monte = updatemontecarlo(k, IC, Hist, Monte, FuzzyInfo, ImpactInfo, xVelocity);
 end
 toc
-
+%%
 % Cut off the dummy first trial
 Monte.trial = Monte.trial(2:end);
 Monte.IC = Monte.IC(2:end);

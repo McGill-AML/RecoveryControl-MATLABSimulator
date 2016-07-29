@@ -94,9 +94,9 @@ hold on
 histogram(Monte.finalHorizVel(Monte.trial(Monte.recovery(:,1)<0.1)),num_iter/10)
 % histogram(Monte.finalHorizVel,num_iter/10)
 
-%% Plot initial pitch for trials that took more than 0.5 seconds to recover
+%% 
 close all
-histogram(rad2deg(Plot.initAngles(2, Monte.trial(Monte.recovery(:,2)<0.1))),num_iter/10)
+histogram(Plot.initAngles( (Monte.trial(Monte.recovery(:,1)<0.1)),num_iter/10)
 
 
 %% Plot correlation to incoming roll angle

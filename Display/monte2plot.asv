@@ -11,7 +11,10 @@ function Plot = monte2plot(Monte)
     % speed
     Plot.initSpeeds = [temp{4,:}];   
    
-    num_iter = Monte.trial(end);
+    %% Performance measures
+    recoveryStageSwitchTimes = Monte.recovery;
+    
+    num_iter = length(Monte.trial);
     % Extract number of trials that recovered 
     Plot.fractionReachedStageOne   = sum(Monte.recovery(:,1) > 0)/num_iter;
     Plot.fractionReachedStageTwo   = sum(Monte.recovery(:,2) > 0)/num_iter;
@@ -21,14 +24,8 @@ function Plot = monte2plot(Monte)
     % get spectrum of recovery times
     Plot.timeUntilStageTwo   = Monte.recovery(:,2);
     Plot.timeUntilStageThree = Monte.recovery(:,3);
-    Plot.timeUntilStageFour = Monte.recovery(:,4);
-
  
     Plot.heightLoss = Monte.heightLoss;
     Plot.horizLoss = Monte.horizLoss;
     
-    no_crash = Plot.trial(Monte.recovery(:,1)==0);
-    no_recover = Plot.trial(Plot.timeUntilStageTwo==0);
-    Plot.failure = no_recover(ismember(no_recover,no_crash)==0);
-
 end
