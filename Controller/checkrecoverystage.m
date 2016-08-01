@@ -1,4 +1,4 @@
-function [Control] = checkrecoverystage(Pose, Twist, Control, ImpactInfo)
+function [Control] = checkrecoverystage(Pose, Twist, Control, ImpactInfo, wallNormalWorld)
 % Checks the recovery stage.
 
 %%%%% CONDITIONS %%%%%
@@ -8,6 +8,8 @@ function [Control] = checkrecoverystage(Pose, Twist, Control, ImpactInfo)
     maneuverStable = abs(Control.errQuat(2)) < 0.3 && abs(Control.errQuat(3)) < 0.3 ... % error quaternion elements 2 and 3
         && abs(Twist.angVel(1)) < 0.5  && abs(Twist.angVel(2)) < 0.5;    % roll/pitch rates   
 
+    % Alternate Stage 2 condition
+    pointingAway = dot(quatrotate(Pose.attQuat', [0 0 -1]), wallNormalWorld) > 0.1;
     % Stage 3 condition is same as for stage 2 with accelRef = 0 
     % (see computedesiredacceleration)
     
@@ -27,7 +29,7 @@ function [Control] = checkrecoverystage(Pose, Twist, Control, ImpactInfo)
                 Control.recoveryStage = 1;
             end
         case 1
-            if maneuverStable
+            if pointingAway
                 Control.recoveryStage = 2;
             end
         case 2

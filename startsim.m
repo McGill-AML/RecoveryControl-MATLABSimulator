@@ -1,28 +1,22 @@
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % Monte Carlo Simulation of Crash Recovery using Fuzzy Logic  %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
-% % ICs:
-% %   -pitch +/- 60 deg
-% %   -roll  +/- 15 deg
-% %   -45 < yaw < 45 deg 
-% %   RPM max acceleration 70,000 rpm/s
-% 
-% % For all trials:
-% %   Thrust coefficient: 8.7e-8
-% %   Drag coefficient:   8.7e-9
-% %   Friction coefficient: 0.3
-% %   Angle error to body rate gain: 20.0
-% %   Proportional gains only for body rate control (20 for {p,q}, 2 for {r})
-% %   Fuzzy logic output between -1 and 1 
-% %       -multiplied by 9.81 for Control.accelRef if TOWARD the wall
-% %       -multiplied by 9.81/2 if AWAY from the wall
-% 
-% % See /Controller/checkrecoverystage.m for recovery stage switch conditions
-% % See /Controller/controllerrecovery.m for recovery method
-% % See /Results/plot_monte.m for plotting results
-% % See /Fuzzy\Logic/initfuzzylogicprocess.m for fuzzy logic parameters
-% 
+
+% Devel branch, testing alternate recovery stage switching method
+
+% put max RPM to 7000 not 8000
+
+% want quicker control of height - should height control engage along with
+% stage 2? Yes. 
+
+% Put 'away' power to the fuzzy logic only until the quad is pointing away
+% from the wall (dot product with wall normal estimate). Then just go to
+% hover
+
+% maxRPMDeriv = 9999999999999;
+%ERROR_TO_DESIRED_BODYRATES = 20;   
+
+% worst case is yaw = 45 deg. 
 tic
 clear all;
 global g timeImpact globalFlag
@@ -35,7 +29,7 @@ SimParams.useRecovery = 1;
 SimParams.timeFinal = 2.0;
 tStep = 1/200;
  
-num_iter = 1000;
+num_iter = 1;
  
 IC = initIC; % dummy initialization
 Monte = initmontecarlo(IC);
@@ -65,13 +59,13 @@ for k = 1:num_iter
     
     % Randomized ICs    
     % World X velocity at impact
-    xVelocity = rand*1.5 + 0.5;
+    xVelocity = 3;%rand*1.5 + 0.5;
     Control.twist.posnDeriv(1) = xVelocity;  
     % Incoming pitch +/- 60 deg, roll +/- 15 deg, incoming yaw -45 to 45 deg
-    IC.attEuler = [deg2rad(30*(rand-0.5));deg2rad(120*(rand-0.5));deg2rad(90*(rand-0.5))];     %%%
+    IC.attEuler = [deg2rad(0);deg2rad(-35);deg2rad(0)];%[deg2rad(30*(rand-0.5));deg2rad(120*(rand-0.5));deg2rad(90*(rand-0.5))];     %%%
     
     % starts next to the wall 5 meter up
-    IC.posn = [-0.32; 0; 5];                             
+    IC.posn = [-0.5; 0; 5];                             
     Setpoint.posn(3) = IC.posn(3);                                        
     xAcc = 0; %don't change                                                
     rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
@@ -128,7 +122,7 @@ for k = 1:num_iter
         %% Control
         if ImpactInfo.firstImpactDetected %recovery control       
 %             if SimParams.useFaesslerRecovery == 1  
-                Control = checkrecoverystage(Pose, Twist, Control, ImpactInfo);
+                Control = checkrecoverystage(Pose, Twist, Control, ImpactInfo, ImpactIdentification.wallNormalWorld);
                 [Control] = computedesiredacceleration(Control, Twist);
  
                 % Compute control outputs
@@ -207,5 +201,5 @@ Plot = monte2plot(Monte);
 %% Generate plottable arrays
 Plot = hist2plot(Hist);
 close all
-animate(0,Hist,'ZX',ImpactParams,timeImpact)
+animate(0,Hist,'na',ImpactParams,timeImpact)
 

@@ -94,7 +94,7 @@ Setpoint.time = SimParams.timeInit;
 Setpoint.posn(1) = IC.posn(1);
 Trajectory = Setpoint;
 
-IC = Monte.IC(66);
+IC = Monte.IC(1);
 
 k = 1;
 
@@ -143,7 +143,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     %% Control
     if ImpactInfo.firstImpactDetected %recovery control       
 %             if SimParams.useFaesslerRecovery == 1  
-            Control = checkrecoverystage(Pose, Twist, Control, ImpactInfo);
+            Control = checkrecoverystage(Pose, Twist, Control, ImpactInfo, ImpactIdentification.wallNormalWorld);
             [Control] = computedesiredacceleration(Control, Twist);
 
             % Compute control outputs
