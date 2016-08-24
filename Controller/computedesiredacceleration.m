@@ -11,10 +11,10 @@ function [Control] = computedesiredacceleration(Control, Twist)
             Control.accelRef = [0; 0; 0];
             dZ = 0;
         case 3 %Stabilize Height
-            dZ = 5;
+            dZ = 10;
             Control.accelRef = [0; 0; 0];
         case 4 %Stabilize Horizontal Position
-            dZ = 5;
+            dZ = 10;
             Control.accelRef = [0; 0; 0];
         otherwise 
             error('Invalid recovery stage!');    

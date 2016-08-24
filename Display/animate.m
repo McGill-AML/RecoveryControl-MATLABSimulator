@@ -6,7 +6,7 @@ global BUMP_RADII BUMP_ANGLE BUMP_POSNS
 
 %% Define recording parameters
 if recordAnimation == 1
-    recordRate = 200/4; %Hz
+    recordRate = 200/8; %Hz
     writerObj = VideoWriter(videoFileName);
     writerObj.FrameRate = recordRate;
     open(writerObj);
@@ -127,14 +127,20 @@ for iFrame = 1:3:size(t,1)
     
     %% Color Overlay for Recovery Stage
     recoverystage = Hist.controls(iFrame).recoveryStage;    
+
     if recoverystage == 1 %Stabilize Attitude to "away" orientation with zero yaw rate
-        fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'r','FaceAlpha',0.4);
+%         fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'r','FaceAlpha',0.4);
+        fill3([-4 1 1 -4],[0 0 0 0],[0 0 6 6],'r','FaceAlpha',0.4);
     elseif recoverystage == 2 %Stabilize Attitude to "hover" orientation
-        fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'y','FaceAlpha',0.4);
+%         fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'y','FaceAlpha',0.4);
+        fill3([-4 1 1 -4],[0 0 0 0],[0 0 6 6],'y','FaceAlpha',0.4);
     elseif recoverystage == 3 %Stabilize Height
-        fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'b','FaceAlpha',0.4);
+%         fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'b','FaceAlpha',0.4);
+        fill3([-4 1 1 -4],[0 0 0 0],[0 0 6 6],'b','FaceAlpha',0.4);
+    
     elseif recoverystage == 4 %stabilize position
-        fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'g','FaceAlpha',0.4);
+%         fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'g','FaceAlpha',0.4);
+        fill3([-4 1 1 -4],[0 0 0 0],[0 0 6 6],'g','FaceAlpha',0.4);
     end
 
     %% Figure settings
@@ -154,7 +160,9 @@ for iFrame = 1:3:size(t,1)
 %     set(ax,'XTick',[0 0.5 1 1.5 2]);
 %     set(ax,'YTick',[-1 -0.5 0 0.5 1]);
 %     set(ax,'ZTick',[-0.5 0 0.5 1 1.5]);
-    
+    xlim([-4 1]);
+    ylim([-3 2]);
+    zlim([0.5 5.5]);
     grid on;
     axis square;
 

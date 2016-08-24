@@ -4,7 +4,7 @@ function [Control] = checkrecoverystage(Pose, Twist, Control, ImpactInfo)
 %%%%% CONDITIONS %%%%%
 
     % Stage 2 condition
-    % limits 0.1 and 0.2 are arbitrary
+    % limits are arbitrary
     maneuverStable = abs(Control.errQuat(2)) < 0.3 && abs(Control.errQuat(3)) < 0.3 ... % error quaternion elements 2 and 3
         && abs(Twist.angVel(1)) < 0.5  && abs(Twist.angVel(2)) < 0.5;    % roll/pitch rates   
 

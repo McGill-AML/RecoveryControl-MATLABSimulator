@@ -50,7 +50,7 @@ SimParams.useRecovery = 1;
 SimParams.timeFinal = 2.0;
 tStep = 1/200;
  
-load('with_more_info.mat');
+% load('with_more_info.mat');
  
 IC = initIC;
  
@@ -94,7 +94,7 @@ Setpoint.time = SimParams.timeInit;
 Setpoint.posn(1) = IC.posn(1);
 Trajectory = Setpoint;
 
-IC = Monte.IC(66);
+IC = Monte.IC(8);
 
 k = 1;
 

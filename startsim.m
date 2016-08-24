@@ -3,7 +3,7 @@
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
 % % ICs:
-% %   -pitch +/- 60 deg
+% %   -pitch +/- 45 deg
 % %   -roll  +/- 15 deg
 % %   -45 < yaw < 45 deg 
 % %   RPM max acceleration 70,000 rpm/s
@@ -32,10 +32,10 @@ ImpactParams = initparams_navi;
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
 SimParams.useRecovery = 1; 
-SimParams.timeFinal = 2.0;
+SimParams.timeFinal = 1.8;
 tStep = 1/200;
  
-num_iter = 1000;
+num_iter = 1;
  
 IC = initIC; % dummy initialization
 Monte = initmontecarlo(IC);
@@ -65,11 +65,12 @@ for k = 1:num_iter
     
     % Randomized ICs    
     % World X velocity at impact
-    xVelocity = rand*1.5 + 0.5;
+    xVelocity = 2;%rand*2.0 + 0.5;
     Control.twist.posnDeriv(1) = xVelocity;  
     % Incoming pitch +/- 60 deg, roll +/- 15 deg, incoming yaw -45 to 45 deg
-    IC.attEuler = [deg2rad(30*(rand-0.5));deg2rad(120*(rand-0.5));deg2rad(90*(rand-0.5))];     %%%
-    
+%     IC.attEuler = [deg2rad(30*(rand-0.5));deg2rad(90*(rand-0.5));deg2rad(90*(rand-0.5))];     %%%
+    IC.attEuler = [0;deg2rad(-35);0];     %%%
+
     % starts next to the wall 5 meter up
     IC.posn = [-0.32; 0; 5];                             
     Setpoint.posn(3) = IC.posn(3);                                        
