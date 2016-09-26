@@ -145,6 +145,7 @@ switch crash
         warning('xAcc in matchexperimentIC may not be correct');
        % To set propCmds and manualCmds to []
         rawManualCmd.times = [];
+        inputData = [];
         
     case 'III-01' 
         posnDeriv = 1.30; %1.98
@@ -156,6 +157,7 @@ switch crash
 
        % To set propCmds and manualCmds to []
         rawManualCmd.times = [];
+        inputData = [];
         
     case 'VI-01'
         posnDeriv = 0.88; %1.98
@@ -166,6 +168,7 @@ switch crash
 
        % To set propCmds and manualCmds to []
         rawManualCmd.times = [];
+        inputData = [];
     case 'VI-03'
         posnDeriv = 1.35; %1.98
         attEuler = [deg2rad(-2.59); deg2rad(0.22);deg2rad(7.9)]; 
@@ -175,6 +178,7 @@ switch crash
 
        % To set propCmds and manualCmds to []
         rawManualCmd.times = [];
+        inputData = [];
 
     case 'VI-06'
         posnDeriv = 1.62; %1.98
@@ -185,6 +189,7 @@ switch crash
 
        % To set propCmds and manualCmds to []
         rawManualCmd.times = [];
+        inputData = [];
         
     case 'VI-09'
         posnDeriv = 2.18; %1.98
@@ -195,6 +200,7 @@ switch crash
 
        % To set propCmds and manualCmds to []
         rawManualCmd.times = [];
+        inputData = [];
         
     case 'VI-14'
         posnDeriv = 1.76; %1.98
@@ -205,18 +211,226 @@ switch crash
 
        % To set propCmds and manualCmds to []
         rawManualCmd.times = [];        
+        inputData = [];
+    case 'VII-03'
+        posnDeriv = 1.29;
+        attEuler = [deg2rad(-4.6); deg2rad(-5.83); deg2rad(180+9.19)];
+        altitude = 0.6;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        rawManualCmd = [];
+        inputData = [];%load('crash_g03_rpms.mat');
+
+    case 'VII-04'
+        posnDeriv = 1.26;
+        attEuler = [deg2rad(-5.4); deg2rad(-4.48); deg2rad(180+10.5)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];
+    case 'VII-05'
+        posnDeriv = 1.27;
+        attEuler = [deg2rad(-4.7); deg2rad(-4.3); deg2rad(180+9.19)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];        
+        
+    case 'VII-06'
+        posnDeriv = 2.35;
+        attEuler = [deg2rad(0.19); deg2rad(10.14); deg2rad(180+3.19)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        rawManualCmd = [];
+%         rawManualCmd = load('crash_g06_attitudeSetpoints.mat');
+        inputData = [];%load('crash_g06_rpms.mat');
+    case 'VII-07'
+        posnDeriv = 1.29;
+        attEuler = [deg2rad(-3.38); deg2rad(-5.16); deg2rad(180+15.58)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];        
+    case 'VII-08'
+        posnDeriv = 1.35;
+        attEuler = [deg2rad(1.48); deg2rad(4.13); deg2rad(180+21.32)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        rawManualCmd = [];
+%         inputData = [];
+%         rawManualCmd = load('crash_g08_attitudeSetpoints.mat');
+        inputData = []; %inputData = load('crash_g08_rpms.mat');
+    case 'VII-10'
+        posnDeriv = 1.45;
+        attEuler = [deg2rad(-1.1); deg2rad(0.77); deg2rad(180+16.49)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];        
+    case 'VII-11'
+        posnDeriv = 0.86;
+        attEuler = [deg2rad(2.05); deg2rad(-0.69); deg2rad(180+12.19)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];
+    case 'VII-12'
+        posnDeriv = 1.54;
+        attEuler = [deg2rad(-7.33); deg2rad(0.14); deg2rad(180+14.12)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];    
+    case 'VII-13'
+        posnDeriv = 1.51;
+        attEuler = [deg2rad(1.34); deg2rad(-2.91); deg2rad(180+8.91)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];     
+    case 'VII-14'
+        posnDeriv = 1.51;
+        attEuler = [deg2rad(3.85); deg2rad(4.33); deg2rad(180+15.14)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];  
+    case 'VII-15'
+        posnDeriv = 1.53;
+        attEuler = [deg2rad(4.91); deg2rad(4.09); deg2rad(180+13.11)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];      
+        
+    case 'VII-16'
+        posnDeriv = 1.52;
+        attEuler = [deg2rad(4.66); deg2rad(4.90); deg2rad(180+8.79)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];    
+    case 'VII-17'
+        posnDeriv = 1.65;
+        attEuler = [deg2rad(1.3); deg2rad(4.03); deg2rad(180+9.87)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];     
+    case 'VII-18'
+        posnDeriv = 1.58;
+        attEuler = [deg2rad(3.29); deg2rad(6.92); deg2rad(180+8.2)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];  
+    case 'VII-19'
+        posnDeriv = 1.55;
+        attEuler = [deg2rad(5.32); deg2rad(8.32); deg2rad(180+5.68)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];
+    case 'VII-20'
+        posnDeriv = 1.67;
+        attEuler = [deg2rad(2.59); deg2rad(5.5); deg2rad(180+9.22)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];     
+    case 'VII-21'
+        posnDeriv = 1.55;
+        attEuler = [deg2rad(3.26); deg2rad(8.14); deg2rad(180+5.51)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];  
+    case 'VII-22'
+        posnDeriv = 1.5;
+        attEuler = [deg2rad(-5.79); deg2rad(7.26); deg2rad(180+4.76)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];
+    case 'VII-23'
+        posnDeriv = 1.37;
+        attEuler = [deg2rad(-1.84); deg2rad(5.16); deg2rad(180+14.53)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];    
+    case 'VII-24'
+        posnDeriv = 1.41;
+        attEuler = [deg2rad(-4.27); deg2rad(5.54); deg2rad(180+9.59)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];     
+    case 'VII-25'
+        posnDeriv = 1.37;
+        attEuler = [deg2rad(-0.77); deg2rad(7.10); deg2rad(180+10.74)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];  
+    case 'VII-26'
+        posnDeriv = 1.32;
+        attEuler = [deg2rad(-4.47); deg2rad(10.75); deg2rad(180+0.53)];
+        altitude = 1.5;
+        setpointAltitude = altitude;
+        xAcc = 0;
+        
+        rawManualCmd = [];
+        inputData = [];           
     otherwise
         error('Invalid experiment crash number');
 end
 
-if isempty(rawManualCmd.times) %currently, both propCmds and manualCmds have to be off together
-    Experiment.propCmds = [];
-    Experiment.manualCmds = [];
-else
-    Experiment = matchexperimentcmds(rawManualCmd,inputData);
-    globalFlag.experiment.rpmChkpt = zeros(4,1);
-    globalFlag.experiment.rpmChkptIsPassed = zeros(1,size(inputData.motors_time,1));
-end
+
+Experiment = matchexperimentcmds(rawManualCmd,inputData);
+
+globalFlag.experiment.rpmChkpt = zeros(4,1);
+globalFlag.experiment.rpmChkptIsPassed = zeros(1,numel(Experiment.propCmds));
 
 
 end

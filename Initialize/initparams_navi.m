@@ -10,6 +10,7 @@ global AERO_AREA AERO_DENS Cd Tv Kp Kq Kr ALPHA BETA
 
 global u2RpmMat BUMP_NORMS BUMP_TANGS BUMP_POSNS
 
+global IMU_POSN
 
 g = 9.81;
 
@@ -42,9 +43,9 @@ Dt = 0.1*Kt; %9.61e-10; %Calculated from 8x4.5 APC Prop
 
 
 u2RpmMat = inv([-Kt -Kt -Kt -Kt;...
-    -Kt*PROP_POSNS(2,1) -Kt*PROP_POSNS(2,2) -Kt*PROP_POSNS(2,3) -Kt*PROP_POSNS(2,4);...
-    Kt*PROP_POSNS(1,1) Kt*PROP_POSNS(1,2) Kt*PROP_POSNS(1,3) Kt*PROP_POSNS(1,4);...
-    -Dt Dt -Dt Dt]);
+                -Kt*PROP_POSNS(2,1) -Kt*PROP_POSNS(2,2) -Kt*PROP_POSNS(2,3) -Kt*PROP_POSNS(2,4);...
+                 Kt*PROP_POSNS(1,1) Kt*PROP_POSNS(1,2) Kt*PROP_POSNS(1,3) Kt*PROP_POSNS(1,4);...
+                 -Dt Dt -Dt Dt]);
 
 %% Aerodynamic Drag
 AERO_AREA = 0; %Area seen by relative velocity vector
@@ -83,7 +84,11 @@ BUMP_POSNS = [b1, b2, b3, b4] - repmat(CoM,1,4); %bumper center locations relati
 % Bumper stiffness params
 ImpactParams.compliantModel.e = 0.9;
 ImpactParams.compliantModel.k = 372;
+% ImpactParams.compliantModel.k = 372*2;
 ImpactParams.compliantModel.n = 0.66;
+
+%% IMU Parameters
+IMU_POSN = [19.205; 8.1034; -47.55] * 10^-3; %IMU posn relative to CM
 
 end
 

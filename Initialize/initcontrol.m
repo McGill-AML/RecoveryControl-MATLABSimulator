@@ -46,4 +46,18 @@ function [Control] = initcontrol()
     Control.accelRef = [0; 0; 0];
     
     Control.accelRefCalculated = 0;
+    
+    Control.errAngVel = [0;0;0];
+    
+    Control.integralErrPosnDeriv = [0;0;0];
+    Control.errPosnDeriv = [0;0;0];
+    Control.integralErrAngVel = [0;0;0];
+    
+    Control.vel_sp = [0;0;0];
+    Control.vel_err = [0;0;0];
+    Control.vel = [0;0;0];
+
+    Control.vel_z_lp = [0;0;0];
+    Control.acc_z_lp = [0;0;0];
+    Control.thrust_int = [0;0;0];
 end

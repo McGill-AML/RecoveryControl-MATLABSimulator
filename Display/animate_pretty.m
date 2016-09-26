@@ -2,11 +2,13 @@ function [ ] =animate_pretty( recordAnimation,Hist,sideview,ImpactParams,timeImp
  
 %UNTITLED6 Summary of this function goes here
 %   Detailed explanation goes here
-global BUMP_RADIUS BUMP_ANGLE BUMP_POSNS
+global BUMP_RADII BUMP_ANGLE BUMP_POSNS
+
+zOffset = 0;
 
 %% Define recording parameters
 if recordAnimation == 1
-    recordRate = 50; %Hz
+    recordRate = 200/16.67; %Hz
     writerObj = VideoWriter(videoFileName);
     writerObj.FrameRate = recordRate;
     open(writerObj);
@@ -58,16 +60,16 @@ impactYPosn = stateHist(vlookup(t,timeImpact),8);
 impactZPosn = stateHist(vlookup(t,timeImpact),9);
 % [wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,roundn(impactZPosn,-1)-(axisMax-axisMin)/2,roundn(impactYPosn,-1)+0.5,(axisMax-axisMin),2);
 % [wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,0.4,0.4,0.9,0.9);
-[wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,0,0,0.9,0.9);
+[wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,0,0,1.8,1.5);
                                                   %bottom,center, height, width  
 
 %% Animate!
-for iFrame = 1:1:154%173%size(t,1)
+for iFrame = 1:1:size(t,1)
     %% Rotate body-fixed points to world-frame points
     q = [stateHist(iFrame,10);stateHist(iFrame,11);stateHist(iFrame,12);stateHist(iFrame,13)];
     q = q/norm(q);
     rotMat = quat2rotmat(q);
-    translation = [stateHist(iFrame,7);stateHist(iFrame,8);stateHist(iFrame,9)];
+    translation = [stateHist(iFrame,7);stateHist(iFrame,8);stateHist(iFrame,9)+zOffset];
 
     bodyPointWorld1 = rotMat'*bodyPoint1 + translation;
     bodyPointWorld2 = rotMat'*bodyPoint2 + translation;
@@ -99,10 +101,10 @@ for iFrame = 1:1:154%173%size(t,1)
     bumperNormalWorld3 = rotMat'*bumperNormalBody3;
     bumperNormalWorld4 = rotMat'*bumperNormalBody4;
 
-    plotCircle3D(bumperCenterWorld1,bumperNormalWorld1,BUMP_RADIUS,2);
-    plotCircle3D(bumperCenterWorld2,bumperNormalWorld2,BUMP_RADIUS,2);
-    plotCircle3D(bumperCenterWorld3,bumperNormalWorld3,BUMP_RADIUS,1);
-    plotCircle3D(bumperCenterWorld4,bumperNormalWorld4,BUMP_RADIUS,1);
+    plotCircle3D(bumperCenterWorld1,bumperNormalWorld1,BUMP_RADII(1),2);
+    plotCircle3D(bumperCenterWorld2,bumperNormalWorld2,BUMP_RADII(2),2);
+    plotCircle3D(bumperCenterWorld3,bumperNormalWorld3,BUMP_RADII(3),1);
+    plotCircle3D(bumperCenterWorld4,bumperNormalWorld4,BUMP_RADII(4),1);
 
     %% Plot body-fixed axes
     axisXWorldPts = [comWorld axisXWorld];
@@ -115,7 +117,7 @@ for iFrame = 1:1:154%173%size(t,1)
 
     %% Plot contact points
     for iBumper = 1:4
-       pointContactWorld = Hist.contacts(iFrame).point.contactWorld(:,iBumper);
+       pointContactWorld = Hist.contacts(iFrame).point.contactWorld(:,iBumper)+[0;0;zOffset];
        plot3(pointContactWorld(1),pointContactWorld(2),pointContactWorld(3),'mX','MarkerSize',10);
     end
 
@@ -126,15 +128,14 @@ for iFrame = 1:1:154%173%size(t,1)
 
     %% Figure settings
 %     axis([axisMin,axisMax,axisMin,axisMax,axisMin,axisMax]);
-%     %Crash I-06:
-%     xlim([0.65 1.65]);
-%     ylim([-0.2 0.8]);
-%     zlim([0.35 1.35]);
 
-    %Crash I-10:
-    xlim([0.8 1.8]);
+%     xlim([-0.5 1.5]);
+%     ylim([-1 1]);
+%     zlim([-0.2 1.8]);
+
+    xlim([0.25 1.25]);
     ylim([-0.5 0.5]);
-    zlim([0 1]);
+    zlim([-0.2 1.8]);
     
     xlhand = xlabel('X(m)','Interpreter','LaTex');
     ylhand = ylabel('Y(m)','Interpreter','LaTex');

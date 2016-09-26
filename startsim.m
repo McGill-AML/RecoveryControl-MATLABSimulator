@@ -1,10 +1,9 @@
-tic
+% function [ImpactIdentification,FuzzyInfo,Plot,timeImpact] = startsim(VxImpact, rollImpact, pitchImpact, yawImpact)
 
-% clearvars accelref
-clear all;
-
-VxImpact = 2;
-pitchImpact = -35; 
+% clear all;
+VxImpact = 0.5;
+rollImpact = 0;
+pitchImpact = -5;
 yawImpact = 0;
 
 global g
@@ -16,14 +15,15 @@ global globalFlag
 
 %% Initialize Simulation Parameters
 ImpactParams = initparams_navi;
+% ImpactParams = initparams_spiri;
 
 SimParams.recordContTime = 0;
-SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
-SimParams.useRecovery = 1; 
-SimParams.timeFinal = 2;
+SimParams.useFaesslerRecovery = 0;%Use Faessler recovery
+SimParams.useRecovery = 0; 
+SimParams.timeFinal = 1;
 tStep = 1/200;%1/200;
 
-ImpactParams.wallLoc = 0.5;%1.5;
+ImpactParams.wallLoc = 1;%1.5;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5; %Desired time of impact. Does nothing
 ImpactParams.frictionModel.muSliding = 0.3;
@@ -46,8 +46,8 @@ ImpactIdentification = initimpactidentification;
 
 %%%%%%%%%%%% ***** SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%%%%
 Control.twist.posnDeriv(1) = VxImpact; %World X Velocity at impact      %%%
-IC.attEuler = [deg2rad(0);deg2rad(pitchImpact);deg2rad(yawImpact)];     %%%
-IC.posn = [ImpactParams.wallLoc-0.3;0;5];                               %%%
+IC.attEuler = [deg2rad(rollImpact);deg2rad(pitchImpact);deg2rad(yawImpact)];%%%
+IC.posn = [ImpactParams.wallLoc-0.32;0;2];                               %%%
 Setpoint.posn(3) = IC.posn(3);                                          %%%
 xAcc = 0;                                                               %%%
 %%%%%%%%%%% ***** END SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%
@@ -79,7 +79,7 @@ PropState.rpm = IC.rpm;
 [Pose, Twist] = updatekinematics(state, stateDeriv);
 
 %% Initialize sensors
-Sensor = initsensor(rotMat, stateDeriv, Twist);
+Sensor = initsensor(state, stateDeriv);
 
 %% Initialize History Arrays
 
@@ -94,24 +94,18 @@ end
 
 %% Simulation Loop
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
-%     display(iSim)    
+%     display(iSim)   
     
-    %% Update Sensors
-    rotMat = quat2rotmat(Pose.attQuat);
-    Sensor.accelerometer = (rotMat*[0;0;g] + stateDeriv(1:3) + cross(Twist.angVel,Twist.linVel))/g; %in g's
-    Sensor.gyro = Twist.angVel;
     
     %% Impact Detection    
-    [ImpactInfo, ImpactIdentification] = detectimpact(iSim, ImpactInfo, ImpactIdentification,...
-                                                      Sensor,Hist.poses,PREIMPACT_ATT_CALCSTEPFWD);
+    [ImpactInfo, ImpactIdentification] = detectimpact(iSim, tStep, ImpactInfo, ImpactIdentification,...
+                                                      Hist.sensors,Hist.poses,PREIMPACT_ATT_CALCSTEPFWD, stateDeriv,state);
     [FuzzyInfo] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
                                     Sensor, Hist.poses(end), SimParams, Control, FuzzyInfo);
                                 
     % Calculate accelref in world frame based on FuzzyInfo.output, estWallNormal
     if sum(FuzzyInfo.InputsCalculated) == 4 && Control.accelRefCalculated == 0;
-            disp(FuzzyInfo.output);
             Control.accelRef = calculaterefacceleration(FuzzyInfo.output, ImpactIdentification.wallNormalWorld);
-            disp(Control.accelRef);
             Control.accelRefCalculated = 1;
     end
     
@@ -135,12 +129,17 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
             
 %             Control = controlleratt(state,iSim,SimParams.timeInit,tStep,2,[0;deg2rad(20);0],Control,timeImpact, manualCmds)
         end
-    else %normal posn control
+    else %normal attitude control
         Control.recoveryStage = 0;
         Control.desEuler = IC.attEuler;
         Control.pose.posn(3) = Trajectory(end).posn(3);
         Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Control,[]);
         Control.type = 'att';
+        
+%         Control.pose.posn = [0;0;2];
+%         Trajectory(end).head = 0;
+%         Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
+%             
     end
     
     
@@ -153,6 +152,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     % Reset contact flags for continuous time recording        
     globalFlag.contact = localFlag.contact;
     
+       
     %% Record History
     if SimParams.recordContTime == 0
         
@@ -190,6 +190,9 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     state = stateODE(end,:)';
     t = tODE(end);
     [Pose, Twist] = updatekinematics(state, stateDeriv);
+    
+    %% Update Sensors
+    Sensor = updatesensor( state, stateDeriv );
 
     %Discrete Time recording @ 200 Hz
     Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
@@ -208,16 +211,11 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         ImpactInfo.isStable = 1;
         break;
     end
-    
-    % Recovery control has worked, altitude stabilized:
-    if Control.recoveryStage == 4
-        display('Altitude has been stabilized');
-        ImpactInfo.isStable = 1;
-        break;
-    end
+
 end
 
-toc
 
 %% Generate plottable arrays
 Plot = hist2plot(Hist);
+
+% end

@@ -4,11 +4,11 @@ function [ flp ] =initfuzzylogicprocess( )
 %%
 flp = newfis('responseIntensity');
 
-flp = addvar(flp, 'input', 'accMagHoriz', [0 8]);
+flp = addvar(flp, 'input', 'accMagHoriz', [0 10]);
 flp = addmf(flp, 'input', 1, 'accVeryLow', 'trimf', [0 0 2]);
 flp = addmf(flp, 'input', 1, 'accLow', 'trimf', [0 2 4]);
 flp = addmf(flp, 'input', 1, 'accMedium', 'trimf', [2 4 6]);
-flp = addmf(flp, 'input', 1, 'accHigh', 'trapmf', [4 6 8 8]);
+flp = addmf(flp, 'input', 1, 'accHigh', 'trapmf', [4 6 10 10]);
 
 % flp = addvar(flp, 'input', 'forceExternalMag', [0 40]);
 % flp = addmf(flp, 'input', 1, 'forceVeryLow', 'trapmf', [0 0 10 15]);
@@ -27,7 +27,7 @@ flp = addmf(flp, 'input', 1, 'accHigh', 'trapmf', [4 6 8 8]);
 % flp = addmf(flp, 'input', 2, 'inclinedLevel', 'trimf', [-5 0 5]);
 % flp = addmf(flp, 'input', 2, 'inclinedTowardBig', 'trapmf', [2.5 8 60 60]);
 
-flp = addvar(flp, 'input', 'inclination', [-60 60]);
+flp = addvar(flp, 'input', 'inclination', [-90 90]);
 flp = addmf(flp, 'input', 2, 'inclinedAwayBig', 'trapmf', [-90 -60 -15 -8]);
 flp = addmf(flp, 'input', 2, 'inclinedLevel', 'trimf', [-2 0 2]);
 flp = addmf(flp, 'input', 2, 'inclinedTowardBig', 'trapmf', [8 15 60 90]);
@@ -39,10 +39,10 @@ flp = addmf(flp, 'input', 3, 'flipAway', 'trapmf', [0 0 50 90]);
 flp = addmf(flp, 'input', 3, 'flipSideway', 'trimf', [70 90 110]);
 flp = addmf(flp, 'input', 3, 'flipToward', 'trapmf', [90 130 180 180]);
 
-flp = addvar(flp, 'input', 'gyroHorizMag', [0 10]);
+flp = addvar(flp, 'input', 'gyroHorizMag', [0 15]);
 flp = addmf(flp, 'input', 4, 'gyroLow', 'trapmf', [0 0 0.5 1.5]);
 flp = addmf(flp, 'input', 4, 'gyroMedium', 'trapmf', [1 1.5 3 3.5]);
-flp = addmf(flp, 'input', 4, 'gyroHigh', 'trapmf', [3 4.5 10 10]);
+flp = addmf(flp, 'input', 4, 'gyroHigh', 'trapmf', [3 4.5 15 15]);
 
 % flp = addvar(flp, 'output', 'responseIntensity', [-1 1]);
 % flp = addmf(flp, 'output', 1, 'towardBig', 'trapmf', [-1 -1 -0.9 -0.6]);

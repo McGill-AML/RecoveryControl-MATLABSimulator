@@ -20,6 +20,7 @@ Plot.linVels = [temp{1,:}];
 
 Plot.posnDerivs = Hist.stateDerivs(7:9,:);
 Plot.bodyAccs = Hist.stateDerivs(1:3,:);
+Plot.angAccs = Hist.stateDerivs(4:6,:);
 
 temp = struct2cell(Hist.contacts);
 % Plot.normalForces = [temp{5,:}];
@@ -64,6 +65,8 @@ Plot.errEulers = [temp{5,:}];
 Plot.desEulers = [temp{13,:}];
 Plot.desYawDerivs = [temp{14,:}];
 Plot.controlAccDes = [temp{3,:}];
+Plot.controlUs = [temp{17,:}]; 
+Plot.errAngVels = [temp{24,:}];
 
 Plot.recoveryStage = [temp{21,:}];
 Plot.accelRef = [temp{22,:}];
@@ -77,41 +80,7 @@ Plot.controlAngVels = [temp3{4,:}];
 temp = struct2cell(Hist.sensors);
 Plot.accelerometers = [temp{1,:}];
 Plot.gyros = [temp{2,:}];
-
-
-
-
-% %% Simulate accelerometer data
-% % Reference: "Small Unmanned Aircraft: Theory and Practice" - Beard &
-% % McLain, 2012 - 7.1 Accelerometers
-% global g
-% Plot.accelerometers = zeros(3,numel(Plot.times));
-% Plot.worldAccs = zeros(3,numel(Plot.times));
-% for iData = 1:numel(Plot.times)    
-%     rotMat = quat2rotmat(Plot.quaternions(:,iData));
-%     Plot.accelerometers(:,iData) = invar2rotmat('x',pi)*(rotMat*[0;0;g] + Plot.bodyAccs(:,iData) + cross(Plot.angVels(:,iData),Plot.linVels(:,iData)))/g;
-%     Plot.worldAccs(:,iData) = rotMat'*Plot.bodyAccs(:,iData);
-% end
-
-% %% Add noise to accelerometer data
-% load('/home/thread/fmchui/Spiri/Collison Experiments/2016_02_25/MATLAB_processed_data/sensor_covs.mat');
-% numSamples = size(Hist.times,1);
-% numStates = 3;
-% sigma = C_accel; %Covariance matrix
-% R = chol(sigma);
-% noise = randn(numSamples,numStates)*R;
-% Plot.accelerometersNoisy = Plot.accelerometers + noise';
-% 
-% %% Simulate gyroscope data
-% Plot.gyros = sign(rad2deg(Plot.angVels)).*min(abs(rad2deg(Plot.angVels)),240);
-% Plot.gyros(3,:) = -Plot.gyros(3,:);
-% %% Add noise to gyroscope data
-% numSamples = size(Hist.times,1);
-% numStates = 3;
-% sigma = C_gyro; %Covariance matrix
-% R = chol(sigma);
-% noise = randn(numSamples,numStates)*R;
-% Plot.gyrosNoisy = Plot.gyros + noise';
+Plot.CMaccelerometers = [temp{3,:}];
 
 
 end

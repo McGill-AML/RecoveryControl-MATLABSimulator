@@ -1,9 +1,7 @@
-function [FuzzyInfo,timeCalc] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
+function [FuzzyInfo,timeCalc] = fuzzylogicprocess_experiment(iSim, ImpactInfo, ImpactIdentification,...
                                     Sensor,currentPose, SimParams, Control, FuzzyInfo)
 timeCalc = [0;0;0;0];
-if Control.recoveryStage == 0
-
-% if SimParams.useRecovery == 1 && Control.recoveryStage == 0
+if SimParams.useRecovery == 1 && Control.recoveryStage == 0
     if ImpactInfo.firstImpactDetected == 1 && Control.accelRefCalculated == 0%Calculate fuzzy inputs
         tic;
         for iInput = 1:4
@@ -21,20 +19,20 @@ if Control.recoveryStage == 0
                             FuzzyInfo.wallTangentWorld = estWallTangentWorld;
                             negBodyZ = [0;0;-1]; %[0;0;1] for NWU, %[0;0;-1] for NED [IMU mounting]
                             bodyZProjection = ImpactIdentification.rotMatPreImpact'*negBodyZ - dot((ImpactIdentification.rotMatPreImpact'*negBodyZ),estWallTangentWorld)*estWallTangentWorld;
-                            dotProductWithWorldZ = dot(bodyZProjection,[0;0;1]); %[0;0;1] for NWU, %[0;0;-1] for NED [World Frame]
+                            dotProductWithWorldZ = dot(bodyZProjection,[0;0;-1]); %[0;0;1] for NWU, %[0;0;-1] for NED [World Frame]
                             inclinationAngle = acos(dotProductWithWorldZ/norm(bodyZProjection));
                             
                             dotProductWithWorldNormal = dot(bodyZProjection,ImpactIdentification.wallNormalWorld);
-                            angleWithWorldNormal = acos(dotProductWithWorldNormal/(norm(bodyZProjection)*norm(ImpactIdentification.wallNormalWorld)));               
+                            angleWithWorldNormal = acos(dotProductWithWorldNormal/(norm(bodyZProjection)*norm(ImpactIdentification.wallNormalWorld)));                       
                             inclinationSign = sign(angleWithWorldNormal - pi/2);                      
                             
                             FuzzyInfo.InputArray(iInput).value = inclinationSign*rad2deg(inclinationAngle);
                             timeCalc(1) = timeCalc(1) + toc;
                         case 3 %FLP input 3: Flipping Direction Angle
                             tic;
-                            rotMat = quat2rotmat(currentPose.attQuat); 
+                            rotMat = quat2rotmat(currentPose.attQuat)'; %rotation matrix transposed in px4
                             angVelWorld = rotMat'*Sensor.gyro;
-                            angVelWorldPerp = cross(angVelWorld,[0;0;1]); %[0;0;1] for NWU, %[0;0;-1] for NED [World Frame]
+                            angVelWorldPerp = cross(angVelWorld,[0;0;-1]); %[0;0;1] for NWU, %[0;0;-1] for NED [World Frame]
                             angVelWorldPerpHoriz = angVelWorldPerp(1:2);
                             wallNormalWorldHoriz = ImpactIdentification.wallNormalWorld(1:2);
                             FuzzyInfo.InputArray(iInput).value = rad2deg(acos(dot(angVelWorldPerpHoriz,wallNormalWorldHoriz)/...

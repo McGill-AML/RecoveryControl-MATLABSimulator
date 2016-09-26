@@ -1,6 +1,6 @@
 function Control = controlleratt(state,iSim,timeInit,tStep,Control,manualCmds)
 % [control,errAltitude,errAltitudeDeriv,evx,evy,errAttYaw,errAttRoll,errAttPitch,errAttYawDeriv,omega,roll_des,pitch_des,attYawDerivDes,u1,u2,u3,u4] = controllerposn(state,iSim,timeInit,tStep,posnDes,attYawDes,errAltitudePrev,errAltitudeDerivPrev,errAttRollPrev,errAttPitchPrev,errAttYawPrev,errAttYawDerivPrev)
-global m g Ixx Iyy Izz Kt Dt PROP_POSNS u2RpmMat timeImpact
+global m g Ixx Iyy Izz u2RpmMat timeImpact
 
 
 %% Save inputs 
@@ -117,7 +117,6 @@ else% Use experiment joystick commands to match controller thrust and attitude c
         end
     end
 end
-
     
 %% Attitude Controller
 
@@ -167,20 +166,6 @@ rpm = sqrt(rpmsquare);
 rpm = max(min(sqrt(rpmsquare),8000),3000); %saturate motor speeds
 rpm = [-rpm(1);rpm(2);-rpm(3);rpm(4)]; %in RPM
 
-% % Saturate propeller acceleration
-% 
-% prop_accel = zeros(4,1);
-% prop_accel(1) = min(abs(omegadot(1)),prop_accel_sat)*sign(omegadot(1));
-% prop_accel(2) = min(abs(omegadot(2)),prop_accel_sat)*sign(omegadot(2));
-% prop_accel(3) = min(abs(omegadot(3)),prop_accel_sat)*sign(omegadot(3));
-% prop_accel(4) = min(abs(omegadot(4)),prop_accel_sat)*sign(omegadot(4));
-% 
-% % Recalculate prop speed based on saturated propeller acceleration
-% omegadot = prop_accel;
-% omega_rad = omegadot*tStep + omega_prev_rad;
-% omega = omega_rad * (60/(2*pi));
-
-
 %% Assign values to output Control
 Control.rpm = rpm;
 Control.errAltitude = errAltitude;
@@ -194,4 +179,3 @@ Control.desYawDeriv = attYawDerivDes;
 
 
 end
-

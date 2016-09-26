@@ -1,16 +1,10 @@
-function [ ] =animate( recordAnimation,frameStep,Hist,sideview,ImpactParams,timeImpact,videoFileName )
+function [ ] =snapshot2( frame,Hist,sideview,ImpactParams,timeImpact)
  
 %UNTITLED6 Summary of this function goes here
 %   Detailed explanation goes here
 global BUMP_RADII BUMP_ANGLE BUMP_POSNS
 
 %% Define recording parameters
-if recordAnimation == 1
-    recordRate = 200;%200/2.5; %Hz %set to same as tStep
-    writerObj = VideoWriter(videoFileName);
-    writerObj.FrameRate = recordRate;
-    open(writerObj);
-end
 
 %% Save inputs to arrays
 t = Hist.times;
@@ -60,9 +54,7 @@ impactZPosn = stateHist(vlookup(t,timeImpact),9);
                                                   %bottom,center, height, width  
 % [wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,-0.5,roundn(impactYPosn,-1)+0.5,(axisMax-axisMin),2);
                                                   
-
-%% Animate!
-for iFrame = 1:frameStep:size(t,1) %set step to 1 for recording
+iFrame = frame;
     %% Rotate body-fixed points to world-frame points
     q = [stateHist(iFrame,10);stateHist(iFrame,11);stateHist(iFrame,12);stateHist(iFrame,13)];
     q = q/norm(q);
@@ -88,9 +80,9 @@ for iFrame = 1:frameStep:size(t,1) %set step to 1 for recording
     bodyPts = [bodyPointWorld1 bodyPointWorld2 bodyPointWorld3 bodyPointWorld4 bodyPointWorld5 bodyPointWorld1];
 
     %% Plot Spiri body points and CoM
-    plot3(bodyPts(1,:),bodyPts(2,:),bodyPts(3,:),'Color',[154 215 227]/255,'LineWidth',2);
+    plot3(bodyPts(1,:),bodyPts(2,:),bodyPts(3,:),'Color',[154 215 227]/255,'LineWidth',4);
     hold on;
-    plot3(translation(1),translation(2),translation(3),'rx','MarkerSize',8); %Centre of mass
+    plot3(translation(1),translation(2),translation(3),'k.','MarkerSize',10); %Centre of mass
 
     
     %% Plot Spiri 3-d bumpers
@@ -99,19 +91,19 @@ for iFrame = 1:frameStep:size(t,1) %set step to 1 for recording
     bumperNormalWorld3 = rotMat'*bumperNormalBody3;
     bumperNormalWorld4 = rotMat'*bumperNormalBody4;
 
-    plotCircle3D(bumperCenterWorld1,bumperNormalWorld1,BUMP_RADII(1),2);
-    plotCircle3D(bumperCenterWorld2,bumperNormalWorld2,BUMP_RADII(2),2);
-    plotCircle3D(bumperCenterWorld3,bumperNormalWorld3,BUMP_RADII(3),2);
-    plotCircle3D(bumperCenterWorld4,bumperNormalWorld4,BUMP_RADII(4),2);
+    plotCircle3D(bumperCenterWorld1,bumperNormalWorld1,BUMP_RADII(1),4);
+    plotCircle3D(bumperCenterWorld2,bumperNormalWorld2,BUMP_RADII(2),4);
+    plotCircle3D(bumperCenterWorld3,bumperNormalWorld3,BUMP_RADII(3),4);
+    plotCircle3D(bumperCenterWorld4,bumperNormalWorld4,BUMP_RADII(4),4);
 
     %% Plot body-fixed axes
-    axisXWorldPts = [comWorld axisXWorld];
-    axisYWorldPts = [comWorld axisYWorld];
-    axisZWorldPts = [comWorld axisZWorld];   
-
-    plot3(axisXWorldPts(1,:),axisXWorldPts(2,:),axisXWorldPts(3,:),'b-','LineWidth',1);
-    plot3(axisYWorldPts(1,:),axisYWorldPts(2,:),axisYWorldPts(3,:),'g-','LineWidth',1);
-    plot3(axisZWorldPts(1,:),axisZWorldPts(2,:),axisZWorldPts(3,:),'r-','LineWidth',1);
+%     axisXWorldPts = [comWorld axisXWorld];
+%     axisYWorldPts = [comWorld axisYWorld];
+%     axisZWorldPts = [comWorld axisZWorld];   
+% 
+%     plot3(axisXWorldPts(1,:),axisXWorldPts(2,:),axisXWorldPts(3,:),'b-','LineWidth',1);
+%     plot3(axisYWorldPts(1,:),axisYWorldPts(2,:),axisYWorldPts(3,:),'g-','LineWidth',1);
+%     plot3(axisZWorldPts(1,:),axisZWorldPts(2,:),axisZWorldPts(3,:),'r-','LineWidth',1);
 
     %% Plot contact points
     for iBumper = 1:4
@@ -120,10 +112,10 @@ for iFrame = 1:frameStep:size(t,1) %set step to 1 for recording
     end
 
     %% Plot wall
-    fill3(wallPts(1,:)',wallPts(2,:)',wallPts(3,:)','r','FaceAlpha',0.4);
-       plot3(wallLines(1,1:2)',wallLines(2,1:2)',wallLines(3,1:2)','r-','LineWidth',3);
-       plot3(wallLines(1,3:4)',wallLines(2,3:4)',wallLines(3,3:4)','r-','LineWidth',3);
-    
+%     fill3(wallPts(1,:)',wallPts(2,:)',wallPts(3,:)','r','FaceAlpha',0.4);
+%        plot3(wallLines(1,1:2)',wallLines(2,1:2)',wallLines(3,1:2)','r-','LineWidth',3);
+%        plot3(wallLines(1,3:4)',wallLines(2,3:4)',wallLines(3,3:4)','r-','LineWidth',3);
+%     
     
 %     %% Color Overlay for Recovery Stage
 %     recoverystage = Hist.controls(iFrame).recoveryStage;    
@@ -149,28 +141,19 @@ for iFrame = 1:frameStep:size(t,1) %set step to 1 for recording
     
     setsimulationview(sideview);
     
+    axis([0.1 1.1,-0.5, 0.5,1.5,2.5])
+    
 %     ax = gca;
 %     set(ax,'XTick',[0 0.5 1 1.5 2]);
 %     set(ax,'YTick',[-1 -0.5 0 0.5 1]);
 %     set(ax,'ZTick',[-0.5 0 0.5 1 1.5]);
     
-    grid on;
+%     grid on;
     axis square;
 
-    drawnow;
+
 %     pause(0.05);
 
-    if recordAnimation == 1
-        frame = getframe;
-        writeVideo(writerObj,frame);
-    end
-
-    hold off;
-end
-
-if recordAnimation == 1
-    close(writerObj);
-end
 
 end
 

@@ -44,7 +44,7 @@ state = reshape(state,[max(size(state)),1]); %make sure state is column vector
 stateDeriv = zeros(13,1); %initialize stateDeriv
 
 %% Saturate Control RPM Rate Signal
-maxRPMDeriv = 70000; %27000 in rpm/s
+maxRPMDeriv = 27000; %27000 in rpm/s
 maxDifference = maxRPMDeriv*tStep;
 
 rpm = zeros(4,1);
@@ -138,15 +138,7 @@ if isempty(propCmds) == 0 %propCmds = [] if not a experiment match simulation
             end
 
             for iMotor = 1:4
-                if isfield(propCmds,'rpmDeriv')
                   rpm(iMotor) = (propCmds(iCmds,1).rpmDeriv(iMotor)~=0)*(sign(rpm(iMotor))*(propCmds(iCmds,1).rpmDeriv(iMotor)*(t - timeImpact - propCmds(iCmds,1).rpmTime)+abs(rpmChkpt(iMotor))));
-                elseif isfield(propCmds, 'rpm')
-%                     disp('set rpm');
-                  rpm(iMotor) = propCmds(iCmds,1).rpm(iMotor)*sign(rpm(iMotor));
-                else
-                    error('invalid Experiment.propCmds');
-                end
-                
             end
 
             break    
@@ -184,4 +176,3 @@ stateDeriv(10:13) = -0.5*quatmultiply([0;state(4:6)],q);
 
 
 end
-

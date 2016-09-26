@@ -11,6 +11,8 @@ switch sideview
         view(-90,0);
     case 'XY'
         view([0 0 1]);
+    case 'YX'
+        view([90 90]);
     case 'V1'
         view([-14.5,6]);
     case 'V2'
@@ -33,6 +35,16 @@ switch sideview
         view(-177,20);   
     case 'VI-01'
         view(-177,-18);
+    case 'VII-08'
+        view(-174,10);
+    case 'VII-11'
+        view(-168, 8);
+    case 'VII-03'
+        view(-177, 12);
+    case 'VII-15'
+        view(-177,6);
+    case 'VII-25'
+        view(-176,-10);
 
 end
 
