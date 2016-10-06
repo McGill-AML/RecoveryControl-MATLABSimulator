@@ -7,7 +7,7 @@ VxImpact = 2;
 pitchImpact = -35; 
 yawImpact = 0;
 
-global g
+global g mag
 global timeImpact
 global globalFlag
 
@@ -37,6 +37,8 @@ Control = initcontrol;
 PropState = initpropstate;
 Setpoint = initsetpoint;
 
+sensParams = initsensor_params;
+
 [Contact, ImpactInfo] = initcontactstructs;
 localFlag = initflags;
 
@@ -46,8 +48,8 @@ ImpactIdentification = initimpactidentification;
 
 %%%%%%%%%%%% ***** SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%%%%
 Control.twist.posnDeriv(1) = VxImpact; %World X Velocity at impact      %%%
-IC.attEuler = [deg2rad(0);deg2rad(pitchImpact);deg2rad(yawImpact)];     %%%
-IC.posn = [ImpactParams.wallLoc-0.3;0;5];                               %%%
+IC.attEuler = [0;0;0]; %[deg2rad(0);deg2rad(pitchImpact);deg2rad(yawImpact)];     %%%
+IC.posn = [ImpactParams.wallLoc-1;0;5];                               %%%
 Setpoint.posn(3) = IC.posn(3);                                          %%%
 xAcc = 0;                                                               %%%
 %%%%%%%%%%% ***** END SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%
@@ -58,11 +60,11 @@ rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(
 SimParams.timeInit = 0; %% comment out if using getinitworldx()
 
 Setpoint.head = IC.attEuler(3);
-Setpoint.time = SimParams.timeInit;
-Setpoint.posn(1) = IC.posn(1);
+Setpoint.time = 1; %SimParams.timeInit;
+Setpoint.posn(1) = IC.posn(1)+5;
 Trajectory = Setpoint;
 
-IC.linVel =  rotMat*[VxImpact;0;0];
+IC.linVel =  [0;0;0]; %rotMat*[VxImpact;0;0];
 
 Experiment.propCmds = [];
 Experiment.manualCmds = [];
@@ -79,12 +81,20 @@ PropState.rpm = IC.rpm;
 [Pose, Twist] = updatekinematics(state, stateDeriv);
 
 %% Initialize sensors
-Sensor = initsensor(rotMat, stateDeriv, Twist);
+Sensor = initsensor(state, stateDeriv, sensParams); % init sensor values
+sensParams = initgps_baro(Sensor, sensParams); %init initial GPS and baro in order to initialize cartesian coord at starting spot
+
+%% Initialize state estimators
+EKF = initEKF;
+AEKF = initAEKF;
+SPKF = initSPKF;
+ASPKF = initASPKF;
 
 %% Initialize History Arrays
 
 % Initialize history 
-Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
+Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
+                sensParams, EKF, AEKF, SPKF, ASPKF);
 
 % Initialize Continuous History
 if SimParams.recordContTime == 1 
@@ -96,10 +106,7 @@ end
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 %     display(iSim)    
     
-    %% Update Sensors
-    rotMat = quat2rotmat(Pose.attQuat);
-    Sensor.accelerometer = (rotMat*[0;0;g] + stateDeriv(1:3) + cross(Twist.angVel,Twist.linVel))/g; %in g's
-    Sensor.gyro = Twist.angVel;
+
     
     %% Impact Detection    
     [ImpactInfo, ImpactIdentification] = detectimpact(iSim, ImpactInfo, ImpactIdentification,...
@@ -153,6 +160,19 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     % Reset contact flags for continuous time recording        
     globalFlag.contact = localFlag.contact;
     
+     %% Update Sensors
+    [Sensor,sensParams] = measurement_model(state, stateDeriv, sensParams, tStep);
+    
+    
+    %% State Estimation
+    SPKF = SPKF_attitude(Sensor, SPKF, EKF, sensParams, tStep);
+    ASPKF = ASPKF_attitude(Sensor, ASPKF, AEKF, sensParams, tStep);
+    
+    EKF = EKF_position(Sensor, EKF, SPKF, Hist.SPKF(end).X_hat.q_hat, sensParams, tStep, iSim);
+    AEKF = AEKF_position(Sensor, AEKF, ASPKF, Hist.ASPKF(end).X_hat.q_hat, sensParams, tStep, iSim);
+    
+    
+    
     %% Record History
     if SimParams.recordContTime == 0
         
@@ -161,9 +181,18 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
                                                          Experiment.propCmds);        
         if sum(globalFlag.contact.isContact)>0
             Contact.hasOccured = 1;
+            if sensParams.crash.new == 1
+                sensParams.crash.time_since = 0;
+                sensParams.crash.new = 0;
+            end
+                
+            sensParams.crash.occur = 1;
+            
             if ImpactInfo.firstImpactOccured == 0
                 ImpactInfo.firstImpactOccured = 1;
             end
+        else
+            sensParams.crash.new = 1;
         end
 
     else      
@@ -192,7 +221,8 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     [Pose, Twist] = updatekinematics(state, stateDeriv);
 
     %Discrete Time recording @ 200 Hz
-    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
+    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
+                        sensParams, EKF, AEKF, SPKF, ASPKF);
 
     %% End loop conditions
     % Navi has crashed:

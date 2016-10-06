@@ -73,13 +73,57 @@ temp2 = [temp{2,:}]; %Control.twist
 temp3 = struct2cell(temp2');
 Plot.controlAngVels = [temp3{4,:}];
 
-
+%sensor stuff
 temp = struct2cell(Hist.sensors);
 Plot.accelerometers = [temp{1,:}];
 Plot.gyros = [temp{2,:}];
+Plot.mag = [temp{3,:}];
+Plot.gps = [temp{4,:}];
+Plot.baro = [temp{5,:}];
 
+temp = struct2cell(Hist.crash);
+Plot.crash = [temp{4,:}];
+Plot.time_since_cont = [temp{5,:}];
 
+temp = struct2cell(Hist.EKF);
+temp2 = struct2cell([temp{1,:}]);
+Plot.EKF_pos = [temp2{1,:}];
+Plot.EKF_vel = [temp2{2,:}];
+Plot.EKF_acc_bias = [temp2{3,:}];
+tempP = [temp{2,:}];
+for ii = 1:9
+    Plot.EKF_P_hat(ii,:) = tempP(ii,ii:9:end);
+end
 
+temp = struct2cell(Hist.AEKF);
+temp2 = struct2cell([temp{1,:}]);
+Plot.AEKF_pos = [temp2{1,:}];
+Plot.AEKF_vel = [temp2{2,:}];
+Plot.AEKF_acc_bias = [temp2{3,:}];
+tempP = [temp{2,:}];
+for ii = 1:9
+    Plot.AEKF_P_hat(ii,:) = tempP(ii,ii:9:end);
+end
+
+% temp = struct2cell(Hist.SPKF);
+% temp2 = struct2cell([temp{1,:}]);
+% Plot.SPKF_pos = [temp2{1,:}];
+% Plot.SPKF_vel = [temp2{2,:}];
+% Plot.SPKF_acc_bias = [temp2{3,:}];
+% tempP = [temp{2,:}];
+% for ii = 1:9
+%     Plot.SPKF_P_hat(ii,:) = tempP(ii,ii:9:end);
+% end
+% 
+% temp = struct2cell(Hist.ASPKF);
+% temp2 = struct2cell([temp{1,:}]);
+% Plot.ASPKF_pos = [temp2{1,:}];
+% Plot.ASPKF_vel = [temp2{2,:}];
+% Plot.ASPKF_acc_bias = [temp2{3,:}];
+% tempP = [temp{2,:}];
+% for ii = 1:9
+%     Plot.ASPKF_P_hat(ii,:) = tempP(ii,ii:9:end);
+% end
 
 % %% Simulate accelerometer data
 % % Reference: "Small Unmanned Aircraft: Theory and Practice" - Beard &

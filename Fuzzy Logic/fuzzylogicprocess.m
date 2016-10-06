@@ -1,5 +1,6 @@
 function [FuzzyInfo,timeCalc] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
                                     Sensor,currentPose, SimParams, Control, FuzzyInfo)
+global g
 timeCalc = [0;0;0;0];
 if SimParams.useRecovery == 1 && Control.recoveryStage == 0
     if ImpactInfo.firstImpactDetected == 1 && Control.accelRefCalculated == 0%Calculate fuzzy inputs
@@ -11,7 +12,7 @@ if SimParams.useRecovery == 1 && Control.recoveryStage == 0
                     switch iInput 
                         case 1 %FLP input 1: Accelerometer Horizontal Magnitude
                             tic;
-                            FuzzyInfo.InputArray(iInput).value = norm(Sensor.accelerometer(1:2));
+                            FuzzyInfo.InputArray(iInput).value = norm(Sensor.acc(1:2)/g);
                             timeCalc(4) = timeCalc(4) + toc;
                         case 2 %FLP input 2: Inclination
                             tic;
@@ -27,8 +28,6 @@ if SimParams.useRecovery == 1 && Control.recoveryStage == 0
                             inclinationSign = sign(angleWithWorldNormal - pi/2);                            
                             
                             FuzzyInfo.InputArray(iInput).value = inclinationSign*rad2deg(inclinationAngle);
-                            disp('Inclination (deg):');
-                            disp(FuzzyInfo.InputArray(2).value);
                             timeCalc(1) = timeCalc(1) + toc;
                         case 3 %FLP input 3: Flipping Direction Angle
                             tic;

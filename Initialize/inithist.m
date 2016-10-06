@@ -1,4 +1,5 @@
-function Hist = inithist(timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor)
+function Hist = inithist(timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag,...
+                        Sensor, sensParams, EKF, AEKF, SPKF, ASPKF)
                 
 % Initialize history of the state and its derivative
 Hist.states = state;
@@ -16,5 +17,12 @@ Hist.localFlag.contact.isContacts = localFlag.contact.isContact;
 Hist.localFlag.contact.initialNormalVels = localFlag.contact.initialNormalVel;
 
 Hist.sensors = Sensor;
+
+Hist.crash = sensParams.crash;
+
+Hist.EKF = EKF;
+Hist.AEKF = AEKF;
+Hist.SPKF = SPKF;
+Hist.ASPKF = ASPKF;
 
 end
