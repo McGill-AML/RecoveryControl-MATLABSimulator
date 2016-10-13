@@ -48,13 +48,13 @@ R_k = diag([sensParams.var_acc;
             sensParams.var_mag]);
         
 %adaptive terms applied to noise matrices
-Delta_G = diag([ones(1,3)/ASPKF.G_k, ASPKF.G_k*ones(1,3)]);
+Delta_G = diag([ones(1,3)*ASPKF.G_k, ones(1,3)]);
 
-lil_del_G = diag(ones(1,6));
+lil_del_G = diag([ones(1,3)*ASPKF.G_k^2, ones(1,3)]);
 
-R_k_G = 1/ASPKF.G_k*lil_del_G*R_k*lil_del_G;
+R_k_G = 1/ASPKF.G_k*lil_del_G*R_k;
 
-Q_k_G = ASPKF.G_k*Delta_G*Q_k_1*Delta_G;
+Q_k_G = ASPKF.G_k*Delta_G*Q_k_1;
 
 
 P_k_1_att =  ASPKF.P_hat;
@@ -144,9 +144,9 @@ end
 if norm(u_b_acc,2) > norm(g,2) + ASPKF.accel_bound || norm(u_b_acc,2) < norm(g,2) - ASPKF.accel_bound
     R_k = diag([sensParams.var_mag]);
     
-    lil_del_G = diag([ones(1,3)]);
+    lil_del_G = diag(ones(1,3));
 
-    R_k_G = 1/ASPKF.G_k*lil_del_G*R_k*lil_del_G;
+    R_k_G = 1/ASPKF.G_k*lil_del_G*R_k;
     
     
     Sigma_Y = zeros(3,2*L+1);
@@ -160,9 +160,9 @@ else
     R_k = diag([sensParams.var_acc;
                 sensParams.var_mag]);
     
-    lil_del_G = diag([ones(1,3),ones(1,3)]);
+    lil_del_G = diag([ones(1,3)*ASPKF.G_k^2,ones(1,3)]);
     
-    R_k_G = 1/ASPKF.G_k*lil_del_G*R_k*lil_del_G;
+    R_k_G = 1/ASPKF.G_k*lil_del_G*R_k;
     
             
     Sigma_Y = zeros(6,2*L+1);

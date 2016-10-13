@@ -1,8 +1,7 @@
-tic
 
-clear all;
+clearvars -except SPKF ASPKF
 
-global g
+global g mag
 global timeImpact
 global globalFlag
 
@@ -18,7 +17,7 @@ SimParams.useRecovery = 1;
 SimParams.timeFinal = 10;
 tStep = 1/100;%1/200;
 
-ImpactParams.wallLoc = 5;%1.5;
+ImpactParams.wallLoc = 0.5;%1.5;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5; %Desired time of impact. Does nothing
 ImpactParams.frictionModel.muSliding = 0.3;
@@ -32,13 +31,16 @@ Control = initcontrol;
 PropState = initpropstate;
 Setpoint = initsetpoint;
 
+sensParams = initsensor_params;
+
+
 [Contact, ImpactInfo] = initcontactstructs;
 localFlag = initflags;
 
 ImpactIdentification = initimpactidentification;
 
 %% Set initial Conditions
-IC.posn = [0;0;2];  
+IC.posn = [ImpactParams.wallLoc-0.5;0;5];  
 IC.angVel = [0;0;0];
 IC.attEuler = [0;0;0];
 IC.linVel = [0;0;0];
@@ -58,33 +60,33 @@ PropState.rpm = IC.rpm;
 %% Waypoint Trajectory
 % Setpt 1
 Setpoint.head = 0;
-Setpoint.time = 0;
-Setpoint.posn = [0;0;2];
+Setpoint.time = 2;
+Setpoint.posn = [0;0;5];
 Trajectory = Setpoint;
 
 % Setpt 2
 Setpoint.head = 0;
-Setpoint.time = Setpoint.time + 5;
-Setpoint.posn = [1;0;2];
+Setpoint.time = Setpoint.time + 10;
+Setpoint.posn = [3;0;5];
 Trajectory = [Trajectory;Setpoint];
 
-% Setpt 3
-Setpoint.head = 0;
-Setpoint.time = Setpoint.time + 5;
-Setpoint.posn = [1;1;2];
-Trajectory = [Trajectory;Setpoint];
-
-% Setpt 4
-Setpoint.head = 0;
-Setpoint.time = Setpoint.time + 5;
-Setpoint.posn = [0;1;2];
-Trajectory = [Trajectory;Setpoint];
-
-% Setpt 5
-Setpoint.head = 0;
-Setpoint.time = Setpoint.time + 5;
-Setpoint.posn = [0;0;2];
-Trajectory = [Trajectory;Setpoint];
+% % Setpt 3
+% Setpoint.head = 0;
+% Setpoint.time = Setpoint.time + 5;
+% Setpoint.posn = [1;1;2];
+% Trajectory = [Trajectory;Setpoint];
+% 
+% % Setpt 4
+% Setpoint.head = 0;
+% Setpoint.time = Setpoint.time + 5;
+% Setpoint.posn = [0;1;2];
+% Trajectory = [Trajectory;Setpoint];
+% 
+% % Setpt 5
+% Setpoint.head = 0;
+% Setpoint.time = Setpoint.time + 5;
+% Setpoint.posn = [0;0;2];
+% Trajectory = [Trajectory;Setpoint];
 
 iTrajectory = 1;
 
@@ -93,13 +95,22 @@ iTrajectory = 1;
 [Pose, Twist] = updatekinematics(state, stateDeriv);
 
 %% Initialize sensors
-Sensor = initsensor(rotMat, stateDeriv, Twist);
+Sensor = initsensor(state, stateDeriv, sensParams); % init sensor values
+sensParams = initgps_baro(Sensor, sensParams); %init initial GPS and baro in order to initialize cartesian coord at starting spot
 
+%% Initialize state estimators
+EKF = initEKF(IC);
+AEKF = initAEKF(IC);
+SPKF = initSPKF(IC,SPKF);
+ASPKF = initASPKF(IC,ASPKF);
+
+time_to_break = 0; %var so sim doesn't stop once it's stabilized
 %% Initialize History Arrays
 
 % Initialize history 
-Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
-
+Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
+                sensParams, EKF, AEKF, SPKF, ASPKF);
+            
 % Initialize Continuous History
 if SimParams.recordContTime == 1 
     ContHist = initconthist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, ...
@@ -115,10 +126,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
             iTrajectory = iTrajectory + 1;            
         end
     end  
-    %% Update Sensors
-    rotMat = quat2rotmat(Pose.attQuat);
-    Sensor.accelerometer = (rotMat*[0;0;g] + stateDeriv(1:3) + cross(Twist.angVel,Twist.linVel))/g; %in g's
-    Sensor.gyro = Twist.angVel;
+
     
     %% Impact Detection    
     [ImpactInfo, ImpactIdentification] = detectimpact(iSim, ImpactInfo, ImpactIdentification,...
@@ -172,7 +180,18 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     % Reset contact flags for continuous time recording        
     globalFlag.contact = localFlag.contact;
     
+     %% Update Sensors
+    [Sensor,sensParams] = measurement_model(state, stateDeriv, sensParams, tStep);
     
+    
+    %% State Estimation
+    SPKF = SPKF_attitude(Sensor, SPKF, EKF, sensParams, tStep);
+    ASPKF = ASPKF_attitude(Sensor, ASPKF, AEKF, sensParams, tStep);
+    
+    EKF = EKF_position(Sensor, EKF, SPKF, Hist.SPKF(end).X_hat.q_hat, sensParams, tStep, iSim);
+    AEKF = AEKF_position(Sensor, AEKF, ASPKF, Hist.ASPKF(end).X_hat.q_hat, sensParams, tStep, iSim);
+    
+    %% Record History
     if SimParams.recordContTime == 0
         
         [stateDeriv, Contact, PropState] = dynamicsystem(tODE(end),stateODE(end,:), ...
@@ -180,9 +199,18 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
                                                          Experiment.propCmds);        
         if sum(globalFlag.contact.isContact)>0
             Contact.hasOccured = 1;
+            if sensParams.crash.new == 1
+                sensParams.crash.time_since = 0;
+                sensParams.crash.new = 0;
+            end
+                
+            sensParams.crash.occur = 1;
+            
             if ImpactInfo.firstImpactOccured == 0
                 ImpactInfo.firstImpactOccured = 1;
             end
+        else
+            sensParams.crash.new = 1;
         end
 
     else      
@@ -211,8 +239,8 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     [Pose, Twist] = updatekinematics(state, stateDeriv);
 
     %Discrete Time recording @ 200 Hz
-    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
-
+    Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
+                        sensParams, EKF, AEKF, SPKF, ASPKF);
     %% End loop conditions
     % Navi has crashed:
     if state(9) <= 0
@@ -229,7 +257,9 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     end
     
     % Recovery control has worked, altitude stabilized:
-    if Control.recoveryStage == 4
+    if Control.recoveryStage == 4 && time_to_break == 0
+        time_to_break = iSim + 4;
+    elseif iSim == time_to_break && iSim ~= 0
         display('Altitude has been stabilized');
         ImpactInfo.isStable = 1;
         break;
@@ -240,3 +270,10 @@ toc
 
 %% Generate plottable arrays
 Plot = hist2plot(Hist);
+
+
+font_size = 15;
+line_size = 15;
+line_width = 2;
+
+

@@ -100,29 +100,37 @@ temp2 = struct2cell([temp{1,:}]);
 Plot.AEKF_pos = [temp2{1,:}];
 Plot.AEKF_vel = [temp2{2,:}];
 Plot.AEKF_acc_bias = [temp2{3,:}];
+Plot.AEKF_G_k = [temp{8,:}];
+for ii = 1:length([temp{9,:}])
+    Plot.AEKF_innov(ii) = norm(temp{9,ii},2);
+end
 tempP = [temp{2,:}];
 for ii = 1:9
     Plot.AEKF_P_hat(ii,:) = tempP(ii,ii:9:end);
 end
 
-% temp = struct2cell(Hist.SPKF);
-% temp2 = struct2cell([temp{1,:}]);
-% Plot.SPKF_pos = [temp2{1,:}];
-% Plot.SPKF_vel = [temp2{2,:}];
-% Plot.SPKF_acc_bias = [temp2{3,:}];
+temp = struct2cell(Hist.SPKF);
+temp2 = struct2cell([temp{2,:}]);
+Plot.SPKF_quat = [temp2{1,:}];
+Plot.SPKF_omega = [temp2{2,:}];
+Plot.SPKF_gyr_bias = [temp2{3,:}];
 % tempP = [temp{2,:}];
-% for ii = 1:9
-%     Plot.SPKF_P_hat(ii,:) = tempP(ii,ii:9:end);
+% for ii = 1:6
+%     Plot.SPKF_P_hat(ii,:) = tempP(ii,ii:6:end);
 % end
-% 
-% temp = struct2cell(Hist.ASPKF);
-% temp2 = struct2cell([temp{1,:}]);
-% Plot.ASPKF_pos = [temp2{1,:}];
-% Plot.ASPKF_vel = [temp2{2,:}];
-% Plot.ASPKF_acc_bias = [temp2{3,:}];
+
+temp = struct2cell(Hist.ASPKF);
+temp2 = struct2cell([temp{2,:}]);
+Plot.ASPKF_quat = [temp2{1,:}];
+Plot.ASPKF_omega = [temp2{2,:}];
+Plot.ASPKF_gyr_bias = [temp2{3,:}];
+Plot.ASPKF_G_k = [temp{8,:}];
+for ii = 1:length([temp{9,:}])
+    Plot.ASPKF_innov(ii) = norm(temp{9,ii},2);
+end
 % tempP = [temp{2,:}];
-% for ii = 1:9
-%     Plot.ASPKF_P_hat(ii,:) = tempP(ii,ii:9:end);
+% for ii = 1:6
+%     Plot.ASPKF_P_hat(ii,:) = tempP(ii,ii:6:end);
 % end
 
 % %% Simulate accelerometer data

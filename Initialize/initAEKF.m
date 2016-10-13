@@ -1,6 +1,6 @@
-function [AEKF] = initAEKF()
+function [AEKF] = initAEKF(IC)
 %initial states vel, pos, acc bias
-AEKF.X_hat.pos_hat = [0;0;0];
+AEKF.X_hat.pos_hat = IC.posn;
 AEKF.X_hat.vel_hat = [0;0;0];
 AEKF.X_hat.bias_acc = [0;0;0];
 

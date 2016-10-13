@@ -12,7 +12,9 @@ function [state, stateDeriv] = initstate(IC, xAcc)
     state(1:3) = IC.linVel; % u v w
     state(4:6) = IC.angVel;   % p q r
     state(7:9) = IC.posn;   % x y z
+%     state(10:13) = angle2quat((IC.attEuler(1)),IC.attEuler(2),IC.attEuler(3),'xyz')';
     state(10:13) = angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')';
+    
     
     rotMat = quat2rotmat(state(10:13));
     stateDeriv(1:3) = rotMat*[xAcc;0;0];

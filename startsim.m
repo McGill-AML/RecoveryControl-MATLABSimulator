@@ -49,7 +49,7 @@ ImpactIdentification = initimpactidentification;
 %%%%%%%%%%%% ***** SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%%%%
 Control.twist.posnDeriv(1) = VxImpact; %World X Velocity at impact      %%%
 IC.attEuler = [0;0;0]; %[deg2rad(0);deg2rad(pitchImpact);deg2rad(yawImpact)];     %%%
-IC.posn = [ImpactParams.wallLoc-1;0;5];                               %%%
+IC.posn = [ImpactParams.wallLoc-0.2;0;5];                               %%%
 Setpoint.posn(3) = IC.posn(3);                                          %%%
 xAcc = 0;                                                               %%%
 %%%%%%%%%%% ***** END SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%
@@ -251,3 +251,8 @@ toc
 
 %% Generate plottable arrays
 Plot = hist2plot(Hist);
+
+
+font_size = 15;
+line_size = 15;
+line_width = 2;

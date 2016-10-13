@@ -53,6 +53,33 @@ xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
 ylabel('$v_{b3}$ (m)','fontsize',font_size,'Interpreter','latex');
 set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
 grid on
+title('Body velocities')
+
+%% acceleration
+
+figure
+subplot(3,1,1)
+plot(Plot.times,Plot.bodyAccs(1,:),'Linewidth',line_width);
+hold on
+xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
+ylabel('$a_{b1}$ (m)','fontsize',font_size,'Interpreter','latex');
+set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
+grid on
+subplot(3,1,2)
+plot(Plot.times,Plot.bodyAccs(2,:),'Linewidth',line_width);
+hold on
+xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
+ylabel('$a_{b2}$ (m)','fontsize',font_size,'Interpreter','latex');
+set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
+grid on
+subplot(3,1,3)
+plot(Plot.times,Plot.bodyAccs(3,:),'Linewidth',line_width);
+hold on
+xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
+ylabel('$a_{b3}$ (m)','fontsize',font_size,'Interpreter','latex');
+set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
+grid on
+title('Body accelerations');
 
 
 %% quaternion

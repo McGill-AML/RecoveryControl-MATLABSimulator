@@ -1,6 +1,6 @@
-function [EKF] = initEKF()
+function [EKF] = initEKF(IC)
 %initial states vel, pos, acc bias
-EKF.X_hat.pos_hat = [0;0;0];
+EKF.X_hat.pos_hat = IC.posn;
 EKF.X_hat.vel_hat = [0;0;0];
 EKF.X_hat.bias_acc = [0;0;0];
 
