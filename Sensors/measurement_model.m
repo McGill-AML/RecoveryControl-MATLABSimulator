@@ -18,19 +18,22 @@ function [Sensor,sensParams] = measurement_model(state, stateDeriv, sensParams, 
     %exponentially as time from impact grows. reset time of crash if another
     %impact or revert to normal variance if long enough. 
     if ~sensParams.crash.occur
-        Sensor.acc = accel + rotMat*[0;0;-g]+ sensParams.bias.acc + randn(3,1).*sensParams.var_acc;
+        Sensor.acc = accel + rotMat*[0;0;g]+ sensParams.bias.acc + randn(3,1).*sensParams.var_acc;
         Sensor.gyro = omega_b_ba + sensParams.bias.gyr + randn(3,1).*sensParams.var_gyr;
     else
         var_acc_crash = sensParams.crash.var_acc*exp(-sensParams.crash.time_since/sensParams.crash.time_const);
-        if var_acc_crash <= sensParams.var_acc
+        if  var_acc_crash <= sensParams.var_acc
             sensParams.crash.occur = 0;
-            sensParams.crash.time_since = 0;
+            Sensor.acc = accel + rotMat*[0;0;g]+ sensParams.bias.acc + randn(3,1).*sensParams.var_acc;
+            Sensor.gyro = omega_b_ba + sensParams.bias.gyr + randn(3,1).*sensParams.var_gyr;
+            
+        else
+            
+            Sensor.acc = accel + rotMat*([0;0;g])+ sensParams.bias.acc + randn(3,1).*var_acc_crash;
+            Sensor.gyro = omega_b_ba + sensParams.bias.gyr + randn(3,1).*sensParams.crash.var_gyr*exp(-sensParams.crash.time_since/sensParams.crash.time_const);
+            
+            sensParams.crash.time_since = sensParams.crash.time_since + tStep;
         end
-        
-        Sensor.acc = rotMat*(accel - [0;0;g])+ sensParams.bias.acc + randn(3,1).*var_acc_crash;
-        Sensor.gyro = omega_b_ba + sensParams.bias.gyr + randn(3,1).*sensParams.crash.var_gyr*exp(-sensParams.crash.time_since/sensParams.crash.time_const);
-        
-        sensParams.crash.time_since = sensParams.crash.time_since + tStep;
     end
 
     Sensor.mag = rotMat*mag + sensParams.bias.mag + randn(3,1).*sensParams.var_mag;

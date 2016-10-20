@@ -1,8 +1,8 @@
 % loop to test variables
 
-for loop_no = 1
-    SPKF.kappa = (loop_no-1)*2;
-    ASPKF.kappa = (loop_no-1)*2;
+for loop_no = 2
+    SPKF.kappa = (loop_no-3)*2;
+    ASPKF.kappa = (loop_no-3)*2;
     
     startsim_trajectory;
     

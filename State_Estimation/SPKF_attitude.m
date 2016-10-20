@@ -18,12 +18,12 @@ q_k_1 = SPKF.X_hat.q_hat;
 
 omega_k_1 = SPKF.X_hat.omega_hat;
 
-rotMat_k_1 = quat2rotmat(q_k_1);
+rotMat = quat2rotmat(q_k_1);
 
 %bias terms
-bias_acc = EKF.X_hat.bias_acc;
+% bias_acc = EKF.X_hat.bias_acc;
 bias_gyr = SPKF.X_hat.bias_gyr;
-
+bias_acc = zeros(3,1);
 
 %measurements
 u_b_acc = Sensor.acc;
@@ -98,11 +98,12 @@ for ii = 1:2*L+1
     %first calc estimated angular vel with sigma pt modified bias terms
     omega_sig(:,ii) = u_b_gyr - Sigma_pts_k_1(4:6,ii) - Sigma_pts_k_1(7:9,ii); %angular velocity
 
+    %estimate orientation using estimated ang vel
     psi_norm = norm(omega_sig(:,ii),2);
-    psi_k_p = sin(0.5*psi_norm*tStep)*omega_sig(:,ii)/psi_norm;
+    psi_k_p = sin(-0.5*psi_norm*tStep)*omega_sig(:,ii)/psi_norm;
     
-    Omega_k_p = [cos(0.5*psi_norm*tStep), -psi_k_p';
-                psi_k_p, cos(0.5*psi_norm*tStep)*eye(3)-cross_mat(psi_k_p)];
+    Omega_k_p = [cos(-0.5*psi_norm*tStep), -psi_k_p';
+                  psi_k_p, cos(-0.5*psi_norm*tStep)*eye(3)+cross_mat(psi_k_p)];
     
     q_k_m_sig(:,ii) = Omega_k_p*q_k_1_sig(:,ii); %predicted quaternion sigma points
     
@@ -134,7 +135,7 @@ if norm(u_b_acc,2) > norm(g,2) + SPKF.accel_bound || norm(u_b_acc,2) < norm(g,2)
         rotMat = quat2rotmat(q_k_m_sig(:,ii));       
         Sigma_Y(1:3,ii) = rotMat*(mag) + Sigma_pts_k_m(16:18,ii); %magnetometer        
     end
-    acc_no_good = 1;
+    SPKF.use_acc = 0;
 else
     R_k = diag([sensParams.var_acc;
                 sensParams.var_mag]);
@@ -145,11 +146,11 @@ else
         
         rotMat = quat2rotmat(q_k_m_sig(:,ii));
         
-        Sigma_Y(1:3,ii) = -rotMat*([0;0;g]) + bias_acc + Sigma_pts_k_m(13:15,ii); %accel
+        Sigma_Y(1:3,ii) = rotMat*([0;0;g]) + bias_acc + Sigma_pts_k_m(13:15,ii); %accel
         Sigma_Y(4:6,ii) = rotMat*(mag) + Sigma_pts_k_m(16:18,ii); %magnetometer
         
     end
-    acc_no_good = 0;
+    SPKF.use_acc = 1;
 end
 
 
@@ -172,16 +173,16 @@ end
 %kalman gain
 K_k = U_k/V_k;
 
-if acc_no_good
-    DX_k = K_k*(u_b_mag - y_k_hat);
-else   
+if SPKF.use_acc
     DX_k = K_k*([u_b_acc; u_b_mag] - y_k_hat);
+else   
+    DX_k = K_k*(u_b_mag - y_k_hat);
 end
 
 
 SPKF.X_hat.bias_gyr = X_k_m(4:6) + DX_k(4:6);
 
-SPKF.X_hat.omega_hat = u_b_gyr - bias_gyr; %ang vel is just gyro minus bias
+SPKF.X_hat.omega_hat = u_b_gyr - SPKF.X_hat.bias_gyr; %ang vel is just gyro minus bias
 
 %need to convert MRP to quaternions
 

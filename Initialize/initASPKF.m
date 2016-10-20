@@ -10,9 +10,9 @@ ASPKF.P_hat = diag([0.01,0.01,0.01, 0.001,0.001, 0.001]); % initial covariance
 %estimator constants
 % ASPKF.kappa = 3; % SPKF scaling factor
 
-ASPKF.accel_bound = 0.5; % +/- how much larger thna gravity before not used in update
+ASPKF.accel_bound = 1; % +/- how much larger thna gravity before not used in update
 
-ASPKF.innov_tresh = 0.5; % innovation sum threshold
+ASPKF.innov_tresh = 1.5; % innovation sum threshold
 
 ASPKF.G_max = 10; % max adaptive gain
 
@@ -24,6 +24,9 @@ ASPKF.G_k = 1; %initial adaptive gain 1 = regular EKF
 ASPKF.innov_k = zeros(30,1); % length of this vector decide how far back to look at innovation
 
 ASPKF.gamma = ones(6); % estimator measurement weights in innovation sum. might need to scale magnetometer?
+
+ASPKF.use_acc = 1; %use accelerometer if within magnitude bounds
+
 
 
 

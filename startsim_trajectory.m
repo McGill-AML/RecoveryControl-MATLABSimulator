@@ -14,7 +14,7 @@ ImpactParams = initparams_navi;
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
 SimParams.useRecovery = 1; 
-SimParams.timeFinal = 10;
+SimParams.timeFinal = 20;
 tStep = 1/100;%1/200;
 
 ImpactParams.wallLoc = 0.5;%1.5;
@@ -42,7 +42,7 @@ ImpactIdentification = initimpactidentification;
 %% Set initial Conditions
 IC.posn = [ImpactParams.wallLoc-0.5;0;5];  
 IC.angVel = [0;0;0];
-IC.attEuler = [0;0;0];
+IC.attEuler = [0;0;pi/5];
 IC.linVel = [0;0;0];
 SimParams.timeInit = 0;
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
@@ -59,13 +59,13 @@ PropState.rpm = IC.rpm;
 
 %% Waypoint Trajectory
 % Setpt 1
-Setpoint.head = 0;
-Setpoint.time = 2;
+Setpoint.head = pi/5;
+Setpoint.time = 4;
 Setpoint.posn = [0;0;5];
 Trajectory = Setpoint;
 
 % Setpt 2
-Setpoint.head = 0;
+Setpoint.head = pi/5;
 Setpoint.time = Setpoint.time + 10;
 Setpoint.posn = [3;0;5];
 Trajectory = [Trajectory;Setpoint];
@@ -103,13 +103,14 @@ EKF = initEKF(IC);
 AEKF = initAEKF(IC);
 SPKF = initSPKF(IC,SPKF);
 ASPKF = initASPKF(IC,ASPKF);
+COMP = initCOMP(IC);
 
 time_to_break = 0; %var so sim doesn't stop once it's stabilized
 %% Initialize History Arrays
 
 % Initialize history 
 Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
-                sensParams, EKF, AEKF, SPKF, ASPKF);
+                sensParams, EKF, AEKF, SPKF, ASPKF, COMP);
             
 % Initialize Continuous History
 if SimParams.recordContTime == 1 
@@ -180,6 +181,11 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     % Reset contact flags for continuous time recording        
     globalFlag.contact = localFlag.contact;
     
+        
+    [stateDeriv, Contact, PropState] = dynamicsystem(tODE(end),stateODE(end,:), ...
+                                                     tStep,Control.rpm,ImpactParams, PropState.rpm, ...
+                                                     Experiment.propCmds);  
+    
      %% Update Sensors
     [Sensor,sensParams] = measurement_model(state, stateDeriv, sensParams, tStep);
     
@@ -191,12 +197,16 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     EKF = EKF_position(Sensor, EKF, SPKF, Hist.SPKF(end).X_hat.q_hat, sensParams, tStep, iSim);
     AEKF = AEKF_position(Sensor, AEKF, ASPKF, Hist.ASPKF(end).X_hat.q_hat, sensParams, tStep, iSim);
     
+    COMP = CompFilt_attitude(Sensor, COMP, EKF, tStep);
+    
     %% Record History
     if SimParams.recordContTime == 0
         
-        [stateDeriv, Contact, PropState] = dynamicsystem(tODE(end),stateODE(end,:), ...
-                                                         tStep,Control.rpm,ImpactParams, PropState.rpm, ...
-                                                         Experiment.propCmds);        
+        %moved this up a notch. otherwise the sensors were behind a
+        %timestep
+%         [stateDeriv, Contact, PropState] = dynamicsystem(tODE(end),stateODE(end,:), ...
+%                                                          tStep,Control.rpm,ImpactParams, PropState.rpm, ...
+%                                                          Experiment.propCmds);        
         if sum(globalFlag.contact.isContact)>0
             Contact.hasOccured = 1;
             if sensParams.crash.new == 1
@@ -240,7 +250,8 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 
     %Discrete Time recording @ 200 Hz
     Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
-                        sensParams, EKF, AEKF, SPKF, ASPKF);
+                        sensParams, EKF, AEKF, SPKF, ASPKF, COMP);
+                    
     %% End loop conditions
     % Navi has crashed:
     if state(9) <= 0
@@ -258,7 +269,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     
     % Recovery control has worked, altitude stabilized:
     if Control.recoveryStage == 4 && time_to_break == 0
-        time_to_break = iSim + 4;
+        time_to_break = iSim + 10;
     elseif iSim == time_to_break && iSim ~= 0
         display('Altitude has been stabilized');
         ImpactInfo.isStable = 1;

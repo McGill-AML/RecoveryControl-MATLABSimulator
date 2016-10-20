@@ -11,4 +11,6 @@ SPKF.P_hat = diag([0.01,0.01,0.01, 0.0001,0.0001, 0.0001]); % initial covariance
 % SPKF.kappa = 3; % SPKF scaling factor
 
 
-SPKF.accel_bound = 0.5; % +/- how much larger thna gravity before not used in update
+SPKF.accel_bound = 1; % +/- how much larger thna gravity before not used in update
+
+SPKF.use_acc = 1; % whether or not accelerometer reading is used in update

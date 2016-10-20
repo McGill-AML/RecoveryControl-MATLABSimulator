@@ -245,10 +245,75 @@ grid on
 title('Accelerometer / body accs');
 legend('body acc','acceleroms');
 
+
+%% Sensor - gyro
+
+figure
+title('Gyroscope measurements');
+subplot(3,1,1)
+plot(Plot.times,Plot.angVels(1,:),'Linewidth',line_width);
+hold on
+plot(Plot.times,Plot.gyros(1,:),'Linewidth',line_width, 'Color', 'r');
+xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
+ylabel('$\omega_{1}$ (m)','fontsize',font_size,'Interpreter','latex');
+set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
+grid on
+subplot(3,1,2)
+plot(Plot.times,Plot.angVels(2,:),'Linewidth',line_width);
+hold on
+plot(Plot.times,Plot.gyros(2,:),'Linewidth',line_width, 'Color', 'r');
+xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
+ylabel('$\omega_{2}$ (m)','fontsize',font_size,'Interpreter','latex');
+set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
+grid on
+subplot(3,1,3)
+plot(Plot.times,Plot.angVels(3,:),'Linewidth',line_width);
+hold on
+plot(Plot.times,Plot.gyros(3,:),'Linewidth',line_width, 'Color', 'r');
+xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
+ylabel('$\omega_{3}$ (m)','fontsize',font_size,'Interpreter','latex');
+set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
+grid on
+legend('\omega','Gyro reading');
+
 %% crash occured
 figure;plot(Plot.times, Plot.crash);grid on;
 title('crash occurs for sensor model');
 
+figure;plot(Plot.times, Plot.time_since_cont);
+title('time since crash occurs for sensor model');
+
+%% plot sensor bias estimates
+figure
+title('Gyroscope bias estimates');
+subplot(3,1,1)
+plot(Plot.times,sensParams.bias.gyr(1)*ones(length(Plot.times),1),'Linewidth',line_width);
+hold on
+plot(Plot.times,Plot.SPKF_gyr_bias(1,:),'Linewidth',line_width, 'Color', 'r');
+plot(Plot.times,Plot.ASPKF_gyr_bias(1,:),'Linewidth',line_width, 'Color', 'y');
+xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
+ylabel('$\omega_{1}$ (m)','fontsize',font_size,'Interpreter','latex');
+set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
+grid on
+subplot(3,1,2)
+plot(Plot.times,sensParams.bias.gyr(2)*ones(length(Plot.times),1),'Linewidth',line_width);
+hold on
+plot(Plot.times,Plot.SPKF_gyr_bias(2,:),'Linewidth',line_width, 'Color', 'r');
+plot(Plot.times,Plot.ASPKF_gyr_bias(2,:),'Linewidth',line_width, 'Color', 'y');
+xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
+ylabel('$\omega_{2}$ (m)','fontsize',font_size,'Interpreter','latex');
+set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
+grid on
+subplot(3,1,3)
+plot(Plot.times,sensParams.bias.gyr(3)*ones(length(Plot.times),1),'Linewidth',line_width);
+hold on
+plot(Plot.times,Plot.SPKF_gyr_bias(3,:),'Linewidth',line_width, 'Color', 'r');
+plot(Plot.times,Plot.ASPKF_gyr_bias(3,:),'Linewidth',line_width, 'Color', 'y');
+xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
+ylabel('$\omega_{3}$ (m)','fontsize',font_size,'Interpreter','latex');
+set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
+grid on
+legend('true bias','SPKF bias','ASPKF bias');
 
 
 %% animate

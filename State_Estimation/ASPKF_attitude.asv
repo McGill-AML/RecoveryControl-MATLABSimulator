@@ -204,7 +204,9 @@ if ASPKF.use_acc
     innov = ([u_b_acc; u_b_mag] - y_k_hat);
     DX_k = K_k*innov; % calc Kalman update term
     ASPKF.innov_k(1) = norm(tStep*ASPKF.gamma(1:6,1:6)*innov,2); %update prev innovation norms
+    
 else   
+    
     innov = (u_b_mag - y_k_hat);
     DX_k = K_k*innov; % calc Kalman update term
     ASPKF.innov_k(1) = norm(tStep*ASPKF.gamma(4:6,4:6)*innov,2); %update prev innovation norms

@@ -14,11 +14,11 @@ function [sensParams] = initsensor_params()
     sensParams.var_baro = 0.9670*1e-0;
 
     %% sensor bias variance - not used as static biases are used instead consider
-    sensParams.var_bias_acc = 0.01;
+    sensParams.var_bias_acc = 0.00000001;
 
-    sensParams.var_bias_gyr  = 0.001;
+    sensParams.var_bias_gyr  = 0.000000001;
 
-    sensParams.var_bias_mag  = 0.0001;
+    sensParams.var_bias_mag  = 0.00000001;
 
     %% walking gps model - not used during crash
     sensParams.var_bias_gps  = .00001;
@@ -34,7 +34,7 @@ function [sensParams] = initsensor_params()
 
     sensParams.bias.acc = randn(3,1)*0.1;
 
-    sensParams.bias.gyr = randn(3,1)*0.001;
+    sensParams.bias.gyr = randn(3,1)*0.01;
 
     sensParams.bias.mag = randn(3,1)*0.001;
 

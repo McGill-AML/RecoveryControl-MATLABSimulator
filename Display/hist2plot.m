@@ -102,7 +102,7 @@ Plot.AEKF_vel = [temp2{2,:}];
 Plot.AEKF_acc_bias = [temp2{3,:}];
 Plot.AEKF_G_k = [temp{8,:}];
 for ii = 1:length([temp{9,:}])
-    Plot.AEKF_innov(ii) = norm(temp{9,ii},2);
+    Plot.AEKF_innov(ii) = sum(temp{9,ii});
 end
 tempP = [temp{2,:}];
 for ii = 1:9
@@ -126,7 +126,7 @@ Plot.ASPKF_omega = [temp2{2,:}];
 Plot.ASPKF_gyr_bias = [temp2{3,:}];
 Plot.ASPKF_G_k = [temp{8,:}];
 for ii = 1:length([temp{9,:}])
-    Plot.ASPKF_innov(ii) = norm(temp{9,ii},2);
+    Plot.ASPKF_innov(ii) = sum(temp{9,ii});
 end
 % tempP = [temp{2,:}];
 % for ii = 1:6
