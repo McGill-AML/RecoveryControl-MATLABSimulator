@@ -23,7 +23,7 @@ rotMat = quat2rotmat(q_k_1);
 %bias terms
 % bias_acc = EKF.X_hat.bias_acc;
 bias_gyr = SPKF.X_hat.bias_gyr;
-bias_acc = zeros(3,1);
+bias_acc = sensParams.bias.acc;
 
 %measurements
 u_b_acc = Sensor.acc;

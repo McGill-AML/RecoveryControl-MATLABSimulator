@@ -3,6 +3,8 @@ function [EKF] = EKF_position(Sensor, EKF, SPKF, q_k_1, ...
 % EKF - kinematic predict - position, velocity and accel bias  \
 % simulates only recieving GPS at given GPS rate 
 
+% predicts POSITION and VELOCITY in the INERTIAL frame
+
 global g
 
 %unpackage
@@ -17,7 +19,7 @@ rotMat_k = quat2rotmat([q_k(1);q_k(2:4)]);
 
 rotMat_k_1 = quat2rotmat(q_k_1); %just used to rotate velocity to inertial frame
 
-vel_k_1 = rotMat_k_1'*EKF.X_hat.vel_hat;
+vel_k_1 = rotMat_k_1'*EKF.X_hat.vel_hat; %inertial frame velocity
 
 %bias terms
 bias_acc_k_1 = EKF.X_hat.bias_acc;
@@ -67,7 +69,7 @@ Q_k = diag([sensParams.var_acc;
 % Q_k = diag([sensParams.var_acc]);
 
 
-vel_k_m = vel_k_1 + tStep*rotMat_k'*(u_b_acc - bias_acc_k_1) + tStep*[0;0;g];
+vel_k_m = vel_k_1 + tStep*rotMat_k'*(u_b_acc - bias_acc_k_1) + tStep*[0;0;-g];
 
 pos_k_m = pos_k_1 + tStep*vel_k_1;
 
@@ -122,7 +124,7 @@ obsvervmat = obsv(F_k_1, H_k);
 
 EKF.X_hat.pos_hat = x_k_hat_pos(1:3);
 
-EKF.X_hat.vel_hat = x_k_hat_pos(4:6);
+EKF.X_hat.vel_hat = rotMat_k*x_k_hat_pos(4:6); % put velocity back into body frame - for comparison with state
 
 EKF.X_hat.bias_acc = x_k_hat_pos(7:9);
     

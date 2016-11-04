@@ -104,13 +104,14 @@ AEKF = initAEKF(IC);
 SPKF = initSPKF(IC,SPKF);
 ASPKF = initASPKF(IC,ASPKF);
 COMP = initCOMP(IC);
+HINF = initHINF(IC);
 
 time_to_break = 0; %var so sim doesn't stop once it's stabilized
 %% Initialize History Arrays
 
 % Initialize history 
 Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
-                sensParams, EKF, AEKF, SPKF, ASPKF, COMP);
+                sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF);
             
 % Initialize Continuous History
 if SimParams.recordContTime == 1 
@@ -197,7 +198,11 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     EKF = EKF_position(Sensor, EKF, SPKF, Hist.SPKF(end).X_hat.q_hat, sensParams, tStep, iSim);
     AEKF = AEKF_position(Sensor, AEKF, ASPKF, Hist.ASPKF(end).X_hat.q_hat, sensParams, tStep, iSim);
     
-    COMP = CompFilt_attitude(Sensor, COMP, EKF, tStep);
+    COMP = CompFilt_attitude(Sensor, COMP, EKF, sensParams, tStep);
+    
+    HINF = HINF_attitude(Sensor, HINF, EKF, sensParams, tStep);
+    
+    
     
     %% Record History
     if SimParams.recordContTime == 0
@@ -250,7 +255,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 
     %Discrete Time recording @ 200 Hz
     Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
-                        sensParams, EKF, AEKF, SPKF, ASPKF, COMP);
+                        sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF);
                     
     %% End loop conditions
     % Navi has crashed:

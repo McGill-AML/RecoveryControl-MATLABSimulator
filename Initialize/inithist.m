@@ -1,5 +1,5 @@
 function Hist = inithist(timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag,...
-                        Sensor, sensParams, EKF, AEKF, SPKF, ASPKF, COMP)
+                        Sensor, sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF)
                 
 % Initialize history of the state and its derivative
 Hist.states = state;
@@ -27,4 +27,5 @@ Hist.ASPKF = ASPKF;
 
 Hist.COMP = COMP;
 
+Hist.HINF = HINF;
 end

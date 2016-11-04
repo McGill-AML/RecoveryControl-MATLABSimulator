@@ -3,9 +3,9 @@ function Sensor = initsensor(state, state_deriv, sensParams)
     
     position = state(7:9);
 
-    velocity = state(1:3);
+    velocity = state(1:3); % velocity in body
 
-    accel = state_deriv(1:3);
+    accel = state_deriv(1:3);  %  accel in body
 
     eta = state(10);
     epsilon = state(11:13);
@@ -14,14 +14,14 @@ function Sensor = initsensor(state, state_deriv, sensParams)
 
     rotMat = quat2rotmat([eta;epsilon]);
 
-    Sensor.acc = accel + rotMat*[0;0;-g]+ sensParams.bias.acc + randn(3,1).*sensParams.var_acc;
+    Sensor.acc = accel + rotMat*[0;0;g]+ sensParams.bias.acc + randn(3,1).*sensParams.var_acc;
     
     Sensor.gyro = omega_b_ba + sensParams.bias.gyr + randn(3,1).*sensParams.var_gyr;
 
 
     Sensor.mag = rotMat*mag + sensParams.bias.mag + randn(3,1).*sensParams.var_mag;
 
-    gps = XYZ_to_GPS(position, velocity, sensParams.gps_init);
+    gps = XYZ_to_GPS(position, rotMat'*velocity, sensParams.gps_init);
 
     Sensor.gps = gps(1:5) +  [sensParams.bias.gps; zeros(2,1)] + randn(5,1).*sensParams.var_gps;
 

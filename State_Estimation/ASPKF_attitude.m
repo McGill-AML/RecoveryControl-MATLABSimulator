@@ -22,8 +22,9 @@ omega_k_1 = ASPKF.X_hat.omega_hat;
 rotMat_k_1 = quat2rotmat(q_k_1);
 
 %bias terms
-bias_acc = AEKF.X_hat.bias_acc;
+% bias_acc = AEKF.X_hat.bias_acc;
 bias_gyr = ASPKF.X_hat.bias_gyr;
+bias_acc = sensParams.bias.acc; % for the sake of comparing attitude estimators assume no accelerometer bias.
 
 
 %measurements

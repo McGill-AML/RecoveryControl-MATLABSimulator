@@ -4,6 +4,7 @@ function [AEKF] = AEKF_position(Sensor, AEKF, ASPKF, q_k_1, ...
 % Adaptive process and measurement noise covariance matrices
 % simulates only recieving GPS at given GPS rate 
 
+% predicts POSITION and VELOCITY in the INERTIAL frame
                                        
 global g
 
@@ -21,7 +22,7 @@ rotMat_k = quat2rotmat(q_k);
 
 rotMat_k_1 = quat2rotmat(q_k_1); %just used to rotate velocity to inertial frame
 
-vel_k_1 = rotMat_k_1'*AEKF.X_hat.vel_hat;
+vel_k_1 = rotMat_k_1'*AEKF.X_hat.vel_hat; % velocity in the inertial frame
 
 %bias terms
 bias_acc_k_1 = AEKF.X_hat.bias_acc;
@@ -74,7 +75,7 @@ Delta_G = diag([AEKF.G_k*ones(1,3), AEKF.G_k*ones(1,3)]);
 Q_k_G = AEKF.G_k*Delta_G*Q_k_1*Delta_G;
         
 
-vel_k_m = vel_k_1 + tStep*rotMat_k'*(u_b_acc - bias_acc_k_1) + tStep*[0;0;g];
+vel_k_m = vel_k_1 + tStep*rotMat_k'*(u_b_acc - bias_acc_k_1) + tStep*[0;0;-g];
 
 pos_k_m = pos_k_1 + tStep*vel_k_1;
 
@@ -163,7 +164,7 @@ end
 
 AEKF.X_hat.pos_hat = x_k_hat_pos(1:3);
 
-AEKF.X_hat.vel_hat = x_k_hat_pos(4:6);
+AEKF.X_hat.vel_hat = rotMat_k*x_k_hat_pos(4:6); % bring vleocity back into body frame
 
 AEKF.X_hat.bias_acc = x_k_hat_pos(7:9);
 

@@ -1,7 +1,10 @@
 function [sensParams] = initsensor_params()
     global mag
     
-    mag = [0.3;0.2;0.5];
+    % actual montreal mag field
+    mag = [0.3;-.07;0.94];
+%     mag = [0.9; .2; 0];
+    
     % sendor variances
     sensParams.var_acc = [1;  1;  1];
 

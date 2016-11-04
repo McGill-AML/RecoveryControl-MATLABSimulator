@@ -1,4 +1,4 @@
-function [COMP] = CompFilt_attitude(Sensor, COMP, EKF, tStep)
+function [COMP] = CompFilt_attitude(Sensor, COMP, EKF, sensParams, tStep)
 % Explicit Complementary filter - notation and design as used in paper
 % Mahony et al - Nonlinear Complementary Filter on SO(3)
 
@@ -17,8 +17,9 @@ omega_k_1 = COMP.X_hat.omega_hat;
 rotMat_k_1 = quat2rotmat(q_k_1);
 
 %bias terms
-bias_acc = EKF.X_hat.bias_acc;
+% bias_acc = EKF.X_hat.bias_acc;
 bias_gyr = COMP.X_hat.bias_gyr;
+bias_acc = sensParams.bias.acc; % for the sake of comparing attitude estimators ignore accel bias
 
 
 %measurements
@@ -48,6 +49,8 @@ else
     
 end
 
+    %debug term
+    COMP.w_mes = w_mes;
 %use Euler integration to compute bias update and quaternion update (with
 %brute force normalization)
 %gyro bias
@@ -56,14 +59,19 @@ bias_gyr = bias_gyr - tStep*COMP.gyr_bias_k_i*w_mes;
 %quaternion
 p = u_b_gyr - bias_gyr + COMP.k_p*w_mes;
 
-q_dot_hat = 1/2*quatmultiply( q_k_1, [0;p]);
+psi_norm = norm(p,2);
+psi_k_p = sin(-0.5*psi_norm*tStep)*p/psi_norm;
 
-q_k = q_k_1 + tStep*q_dot_hat;
+Omega_k_p = [cos(-0.5*psi_norm*tStep), -psi_k_p';
+            psi_k_p, cos(-0.5*psi_norm*tStep)*eye(3)+cross_mat(psi_k_p)];
+
+
+q_k = Omega_k_p*q_k_1;
 
 q_k = q_k/norm(q_k,2); %normalize quaternion
 
 COMP.X_hat.q_hat = q_k;
-COMP.X_hat.omega_hat = omega_k_1 - bias_gyr;
+COMP.X_hat.omega_hat = u_b_gyr - bias_gyr;
 COMP.X_hat.bias_gyr = bias_gyr;
 
 

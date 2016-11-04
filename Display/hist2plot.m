@@ -1,6 +1,6 @@
 function [ Plot ] = hist2plot( Hist )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+%convert history structure to plotable data
+% 
 
 Plot.times = Hist.times;
 
@@ -128,6 +128,25 @@ Plot.ASPKF_G_k = [temp{8,:}];
 for ii = 1:length([temp{9,:}])
     Plot.ASPKF_innov(ii) = sum(temp{9,ii});
 end
+
+
+temp = struct2cell(Hist.COMP);
+temp2 = struct2cell([temp{1,:}]);
+Plot.COMP_quat = [temp2{1,:}];
+Plot.COMP_omega = [temp2{2,:}];
+Plot.COMP_gyr_bias = [temp2{3,:}];
+Plot.COMP_w_mes = [temp{2,:}];
+
+temp = struct2cell(Hist.HINF);
+temp2 = struct2cell([temp{1,:}]);
+Plot.HINF_quat = [temp2{1,:}];
+Plot.HINF_omega = [temp2{2,:}];
+Plot.HINF_gyr_bias = [temp2{3,:}];
+
+
+
+
+
 % tempP = [temp{2,:}];
 % for ii = 1:6
 %     Plot.ASPKF_P_hat(ii,:) = tempP(ii,ii:6:end);
