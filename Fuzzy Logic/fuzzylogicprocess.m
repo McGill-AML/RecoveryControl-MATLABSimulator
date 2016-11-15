@@ -1,7 +1,7 @@
 function [FuzzyInfo] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
                                     Sensor,currentPose, SimParams, Control, FuzzyInfo)
 
-if SimParams.useRecovery == 1 && Control.recoveryStage == 0
+if SimParams.useRecovery == 1 
     if ImpactInfo.firstImpactDetected == 1 && Control.accelRefCalculated == 0%Calculate fuzzy inputs
         for iInput = 1:4
             if FuzzyInfo.InputsCalculated(iInput) == 0
@@ -20,11 +20,10 @@ if SimParams.useRecovery == 1 && Control.recoveryStage == 0
                             inclinationAngle = acos(dotProductWithWorldZ/norm(bodyZProjection));
                             
                             dotProductWithWorldNormal = dot(bodyZProjection,ImpactIdentification.wallNormalWorld);
-                            angleWithWorldNormal = acos(dotProductWithWorldNormal/(norm(bodyZProjection)*norm(ImpactIdentification.wallNormalWorld)));                            
-                            inclinationSign = sign(angleWithWorldNormal - pi/2);                            
+                            angleWithWorldNormal = acos(dotProductWithWorldNormal/(norm(bodyZProjection)*norm(ImpactIdentification.wallNormalWorld)));                        
+                            inclinationSign = sign(angleWithWorldNormal - pi/2);                          
                             
                             FuzzyInfo.InputArray(iInput).value = inclinationSign*rad2deg(inclinationAngle); 
-                            %disp('input 2 calc');
                         case 3 %FLP input 3: Flipping Direction Angle
                             %Try calculating according to world frame:
                             rotMat = quat2rotmat(currentPose.attQuat); 

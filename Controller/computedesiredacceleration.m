@@ -4,13 +4,8 @@ function [Control] = computedesiredacceleration(Control, Twist)
     % Introduce vertical velocity control gain at recovery stage 3
     switch Control.recoveryStage
         case 0 % Normal Flight
-            warning('Using recovery controller during Normal Flight');
-            Control.accelRef = [g/4; 0; 0];
             dZ = 0;
         case 1 % Stabilize Attitude to "away" orientation with zero yaw rate
-            % Control.accelRef comes from Fuzzy Logic 
-%             display('Fuzzy Logic accelRef:');
-%             display(Control.accelRef)
             dZ = 0;
         case 2 %Stabilize Attitude to "hover" orientation
             Control.accelRef = [0; 0; 0];
@@ -20,6 +15,7 @@ function [Control] = computedesiredacceleration(Control, Twist)
             Control.accelRef = [0; 0; 0];
         case 4 %Stabilize Horizontal Position
             dZ = 5;
+            Control.accelRef = [0; 0; 0];
         otherwise 
             error('Invalid recovery stage!');    
     end
