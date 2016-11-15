@@ -1,14 +1,9 @@
 %% Plot Monte Carlo Results
+% load('recovery_dumb.mat');
 load('recovery_dumb.mat');
-%%
-% Monte.trial = trial;
-% Monte.IC = IC;
-% Monte.recovery = recovery;
-% Monte.heightLoss = heightLoss;
-% Monte.horizLoss = horizLoss;
  
 Plot = monte2plot(Monte);
-%%
+%
 num_iter = 1000;
 
 %% Recovery Percentages
@@ -32,26 +27,28 @@ axis([-60 60 0 5]);
 title('No Crash and No Recovery Initial Pitch Angles');
 xlabel('Initial Pitch Angle (deg)');
 ylabel('Number of trials');
-histogram(-1*Monte.inclination(failure),num_iter/10);
+% histogram(-1*Monte.inclination(failure),num_iter/10);
 
-legend('No crash','No recovery pitch','No recovery inclination');
+legend('No crash','No recovery pitch');
 % Alternately Inclination angle
 
 % Note: no correspondance between roll/yaw and failure cases
 
 %% Height Loss
 histogram(Monte.heightLoss(Monte.heightLoss~=0),num_iter/10);
-title('Height loss for 1000 trials');
+title('Height loss for trials which recovered');
 xlabel('Height loss (meters)');
 ylabel('Number of trials');
+axis([-3.5 0.5 0 250])
  
 %% Horizontal Loss
 % histogram(Plot.horizLoss,num_iter/10);
-histogram(Monte.horizLoss(Monte.horizLoss~=0),num_iter)
-title('Horizontal loss for 1000 trials');
+histogram(Monte.horizLoss(Monte.horizLoss~=0),num_iter/10)
+title('Horizontal loss for recovered trials');
 xlabel('Horizontal loss (meters)');
 ylabel('Number of trials');
-
+axis([0 4.5 0 250])
+ 
 
 %% How long each trial took to reach stages two and three
 histogram(Plot.timeUntilStageTwo(Plot.timeUntilStageTwo~=0), num_iter/10);
@@ -68,7 +65,7 @@ ylabel('Number of trials');
 
 %% Matching ICs of trials with stage two time in second peak
  
-secondWaveTrials = Plot.trial(Plot.timeUntilStageTwo > 1.2);
+secondWaveTrials = Plot.trial(Plot.timeUntilStageTwo > 0.6);
  
 incomingRoll = rad2deg(Plot.initAngles(1,:));
 incomingPitch = rad2deg(Plot.initAngles(2,:));
