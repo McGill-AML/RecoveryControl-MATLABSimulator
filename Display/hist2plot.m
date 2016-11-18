@@ -100,9 +100,9 @@ temp2 = struct2cell([temp{1,:}]);
 Plot.AEKF_pos = [temp2{1,:}];
 Plot.AEKF_vel = [temp2{2,:}];
 Plot.AEKF_acc_bias = [temp2{3,:}];
-Plot.AEKF_G_k = [temp{8,:}];
-for ii = 1:length([temp{9,:}])
-    Plot.AEKF_innov(ii) = sum(temp{9,ii});
+Plot.AEKF_G_k = [temp{7,:}];
+for ii = 1:length([temp{8,:}])
+    Plot.AEKF_innov(ii) = sum(temp{8,ii});
 end
 tempP = [temp{2,:}];
 for ii = 1:9
@@ -125,6 +125,7 @@ Plot.ASPKF_quat = [temp2{1,:}];
 Plot.ASPKF_omega = [temp2{2,:}];
 Plot.ASPKF_gyr_bias = [temp2{3,:}];
 Plot.ASPKF_G_k = [temp{8,:}];
+Plot.use_acc = [temp{11,:}];
 for ii = 1:length([temp{9,:}])
     Plot.ASPKF_innov(ii) = sum(temp{9,ii});
 end
@@ -142,6 +143,15 @@ temp2 = struct2cell([temp{1,:}]);
 Plot.HINF_quat = [temp2{1,:}];
 Plot.HINF_omega = [temp2{2,:}];
 Plot.HINF_gyr_bias = [temp2{3,:}];
+
+temp = struct2cell(Hist.SPKF_full);
+temp2 = struct2cell([temp{2,:}]);
+Plot.SPKF_full_pos = [temp2{1,:}];
+Plot.SPKF_full_vel = [temp2{2,:}];
+Plot.SPKF_full_quat = [temp2{3,:}];
+Plot.SPKF_full_omega = [temp2{4,:}];
+Plot.SPKF_full_acc_bias = [temp2{5,:}];
+Plot.SPKF_full_gyr_bias = [temp2{6,:}];
 
 
 

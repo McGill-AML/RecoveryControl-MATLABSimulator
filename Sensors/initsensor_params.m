@@ -6,7 +6,7 @@ function [sensParams] = initsensor_params()
 %     mag = [0.9; .2; 0];
     
     % sendor variances
-    sensParams.var_acc = [1;  1;  1];
+    sensParams.var_acc = [1; 1;  1];
 
     sensParams.var_gyr = [1.8*1e-3; 1.8*1e-3; 1.8*1e-3];
 
@@ -37,7 +37,7 @@ function [sensParams] = initsensor_params()
 
     sensParams.bias.acc = randn(3,1)*0.1;
 
-    sensParams.bias.gyr = randn(3,1)*0.01;
+    sensParams.bias.gyr = [ -0.0173; -0.0056; 0.0218];%randn(3,1)*0.01;
 
     sensParams.bias.mag = randn(3,1)*0.001;
 
@@ -55,7 +55,7 @@ function [sensParams] = initsensor_params()
     
     sensParams.crash.var_gyr = 0.1;
     
-    sensParams.crash.time_const = 0.1;
+    sensParams.crash.time_const = 0.4;
     
     sensParams.crash.occur = 0;
     

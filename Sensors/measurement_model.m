@@ -44,7 +44,7 @@ function [Sensor,sensParams] = measurement_model(state, stateDeriv, sensParams, 
 
     % z is negative because here z is down - also we assume the system
     % initialized to whatever the GPS initial height is
-    Sensor.baro = 101325*(1-2.25577*10^-5*(-position(3)+sensParams.gps_init(3)))^5.25588 + sensParams.bias.baro + randn(1,1)*sensParams.var_baro;
+    Sensor.baro = 101325*(1-2.25577*10^-5*(position(3)+sensParams.gps_init(3)))^5.25588 + sensParams.bias.baro + randn(1,1)*sensParams.var_baro;
 
 
 end

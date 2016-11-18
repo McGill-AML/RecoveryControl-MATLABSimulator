@@ -1,15 +1,13 @@
-function [AEKF] = initAEKF(IC)
+function [AEKF] = initAEKF(Est_ICs)
 %initial states vel, pos, acc bias
-AEKF.X_hat.pos_hat = IC.posn;
-AEKF.X_hat.vel_hat = [0;0;0];
-AEKF.X_hat.bias_acc = [0;0;0];
+AEKF.X_hat.pos_hat = Est_ICs.posn;
+AEKF.X_hat.vel_hat = Est_ICs.linVel;
+AEKF.X_hat.bias_acc = Est_ICs.bias_acc;
 
 % initial covariance pos, vel, acc_bias
-AEKF.P_hat = diag([0.1,0.1,0.1, 0.005,0.005,0.005, 0.0001, 0.0001, 0.0001]); 
+AEKF.P_hat = Est_ICs.P_init_pos; 
 
 %estimator constants
-AEKF.kappa = 0; % dont need in EKF either
-
 AEKF.accel_bound = 0.5; % accelerometer bound - dont need in EKF <---***
 
 AEKF.innov_tresh = 0.05; % innovation sum threshold

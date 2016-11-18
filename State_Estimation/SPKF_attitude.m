@@ -1,5 +1,5 @@
-function [SPKF] = SPKF_attitude(Sensor, SPKF, EKF, sensParams, tStep)
-% SPKF - kinematic prediction for orientation
+function [SPKF_full] = SPKF_full_state(Sensor, SPKF_full, sensParams, tStep)
+% SPKF_full - kinematic prediction for orientation
 % this estimator uses an MRP formulation of the quaternion in a sigma point
 % kalman filter to propagate the state estimate. Only estimates gryo bias
 % and quaternion - angular velocity is assumed to be gyro value minus bias
@@ -10,19 +10,19 @@ function [SPKF] = SPKF_attitude(Sensor, SPKF, EKF, sensParams, tStep)
 global g mag
 %unpackage
 %states
-pos_k_1 = EKF.X_hat.pos_hat;
+pos_k_1 = SPKF_full_full.X_hat.pos_hat;
 
-vel_k_1 = EKF.X_hat.vel_hat;
+vel_k_1 = SPKF_full_full.X_hat.vel_hat;
 
-q_k_1 = SPKF.X_hat.q_hat;
+q_k_1 = SPKF_full.X_hat.q_hat;
 
-omega_k_1 = SPKF.X_hat.omega_hat;
+omega_k_1 = SPKF_full.X_hat.omega_hat;
 
 rotMat = quat2rotmat(q_k_1);
 
 %bias terms
-% bias_acc = EKF.X_hat.bias_acc;
-bias_gyr = SPKF.X_hat.bias_gyr;
+% bias_acc = SPKF_full_full.X_hat.bias_acc;
+bias_gyr = SPKF_full.X_hat.bias_gyr;
 bias_acc = sensParams.bias.acc;
 
 %measurements
@@ -46,7 +46,7 @@ Q_k_1 = diag([sensParams.var_gyr;
 R_k = diag([sensParams.var_acc; 
             sensParams.var_mag]);
         
-P_k_1_att = SPKF.P_hat;
+P_k_1_att = SPKF_full.P_hat;
 
 %construct matrix to find sigma point modifiers
 Y = blkdiag(P_k_1_att,Q_k_1,R_k); 
@@ -71,8 +71,8 @@ q_k_1_sig(:,1) = q_k_1;
 for ii = 1:L
     
     %make sigma points
-    Sigma_pts_k_1(:,ii+1) = Sigma_pts_k_1(:,1) + sqrt(L+SPKF.kappa)*S(:,ii);
-    Sigma_pts_k_1(:,L+ii+1) = Sigma_pts_k_1(:,1) - sqrt(L+SPKF.kappa)*S(:,ii);
+    Sigma_pts_k_1(:,ii+1) = Sigma_pts_k_1(:,1) + sqrt(L+SPKF_full.kappa)*S(:,ii);
+    Sigma_pts_k_1(:,L+ii+1) = Sigma_pts_k_1(:,1) - sqrt(L+SPKF_full.kappa)*S(:,ii);
     
     %convert MRP sigma points into quaternions by crassidis' chose a = f = 1
     eta_k_d_pos = (1-Sigma_pts_k_1(1:3,ii+1)'*Sigma_pts_k_1(1:3,ii+1))/(1+Sigma_pts_k_1(1:3,ii+1)'*Sigma_pts_k_1(1:3,ii+1));
@@ -116,17 +116,17 @@ for ii = 1:2*L+1
     Sigma_pts_k_m(13:end,ii) = Sigma_pts_k_1(13:end,ii);
 end
 %find state and covariance predictions
-X_k_m = 1/(L+SPKF.kappa)*(SPKF.kappa*Sigma_pts_k_m(1:6,1)+0.5*sum(Sigma_pts_k_m(1:6,2:2*L+1),2));
+X_k_m = 1/(L+SPKF_full.kappa)*(SPKF_full.kappa*Sigma_pts_k_m(1:6,1)+0.5*sum(Sigma_pts_k_m(1:6,2:2*L+1),2));
 
-P_k_m = 1/(L+SPKF.kappa)*(SPKF.kappa*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6))*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6))');
+P_k_m = 1/(L+SPKF_full.kappa)*(SPKF_full.kappa*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6))*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6))');
 for ii = 2:2*L+1
-    P_k_m = P_k_m+1/(L+SPKF.kappa)*(0.5*(Sigma_pts_k_m(1:6,ii)-X_k_m(1:6))*(Sigma_pts_k_m(1:6,ii)-X_k_m(1:6))');
+    P_k_m = P_k_m+1/(L+SPKF_full.kappa)*(0.5*(Sigma_pts_k_m(1:6,ii)-X_k_m(1:6))*(Sigma_pts_k_m(1:6,ii)-X_k_m(1:6))');
 end 
 
 %%
 %measurement sigma and correct
 % bound so if there's large acceleration (besides gravity) dont use
-if norm(u_b_acc,2) > norm(g,2) + SPKF.accel_bound || norm(u_b_acc,2) < norm(g,2) - SPKF.accel_bound
+if norm(u_b_acc,2) > norm(g,2) + SPKF_full.accel_bound || norm(u_b_acc,2) < norm(g,2) - SPKF_full.accel_bound
     R_k = diag([sensParams.var_mag]);
     
     Sigma_Y = zeros(3,2*L+1);
@@ -135,7 +135,7 @@ if norm(u_b_acc,2) > norm(g,2) + SPKF.accel_bound || norm(u_b_acc,2) < norm(g,2)
         rotMat = quat2rotmat(q_k_m_sig(:,ii));       
         Sigma_Y(1:3,ii) = rotMat*(mag) + Sigma_pts_k_m(16:18,ii); %magnetometer        
     end
-    SPKF.use_acc = 0;
+    SPKF_full.use_acc = 0;
 else
     R_k = diag([sensParams.var_acc;
                 sensParams.var_mag]);
@@ -150,39 +150,39 @@ else
         Sigma_Y(4:6,ii) = rotMat*(mag) + Sigma_pts_k_m(16:18,ii); %magnetometer
         
     end
-    SPKF.use_acc = 1;
+    SPKF_full.use_acc = 1;
 end
 
 
-y_k_hat = 1/(L+SPKF.kappa)*(SPKF.kappa*Sigma_Y(:,1)+0.5*sum(Sigma_Y(:,2:2*L+1),2));
+y_k_hat = 1/(L+SPKF_full.kappa)*(SPKF_full.kappa*Sigma_Y(:,1)+0.5*sum(Sigma_Y(:,2:2*L+1),2));
 
 %now find matrices needed for kalman gain
 
-V_k = SPKF.kappa/(L+SPKF.kappa)*(Sigma_Y(:,1)-y_k_hat)*(Sigma_Y(:,1)-y_k_hat)';
+V_k = SPKF_full.kappa/(L+SPKF_full.kappa)*(Sigma_Y(:,1)-y_k_hat)*(Sigma_Y(:,1)-y_k_hat)';
 for ii = 2:2*L+1
-    V_k = V_k+.5/(L+SPKF.kappa)*(Sigma_Y(:,ii)-y_k_hat)*(Sigma_Y(:,ii)-y_k_hat)';
+    V_k = V_k+.5/(L+SPKF_full.kappa)*(Sigma_Y(:,ii)-y_k_hat)*(Sigma_Y(:,ii)-y_k_hat)';
 end
 V_k = V_k + R_k;
 
-U_k = SPKF.kappa/(L+SPKF.kappa)*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6))*(Sigma_Y(:,1)-y_k_hat)';
+U_k = SPKF_full.kappa/(L+SPKF_full.kappa)*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6))*(Sigma_Y(:,1)-y_k_hat)';
 
 for ii =2:2*L+1
-    U_k = U_k + .5/(L+SPKF.kappa)*(Sigma_pts_k_m(1:6,ii)-X_k_m(1:6))*(Sigma_Y(:,ii)-y_k_hat)';
+    U_k = U_k + .5/(L+SPKF_full.kappa)*(Sigma_pts_k_m(1:6,ii)-X_k_m(1:6))*(Sigma_Y(:,ii)-y_k_hat)';
 end
 
 %kalman gain
 K_k = U_k/V_k;
 
-if SPKF.use_acc
+if SPKF_full.use_acc
     DX_k = K_k*([u_b_acc; u_b_mag] - y_k_hat);
 else   
     DX_k = K_k*(u_b_mag - y_k_hat);
 end
 
 
-SPKF.X_hat.bias_gyr = X_k_m(4:6) + DX_k(4:6);
+SPKF_full.X_hat.bias_gyr = X_k_m(4:6) + DX_k(4:6);
 
-SPKF.X_hat.omega_hat = u_b_gyr - SPKF.X_hat.bias_gyr; %ang vel is just gyro minus bias
+SPKF_full.X_hat.omega_hat = u_b_gyr - SPKF_full.X_hat.bias_gyr; %ang vel is just gyro minus bias
 
 %need to convert MRP to quaternions
 
@@ -190,14 +190,14 @@ q_k_upd(1) = (1-DX_k(1:3)'*DX_k(1:3))/(1+DX_k(1:3)'*DX_k(1:3));
 
 q_k_upd(2:4,1) = (1+q_k_upd(1))*DX_k(1:3);
 
-SPKF.X_hat.q_hat = quatmultiply(q_k_upd,q_k_m_sig(:,1));
+SPKF_full.X_hat.q_hat = quatmultiply(q_k_upd,q_k_m_sig(:,1));
 
 
 upd =  K_k*V_k*K_k';
 P_hat = P_k_m - upd;
 
 
-SPKF.P_hat = 0.5*(P_hat + P_hat');
+SPKF_full.P_hat = 0.5*(P_hat + P_hat');
 
 
 

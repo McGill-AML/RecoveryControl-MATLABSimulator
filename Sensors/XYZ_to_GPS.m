@@ -1,6 +1,6 @@
 function gps_out = XYZ_to_GPS(position, velocity, init_GPS)
 
-% converts position in the NED frame to GPS coordinates
+% converts position in the NED inertial frame to GPS coordinates
 % init_GPS = [lat_0, long_0, altitude_0]
 
 lat_0 = init_GPS(1);

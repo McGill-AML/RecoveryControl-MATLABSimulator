@@ -72,7 +72,7 @@ A_k_1 = [ -0.5*tStep*[A_k_1_1, A_k_1_2];
           zeros(3,4), eye(3)];
 
 % process noise weighting matrix, could change if we know gyro noise is more?
-B_k_1 = tStep*blkdiag(eye(4), eye(3)); 
+B_k_1 = tStep*blkdiag(eye(4), eye(3)*0.01); 
 
 %predict covariance matrix
 HINF.P_hat = A_k_1*HINF.P_hat_eps*A_k_1' + B_k_1*B_k_1';

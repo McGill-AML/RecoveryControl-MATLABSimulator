@@ -414,7 +414,7 @@ xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
 ylabel('$\omega_{3}$ (m)','fontsize',font_size,'Interpreter','latex');
 set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
 grid on
-legend('true bias','SPKF bias','ASPKF bias',);
+legend('true bias','SPKF bias','ASPKF bias');
 
 %% plot GPS coordinates
 

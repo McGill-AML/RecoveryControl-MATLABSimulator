@@ -1,8 +1,8 @@
-function [EKF] = initEKF(IC)
+function [EKF] = initEKF(Est_ICs)
 %initial states vel, pos, acc bias
-EKF.X_hat.pos_hat = IC.posn;
-EKF.X_hat.vel_hat = [0;0;0];
-EKF.X_hat.bias_acc = [0;0;0];
+EKF.X_hat.pos_hat = Est_ICs.posn;
+EKF.X_hat.vel_hat = Est_ICs.linVel;
+EKF.X_hat.bias_acc = Est_ICs.bias_acc;
 
 % initial covariance pos, vel, acc_bias
-EKF.P_hat = diag([0.1,0.1,0.1, 0.005,0.005,0.005, 0.0001, 0.0001, 0.0001]); 
+EKF.P_hat = Est_ICs.P_init_pos; 
