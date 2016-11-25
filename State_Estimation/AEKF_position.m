@@ -59,7 +59,7 @@ L_k_1 = [0.5*tStep^2*rotMat_k', -0.5*tStep^2*rotMat_k';
          zeros(3), tStep*eye(3)];
      
 Q_k_1 = diag([sensParams.var_acc;
-       sensParams.var_bias_acc*ones(3,1)]);
+       sensParams.var_bias_acc]);
 
         
 % R_k = diag([sensParams.var_gps;

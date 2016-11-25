@@ -1,5 +1,5 @@
 function [EKF] = EKF_position(Sensor, EKF, SPKF, q_k_1, ...
-                                sensParams, tStep, current_time)
+                                sensParams, tStep, iSim)
 % EKF - kinematic predict - position, velocity and accel bias  \
 % simulates only recieving GPS at given GPS rate 
 
@@ -52,12 +52,12 @@ F_k_1 = [eye(3), tStep*eye(3), zeros(3);
          zeros(3), eye(3), -tStep*rotMat_k';
          zeros(3), zeros(3), eye(3)];
 
-L_k_1 = [0.5*tStep^2*rotMat_k', -0.5*tStep^2*rotMat_k';
-         tStep*rotMat_k', -tStep*rotMat_k';
+L_k_1 = [tStep^2*rotMat_k', tStep^3*rotMat_k';
+         tStep*rotMat_k', -tStep^2*rotMat_k';
          zeros(3), tStep*eye(3)];
      
 Q_k = diag([sensParams.var_acc;
-       sensParams.var_bias_acc*ones(3,1)]);
+       sensParams.var_bias_acc]);
      
 % F_k_1 = [eye(3), tStep*eye(3);
 %          zeros(3), eye(3)];
@@ -80,10 +80,12 @@ P_k_m = F_k_1*P_k_1_pos*F_k_1' + L_k_1*Q_k*L_k_1';
 
 %% correct
 
-if mod(current_time,sensParams.GPS_rate) == 0
-    H_k = [blkdiag(1/(Me+height_0-pos_k_m(3))*180/pi, 1/((Ne+height_0-pos_k_m(3))*cos(lat_0*pi/180.0))*180/pi,  -1, eye(2), 101325* -2.25577*10^ -5*5.25588*(1 - 2.25577*10^(-5)*(-pos_k_m(3)+height_0))^4.25588), zeros(6,3)];
+if mod(iSim,sensParams.GPS_rate) == 0
+    H_k = [blkdiag(1/(Me+height_0-pos_k_m(3))*180/pi, 1/((Ne+height_0-pos_k_m(3))*cos(lat_0*pi/180.0))*180/pi,  -1, eye(2), 0), zeros(6,3)];
     
-    R_k = diag([sensParams.var_gps/100;
+    H_k(6,3) = 101325* 2.25577*10^ -5*5.25588*(1 - 2.25577*10^(-5)*(-pos_k_m(3)+height_0))^4.25588;
+    
+    R_k = diag([sensParams.var_gps;
         sensParams.var_baro]);
     
     
@@ -93,16 +95,16 @@ if mod(current_time,sensParams.GPS_rate) == 0
     
 
     
-    y_k_hat(6,1) = 101325*(1-2.25577*10^-5*(-pos_k_m(3)+baro_0))^5.25588;
+    y_k_hat(6,1) = 101325*(1-2.25577*10^-5*(-pos_k_m(3)+height_0))^5.25588;
     
 else
-    H_k = [zeros(1,5), 101325* -2.25577*10^ -5*5.25588*(1 - 2.25577*10^(-5)*(-pos_k_m(3)+baro_0))^4.25588, zeros(1,3)];
+    H_k = [zeros(1,2), 101325* 2.25577*10^ -5*5.25588*(1 - 2.25577*10^(-5)*(-pos_k_m(3)+height_0))^4.25588, zeros(1,6)];
     
     R_k = diag([sensParams.var_baro]);
     
     y_k = u_b_baro;
     
-    y_k_hat = 101325*(1-2.25577*10^-5*(-pos_k_m(3)+baro_0))^5.25588;
+    y_k_hat = 101325*(1-2.25577*10^-5*(-pos_k_m(3)+height_0))^5.25588;
 end
 
 

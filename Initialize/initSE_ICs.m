@@ -4,8 +4,8 @@ Est_ICs.posn = IC.posn;
 Est_ICs.linVel = IC.linVel;
 Est_ICs.q = angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')';
 Est_ICs.omega = [0;0;0];
-Est_ICs.bias_acc = [0;0;0]; %sensParams.bias.acc + randn(3,1)*0.01;
-Est_ICs.bias_gyr = [0;0;0]; %sensParams.bias.gyr + randn(3,1)*0.01;
+Est_ICs.bias_acc = [0;0;0]; % sensParams.bias.acc; %+ randn(3,1)*0.01;
+Est_ICs.bias_gyr = [0;0;0]; %sensParams.bias.gyr;% + randn(3,1)*0.01;
 
 
 % initial covariance q, gyr_bias

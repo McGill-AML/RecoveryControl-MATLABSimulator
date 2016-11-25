@@ -1,5 +1,5 @@
 
-clearvars -except SPKF ASPKF
+% clearvars -except SPKF ASPKF rmse loop_no timer Setpoint Trajectory gamma
 
 global g mag
 global timeImpact
@@ -29,9 +29,9 @@ timeStabilized = 10000;
 IC = initIC;
 Control = initcontrol;
 PropState = initpropstate;
-Setpoint = initsetpoint;
+% Setpoint = initsetpoint;
 
-sensParams = initsensor_params;
+sensParams = initsensor_params; % initialize sensor parameters for use in measurement model
 
 move_avg_acc = zeros(3,6);
 
@@ -61,16 +61,16 @@ PropState.rpm = IC.rpm;
 
 %% Waypoint Trajectory
 % Setpt 1
-Setpoint.head = pi/5;
-Setpoint.time = 4;
-Setpoint.posn = [0;0;5];
-Trajectory = Setpoint;
-
-% Setpt 2
-Setpoint.head = pi/5;
-Setpoint.time = Setpoint.time + 10;
-Setpoint.posn = [8;0;5];
-Trajectory = [Trajectory;Setpoint];
+% Setpoint.head = pi/5;
+% Setpoint.time = 4;
+% Setpoint.posn = [0;0;5];
+% Trajectory = Setpoint;
+% 
+% % Setpt 2
+% Setpoint.head = pi/5;
+% Setpoint.time = Setpoint.time + 10;
+% Setpoint.posn = [8;0;5];
+% Trajectory = [Trajectory;Setpoint];
 
 % % Setpt 3
 % Setpoint.head = 0;
@@ -100,23 +100,29 @@ iTrajectory = 1;
 Sensor = initsensor(state, stateDeriv, sensParams); % init sensor values
 sensParams = initgps_baro(Sensor, sensParams); %init initial GPS and baro in order to initialize cartesian coord at starting spot
 
+Est_sensParams = initEst_sensPars(sensParams); %initialize sensor parameters for use in estimators (to add error, etc.)
+
 %% Initialize state estimators
-Est_ICs = initSE_ICs(IC); % set initial condition estimate with errors
+Est_ICs = initSE_ICs(IC, sensParams); % set initial condition estimate in order to add errors
 
 EKF = initEKF(Est_ICs);
 AEKF = initAEKF(Est_ICs);
-SPKF = initSPKF(Est_ICs,SPKF);
-ASPKF = initASPKF(Est_ICs,ASPKF);
+SPKF = initSPKF(Est_ICs);
+ASPKF = initASPKF(Est_ICs);
 COMP = initCOMP(Est_ICs);
 HINF = initHINF(Est_ICs);
 SPKF_full = initSPKF_full(Est_ICs);
+EKF_att = initEKF_att(Est_ICs);
+SRSPKF = initSRSPKF(Est_ICs);
+
+
 
 time_to_break = 0; %var so sim doesn't stop once it's stabilized
 %% Initialize History Arrays
 
 % Initialize history 
 Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
-                sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full);
+                sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full,EKF_att,SRSPKF);
             
 % Initialize Continuous History
 if SimParams.recordContTime == 1 
@@ -197,17 +203,38 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     
 %     [Sensor.acc, move_avg_acc] = moving_avg_filt(Sensor.acc, move_avg_acc);
     %% State Estimation
-%     SPKF = SPKF_attitude(Sensor, SPKF, EKF, sensParams, tStep);
-%     ASPKF = ASPKF_attitude(Sensor, ASPKF, AEKF, sensParams, tStep);
-
-    SPKF_full = SPKF_full_state(Sensor, SPKF_full, sensParams, tStep, iSim);
+    tic;
+    SPKF = SPKF_attitude(Sensor, SPKF, EKF, Est_sensParams, tStep);
+    timer(1) = timer(1) + toc;
+    
+    tic;
+    ASPKF = ASPKF_attitude(Sensor, ASPKF, EKF, Est_sensParams, tStep);
+    timer(2) = timer(2) + toc;
+    
+    tic;
+    EKF_att = EKF_attitude(Sensor, EKF_att, EKF, Est_sensParams, tStep);
+    timer(3) = timer(3) + toc;
+    
+    tic;
+    SPKF_full = SPKF_full_state(Sensor, SPKF_full, Est_sensParams, tStep, iSim);
+    timer(4) = timer(4) + toc;
+    
+    tic;
+    COMP = CompFilt_attitude(Sensor, COMP, EKF, Est_sensParams, tStep);
+    timer(5) = timer(5) + toc;
+    
+    tic;
+    HINF = HINF_attitude(Sensor, HINF, EKF, Est_sensParams, tStep);
+    timer(6) = timer(6) + toc;
+    
+    tic;
+    SPKF = SRSPKF_attitude(Sensor, SRSPKF, EKF, Est_sensParams, tStep);
+    timer(7) = timer(7) + toc;
 %     
-%     EKF = EKF_position(Sensor, EKF, SPKF, Hist.SPKF(end).X_hat.q_hat, sensParams, tStep, iSim);
-%     AEKF = AEKF_position(Sensor, AEKF, ASPKF, Hist.ASPKF(end).X_hat.q_hat, sensParams, tStep, iSim);
+    EKF = EKF_position(Sensor, EKF, SPKF, Hist.SPKF(end).X_hat.q_hat, Est_sensParams, tStep, iSim);
+%     AEKF = AEKF_position(Sensor, AEKF, ASPKF, Hist.ASPKF(end).X_hat.q_hat, Est_sensParams, tStep, iSim);
     
-    COMP = CompFilt_attitude(Sensor, COMP, EKF, sensParams, tStep);
-    
-    HINF = HINF_attitude(Sensor, HINF, EKF, sensParams, tStep);
+
     
     
     
@@ -262,7 +289,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 
     %Discrete Time recording @ 200 Hz
     Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
-                        sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full);
+                        sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full,EKF_att, SRSPKF);
                     
     %% End loop conditions
     % Navi has crashed:
@@ -273,7 +300,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     end  
     
     % Navi has drifted very far away from wall:
-    if state(7) <= -10
+    if state(7) <= -30
         display('Navi has left the building');
         ImpactInfo.isStable = 1;
         break;
@@ -281,6 +308,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     
     % Recovery control has worked, altitude stabilized:
     if Control.recoveryStage == 4 && time_to_break == 0
+        time_of_recovery = iSim;
         time_to_break = iSim + 10;
     elseif iSim == time_to_break && iSim ~= 0
         display('Altitude has been stabilized');

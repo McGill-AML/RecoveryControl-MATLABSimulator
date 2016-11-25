@@ -153,6 +153,19 @@ Plot.SPKF_full_omega = [temp2{4,:}];
 Plot.SPKF_full_acc_bias = [temp2{5,:}];
 Plot.SPKF_full_gyr_bias = [temp2{6,:}];
 
+temp = struct2cell(Hist.EKF_att);
+temp2 = struct2cell([temp{1,:}]);
+Plot.EKF_att_quat = [temp2{1,:}];
+Plot.EKF_att_omega = [temp2{2,:}];
+Plot.EKF_att_gyr_bias = [temp2{3,:}];
+
+
+temp = struct2cell(Hist.SRSPKF);
+temp2 = struct2cell([temp{2,:}]);
+Plot.SRSPKF_quat = [temp2{1,:}];
+Plot.SRSPKF_omega = [temp2{2,:}];
+Plot.SRSPKF_gyr_bias = [temp2{3,:}];
+
 
 
 

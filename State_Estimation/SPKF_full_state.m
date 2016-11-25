@@ -49,8 +49,8 @@ MRP_0 = zeros(3,1); %q_k_1(2:4)/(1+q_k_1(1));
 %sig for prediction (process)
 Q_k_1 = diag([sensParams.var_acc;
               sensParams.var_gyr;
-              ones(3,1)*sensParams.var_bias_acc
-              ones(3,1)*sensParams.var_bias_gyr]); 
+              sensParams.var_bias_acc
+              sensParams.var_bias_gyr]); 
 
 %sig for correct (update)        
 R_k = diag([sensParams.var_mag

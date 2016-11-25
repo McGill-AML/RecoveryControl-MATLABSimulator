@@ -1,5 +1,5 @@
 function Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
-                        sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF,SPKF_full)
+                        sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full, EKF_att,SRSPKF)
                     
     Hist.times = [Hist.times;t];
     Hist.states = [Hist.states, state];
@@ -25,5 +25,7 @@ function Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, Pro
     Hist.COMP = [Hist.COMP; COMP];
     Hist.HINF = [Hist.HINF; HINF];
     Hist.SPKF_full = [Hist.SPKF_full; SPKF_full];
+    Hist.EKF_att = [Hist.EKF_att; EKF_att];
+    Hist.SRSPKF = [Hist.SRSPKF; SRSPKF]; 
 
 end

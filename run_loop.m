@@ -1,100 +1,60 @@
 % loop to test variables
+clearvars;
 
-for loop_no = 2
-    SPKF.kappa = (loop_no-3)*2;
-    ASPKF.kappa = (loop_no-3)*2;
+timer = zeros(7,1);
+
+angle_head = 1;
+posn_hit = 0;
+
+for loop_no = 1:15
+  
+    clearvars -except loop_no timer rmse angle_head posn_hit
+    
+    if mod(loop_no-1,5) == 0
+        angle_head = 1;
+        posn_hit = posn_hit+5;
+    end
+    
+    
+    
+    % set waypoints for run. 
+    Setpoint = initsetpoint;
+    
+    
+    % Setpt 1
+    Setpoint.head = angle_head*pi/5;
+    Setpoint.time = 4;
+    Setpoint.posn = [0;0;5];
+    Trajectory = Setpoint;
+    
+    % Setpt 2
+    Setpoint.head = angle_head*pi/5;
+    Setpoint.time = Setpoint.time + 10;
+    Setpoint.posn = [posn_hit;0;5];
+    Trajectory = [Trajectory;Setpoint];
+    
     
     startsim_trajectory;
     
-    plot_SPKF = 0;
-    plot_ASPKF = 0;
-    plot_EKF = 1;
-    plot_AEKF = 1;
-    plot_COMP = 1;
-    plot_HINF = 1;
+  
+    if ~exist('time_of_recovery','var');
+        time_of_recovery = iSim;
+    end
+    rmse(loop_no,:) = rmse_att(Plot,sensParams,time_of_recovery/tStep);
+    
+    
+    
+    if mod(loop_no,2) == 0
+    
+%     plot_SE;
+    end
 
-
     
-    
-    
-figure
-subplot(4,1,1)
-plot(Plot.times,Plot.quaternions(1,:),'Linewidth',line_width);
-hold on
-if plot_SPKF == 1
-    plot(Plot.times,Plot.SPKF_quat(1,:),'Linewidth',line_width, 'Color', 'r');
-end
-if plot_ASPKF == 1
-    plot(Plot.times,Plot.ASPKF_quat(1,:),'Linewidth',line_width, 'Color', 'y');
-end
-if plot_COMP == 1
-     plot(Plot.times,Plot.COMP_quat(1,:),'Linewidth',line_width, 'Color', 'b');
-end
-if plot_HINF == 1
-     plot(Plot.times,Plot.HINF_quat(1,:),'Linewidth',line_width, 'Color', 'g');
-end
-xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
-ylabel('$q_0$ (m)','fontsize',font_size,'Interpreter','latex');
-set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
-grid on
-subplot(4,1,2)
-plot(Plot.times,Plot.quaternions(2,:),'Linewidth',line_width);
-hold on
-if plot_SPKF == 1
-    plot(Plot.times,Plot.SPKF_quat(2,:),'Linewidth',line_width, 'Color', 'r');
-end
-if plot_ASPKF == 1
-    plot(Plot.times,Plot.ASPKF_quat(2,:),'Linewidth',line_width, 'Color', 'y');
-end
-if plot_COMP == 1
-     plot(Plot.times,Plot.COMP_quat(2,:),'Linewidth',line_width, 'Color', 'b');
-end
-if plot_HINF == 1
-     plot(Plot.times,Plot.HINF_quat(2,:),'Linewidth',line_width, 'Color', 'g');
-end
-xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
-ylabel('$q_x$ (m)','fontsize',font_size,'Interpreter','latex');
-set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
-grid on
-subplot(4,1,3)
-plot(Plot.times,Plot.quaternions(3,:),'Linewidth',line_width);
-hold on
-if plot_SPKF == 1
-    plot(Plot.times,Plot.SPKF_quat(3,:),'Linewidth',line_width, 'Color', 'r');
-end
-if plot_ASPKF == 1
-    plot(Plot.times,Plot.ASPKF_quat(3,:),'Linewidth',line_width, 'Color', 'y');
-end
-if plot_COMP == 1
-     plot(Plot.times,Plot.COMP_quat(3,:),'Linewidth',line_width, 'Color', 'b');
-end
-if plot_HINF == 1
-     plot(Plot.times,Plot.HINF_quat(3,:),'Linewidth',line_width, 'Color', 'g');
-end
-xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
-ylabel('$q_y$ (m)','fontsize',font_size,'Interpreter','latex');
-set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
-grid on
-subplot(4,1,4)
-plot(Plot.times,Plot.quaternions(4,:),'Linewidth',line_width);
-hold on
-if plot_SPKF == 1
-    plot(Plot.times,Plot.SPKF_quat(4,:),'Linewidth',line_width, 'Color', 'r');
-end
-if plot_ASPKF == 1
-    plot(Plot.times,Plot.ASPKF_quat(4,:),'Linewidth',line_width, 'Color', 'y');
-end
-if plot_COMP == 1
-     plot(Plot.times,Plot.COMP_quat(4,:),'Linewidth',line_width, 'Color', 'b');
-end
-if plot_HINF == 1
-     plot(Plot.times,Plot.HINF_quat(4,:),'Linewidth',line_width, 'Color', 'g');
-end
-xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
-ylabel('$q_z$ (m)','fontsize',font_size,'Interpreter','latex');
-set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
-grid on
+    angle_head = angle_head + 1;
 
 
     
 end
+
+PlotRMSE = RMSE_to_plot(rmse);
+
