@@ -2,18 +2,22 @@
 
 plot_SPKF = 1;
 plot_ASPKF = 1;
-plot_EKF = 1;
+plot_EKF = 0;
 plot_AEKF = 0;
-plot_COMP = 1;
+plot_COMP = 0;
 plot_HINF = 0;
-plot_SPKF_full = 1;
+plot_SPKF_full =0;
 plot_EKF_att = 1;
+plot_SRSPKF = 0;
+plot_SRSPKF_full = 0;
+plot_ASPKF_opt = 0;
+plot_AHINF = 1;
 
 plot_pos =0;
 plot_cov = 0;
 plot_vel = 0;
-plot_quat = 0;
-plot_ASPKF_stuff = 0;
+plot_quat = 1;
+plot_ASPKF_stuff = 1;
 plot_angvel = 0;
 plot_eul_ang = 0;
 plot_acceleroms = 0;
@@ -25,6 +29,10 @@ plot_accel_bias = 0;
 plot_gps = 0;
 plot_baro = 0;
 plot_animate = 0;
+plot_AHINF_stuff = 0;
+
+
+
 
 %% Position
 if plot_pos == 1
@@ -151,6 +159,18 @@ if plot_quat == 1
     if plot_EKF_att == 1
         plot(Plot.times,Plot.EKF_att_quat(1,:),'Linewidth',line_width, 'Color', 'k');
     end
+    if plot_SRSPKF == 1
+        plot(Plot.times,Plot.SRSPKF_quat(1,:), 'r--','Linewidth',line_width);
+    end
+    if plot_SRSPKF_full == 1
+        plot(Plot.times,Plot.SRSPKF_full_quat(1,:), 'c--','Linewidth',line_width);
+    end
+    if plot_ASPKF_opt == 1
+        plot(Plot.times,Plot.ASPKF_opt_quat(1,:),'y--', 'Linewidth',line_width);
+    end
+    if plot_AHINF == 1
+        plot(Plot.times,Plot.AHINF_quat(1,:),'g--', 'Linewidth',line_width);
+    end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$q_0$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
@@ -175,6 +195,18 @@ if plot_quat == 1
     end
     if plot_EKF_att == 1
         plot(Plot.times,Plot.EKF_att_quat(2,:),'Linewidth',line_width, 'Color', 'k');
+    end
+    if plot_SRSPKF == 1
+        plot(Plot.times,Plot.SRSPKF_quat(2,:), 'r--','Linewidth',line_width);
+    end
+    if plot_SRSPKF_full == 1
+        plot(Plot.times,Plot.SRSPKF_full_quat(2,:), 'c--','Linewidth',line_width);
+    end
+    if plot_ASPKF_opt == 1
+        plot(Plot.times,Plot.ASPKF_opt_quat(2,:),'y--', 'Linewidth',line_width);
+    end
+    if plot_AHINF == 1
+        plot(Plot.times,Plot.AHINF_quat(2,:),'g--', 'Linewidth',line_width);
     end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$q_x$ (m)','fontsize',font_size,'Interpreter','latex');
@@ -201,6 +233,18 @@ if plot_quat == 1
     if plot_EKF_att == 1
         plot(Plot.times,Plot.EKF_att_quat(3,:),'Linewidth',line_width, 'Color', 'k');
     end
+    if plot_SRSPKF == 1
+        plot(Plot.times,Plot.SRSPKF_quat(3,:), 'r--','Linewidth',line_width);
+    end
+    if plot_SRSPKF_full == 1
+        plot(Plot.times,Plot.SRSPKF_full_quat(3,:), 'c--','Linewidth',line_width);
+    end
+    if plot_ASPKF_opt == 1
+        plot(Plot.times,Plot.ASPKF_opt_quat(3,:),'y--', 'Linewidth',line_width);
+    end
+    if plot_AHINF == 1
+        plot(Plot.times,Plot.AHINF_quat(3,:),'g--', 'Linewidth',line_width);
+    end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$q_y$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
@@ -225,6 +269,18 @@ if plot_quat == 1
     end
     if plot_EKF_att == 1
         plot(Plot.times,Plot.EKF_att_quat(4,:),'Linewidth',line_width, 'Color', 'k');
+    end
+    if plot_SRSPKF == 1
+        plot(Plot.times,Plot.SRSPKF_quat(4,:), 'r--','Linewidth',line_width);
+    end
+    if plot_SRSPKF_full == 1
+        plot(Plot.times,Plot.SRSPKF_full_quat(4,:), 'c--','Linewidth',line_width);
+    end
+    if plot_ASPKF_opt == 1
+        plot(Plot.times,Plot.ASPKF_opt_quat(4,:),'y--', 'Linewidth',line_width);
+    end
+    if plot_AHINF == 1
+        plot(Plot.times,Plot.AHINF_quat(4,:),'g--', 'Linewidth',line_width);
     end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$q_z$ (m)','fontsize',font_size,'Interpreter','latex');
@@ -446,6 +502,18 @@ if plot_gyro_bias ==1
     if plot_EKF_att == 1
         plot(Plot.times,Plot.EKF_att_gyr_bias(1,:),'Linewidth',line_width, 'Color', 'k');
     end
+    if plot_SRSPKF == 1
+        plot(Plot.times,Plot.SRSPKF_gyr_bias(1,:),'r--', 'Linewidth',line_width );
+    end
+    if plot_SRSPKF_full == 1
+        plot(Plot.times,Plot.SRSPKF_full_gyr_bias(1,:),'c--', 'Linewidth',line_width );
+    end
+    if plot_ASPKF_opt == 1 
+        plot(Plot.times,Plot.ASPKF_opt_gyr_bias(1,:),'y--', 'Linewidth',line_width);
+    end
+    if plot_AHINF == 1
+        plot(Plot.times,Plot.AHINF_gyr_bias(1,:),'g--', 'Linewidth',line_width);
+    end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$\omega_{1}$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
@@ -471,6 +539,18 @@ if plot_gyro_bias ==1
     if plot_EKF_att == 1
         plot(Plot.times,Plot.EKF_att_gyr_bias(2,:),'Linewidth',line_width, 'Color', 'k');
     end
+    if plot_SRSPKF == 1
+        plot(Plot.times,Plot.SRSPKF_gyr_bias(2,:),'r--', 'Linewidth',line_width );
+    end
+    if plot_SRSPKF_full == 1
+        plot(Plot.times,Plot.SRSPKF_full_gyr_bias(2,:),'c--', 'Linewidth',line_width );
+    end
+    if plot_ASPKF_opt == 1 
+        plot(Plot.times,Plot.ASPKF_opt_gyr_bias(2,:),'y--', 'Linewidth',line_width);
+    end
+    if plot_AHINF == 1
+        plot(Plot.times,Plot.AHINF_gyr_bias(2,:),'g--', 'Linewidth',line_width);
+    end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$\omega_{2}$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
@@ -495,6 +575,18 @@ if plot_gyro_bias ==1
     end
     if plot_EKF_att == 1
         plot(Plot.times,Plot.EKF_att_gyr_bias(3,:),'Linewidth',line_width, 'Color', 'k');
+    end
+    if plot_SRSPKF == 1
+        plot(Plot.times,Plot.SRSPKF_gyr_bias(3,:),'r--', 'Linewidth',line_width );
+    end
+    if plot_SRSPKF_full == 1
+        plot(Plot.times,Plot.SRSPKF_full_gyr_bias(3,:),'c--', 'Linewidth',line_width );
+    end
+    if plot_ASPKF_opt == 1 
+        plot(Plot.times,Plot.ASPKF_opt_gyr_bias(3,:),'y--', 'Linewidth',line_width);
+    end
+    if plot_AHINF == 1
+        plot(Plot.times,Plot.AHINF_gyr_bias(3,:),'g--', 'Linewidth',line_width);
     end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$\omega_{3}$ (m)','fontsize',font_size,'Interpreter','latex');
@@ -581,4 +673,16 @@ end
 %% animate
 if plot_animate == 1
     animate(0,Hist,'XZ',ImpactParams,timeImpact,'' )
+end
+
+
+
+%% plot AHINF stuff
+if plot_AHINF_stuff == 1
+    figure;
+    plot(Plot.times,Plot.AHINF_bound);grid on;
+    title('AHINF bound');
+    
+    figure;plot(Plot.times,Plot.AHINF_innov);grid on;
+    title('AHINF innov sum');
 end

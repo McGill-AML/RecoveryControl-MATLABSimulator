@@ -114,6 +114,9 @@ HINF = initHINF(Est_ICs);
 SPKF_full = initSPKF_full(Est_ICs);
 EKF_att = initEKF_att(Est_ICs);
 SRSPKF = initSRSPKF(Est_ICs);
+SRSPKF_full = initSRSPKF_full(Est_ICs);
+ASPKF_opt = initASPKF_opt(Est_ICs);
+AHINF = initAHINF(Est_ICs);
 
 
 
@@ -122,7 +125,7 @@ time_to_break = 0; %var so sim doesn't stop once it's stabilized
 
 % Initialize history 
 Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
-                sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full,EKF_att,SRSPKF);
+                sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full,EKF_att,SRSPKF, SRSPKF_full, ASPKF_opt, AHINF);
             
 % Initialize Continuous History
 if SimParams.recordContTime == 1 
@@ -206,30 +209,42 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     tic;
     SPKF = SPKF_attitude(Sensor, SPKF, EKF, Est_sensParams, tStep);
     timer(1) = timer(1) + toc;
-    
+%     
     tic;
     ASPKF = ASPKF_attitude(Sensor, ASPKF, EKF, Est_sensParams, tStep);
     timer(2) = timer(2) + toc;
-    
+%     
     tic;
     EKF_att = EKF_attitude(Sensor, EKF_att, EKF, Est_sensParams, tStep);
     timer(3) = timer(3) + toc;
-    
+%     
     tic;
     SPKF_full = SPKF_full_state(Sensor, SPKF_full, Est_sensParams, tStep, iSim);
     timer(4) = timer(4) + toc;
-    
+%     
     tic;
     COMP = CompFilt_attitude(Sensor, COMP, EKF, Est_sensParams, tStep);
     timer(5) = timer(5) + toc;
-    
+%     
     tic;
     HINF = HINF_attitude(Sensor, HINF, EKF, Est_sensParams, tStep);
     timer(6) = timer(6) + toc;
     
+%     tic;
+%     SRSPKF = SRSPKF_attitude(Sensor, SRSPKF, EKF, Est_sensParams, tStep);
+%     timer(7) = timer(7) + toc;
+    
+%     tic;
+%     SRSPKF_full = SRSPKF_full_state(Sensor, SRSPKF_full, Est_sensParams, tStep, iSim);
+%     timer(8) = timer(8) + toc;
+    
     tic;
-    SPKF = SRSPKF_attitude(Sensor, SRSPKF, EKF, Est_sensParams, tStep);
-    timer(7) = timer(7) + toc;
+    ASPKF_opt = ASPKF_opt_attitude(Sensor, ASPKF_opt, AEKF, sensParams, tStep);
+    timer(9) = timer(9) + toc;
+    
+    tic;
+    AHINF = AHINF_attitude(Sensor, AHINF, EKF, Est_sensParams, tStep);
+    timer(10) = timer(10) + toc;
 %     
     EKF = EKF_position(Sensor, EKF, SPKF, Hist.SPKF(end).X_hat.q_hat, Est_sensParams, tStep, iSim);
 %     AEKF = AEKF_position(Sensor, AEKF, ASPKF, Hist.ASPKF(end).X_hat.q_hat, Est_sensParams, tStep, iSim);
@@ -289,7 +304,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 
     %Discrete Time recording @ 200 Hz
     Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
-                        sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full,EKF_att, SRSPKF);
+                        sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full,EKF_att, SRSPKF, SRSPKF_full, ASPKF_opt, AHINF);
                     
     %% End loop conditions
     % Navi has crashed:

@@ -152,7 +152,7 @@ ylabel('RMSE','fontsize',font_size,'Interpreter','latex');
 set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
 grid on;
 title('bias RMSE during crash');
-legend('H-Inf', 'EKF', 'AH-Inf', 'H-Inf', 'SPKF Full', 'EKF', 'Opt ASPKF', 'AHINF');
+legend('H-Inf', 'EKF', 'AHI', 'H-Inf', 'SPKF Full', 'EKF', 'Opt ASPKF', 'AHINF');
 
 % legend('SPKF', 'ASPKF', 'Opt ASPKF', 'H-Inf', 'SPKF Full', 'EKF', 'Opt ASPKF', 'AHINF');
 

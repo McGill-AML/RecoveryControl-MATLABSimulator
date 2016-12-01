@@ -167,7 +167,32 @@ Plot.SRSPKF_omega = [temp2{2,:}];
 Plot.SRSPKF_gyr_bias = [temp2{3,:}];
 
 
+temp = struct2cell(Hist.SRSPKF_full);
+temp2 = struct2cell([temp{2,:}]);
+Plot.SRSPKF_full_pos = [temp2{1,:}];
+Plot.SRSPKF_full_vel = [temp2{2,:}];
+Plot.SRSPKF_full_quat = [temp2{3,:}];
+Plot.SRSPKF_full_omega = [temp2{4,:}];
+Plot.SRSPKF_full_acc_bias = [temp2{5,:}];
+Plot.SRSPKF_full_gyr_bias = [temp2{6,:}];
 
+
+temp = struct2cell(Hist.ASPKF_opt);
+temp2 = struct2cell([temp{2,:}]);
+Plot.ASPKF_opt_quat = [temp2{1,:}];
+Plot.ASPKF_opt_omega = [temp2{2,:}];
+Plot.ASPKF_opt_gyr_bias = [temp2{3,:}];
+
+
+temp = struct2cell(Hist.AHINF);
+temp2 = struct2cell([temp{1,:}]);
+Plot.AHINF_quat = [temp2{1,:}];
+Plot.AHINF_omega = [temp2{2,:}];
+Plot.AHINF_gyr_bias = [temp2{3,:}];
+Plot.AHINF_bound = [temp{7,:}];
+for ii = 1:length([temp{8,:}])
+    Plot.AHINF_innov(ii) = sum(temp{8,ii});
+end
 
 
 % tempP = [temp{2,:}];

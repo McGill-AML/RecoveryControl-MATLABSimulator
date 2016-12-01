@@ -39,22 +39,38 @@ MRP_0 = zeros(3,1); %q_k_1(2:4)/(1+q_k_1(1));
 
 %%
 
-S = SRSPKF.S_hat;
+Q_k_1 = diag([sensParams.var_gyr;  
+              sensParams.var_bias_gyr].^0.5); 
+          
+          
 
 if norm(u_b_acc,2) > norm(g,2) + SRSPKF.accel_bound || norm(u_b_acc,2) < norm(g,2) - SRSPKF.accel_bound
-    L = length(S);
+    
+    R_k =  diag(sensParams.var_mag.^0.5);    
+    
+    L = length(SRSPKF.S_hat)+length(Q_k_1)+length(R_k);
     SRSPKF.use_acc = 0;
+    
 else
-    L = length(S);
+    R_k = diag([sensParams.var_acc;
+                sensParams.var_mag].^0.5);
+    
+    L = length(SRSPKF.S_hat)+length(Q_k_1)+length(R_k);
     SRSPKF.use_acc = 1;
+    
 end
+
+S = blkdiag(SRSPKF.S_hat,Q_k_1, R_k);
 
 Sigma_pts_k_1 = zeros(L,2*L+1);
 
+
 % sigma points are generated for MRP error, gyro bias and noise terms
-
-Sigma_pts_k_1(:,1) = [MRP_0; bias_gyr];
-
+if SRSPKF.use_acc
+    Sigma_pts_k_1(:,1) = [MRP_0; bias_gyr; zeros(12,1)];
+else
+    Sigma_pts_k_1(:,1) = [MRP_0; bias_gyr; zeros(9,1)];
+end
 
 q_k_1_err = zeros(4,2*L+1);
 q_k_1_sig = zeros(4,2*L+1);
@@ -92,7 +108,7 @@ for ii = 1:2*L+1
     %use discretized quat equation to calculate initial quat estimates
     %based on error
     %first calc estimated angular vel with sigma pt modified bias terms
-    omega_sig(:,ii) = u_b_gyr - Sigma_pts_k_1(4:6,ii);% - Sigma_pts_k_1(7:9,ii); %angular velocity
+    omega_sig(:,ii) = u_b_gyr - Sigma_pts_k_1(4:6,ii) - Sigma_pts_k_1(7:9,ii); %angular velocity
 
     %estimate orientation using estimated ang vel
     psi_norm = norm(omega_sig(:,ii),2);
@@ -108,23 +124,24 @@ for ii = 1:2*L+1
     Sigma_pts_k_m(1:3,ii) = q_k_err(2:4,ii)/(1+q_k_err(1,ii)); %convert quat error to MRP
     
     
-    Sigma_pts_k_m(4:6,ii) = Sigma_pts_k_1(4:6,ii);% + tStep*Sigma_pts_k_1(10:12,ii) ;
-%     Sigma_pts_k_m(13:end,ii) = Sigma_pts_k_1(13:end,ii);
+    Sigma_pts_k_m(4:6,ii) = Sigma_pts_k_1(4:6,ii) + tStep*Sigma_pts_k_1(10:12,ii) ;
+    Sigma_pts_k_m(7:end,ii) = Sigma_pts_k_1(7:end,ii);
 end
+
+lambda = SRSPKF.alpha^2*(L-SRSPKF.kappa)-L;
+
 %find state and covariance predictions
-X_k_m = 1/(L+SRSPKF.kappa)*(SRSPKF.kappa*Sigma_pts_k_m(1:6,1)+0.5*sum(Sigma_pts_k_m(1:6,2:2*L+1),2));
+X_k_m = 1/(L+lambda)*(lambda*Sigma_pts_k_m(1:6,1)+0.5*sum(Sigma_pts_k_m(1:6,2:2*L+1),2));
 
-Q_k_1 = diag([sensParams.var_gyr;  
-              sensParams.var_bias_gyr].^0.5); 
 
-[~, S_k_m] = qr([sqrt(0.5/(L+SRSPKF.kappa))*(bsxfun(@minus, Sigma_pts_k_m(1:6,2:2*L+1), X_k_m(1:6))), Q_k_1]');
+[~, S_k_m] = qr([sqrt(0.5/(L+lambda))*(bsxfun(@minus, Sigma_pts_k_m(1:6,2:2*L+1), X_k_m(1:6)))]');
 
 S_k_m = S_k_m(1:6,1:6);
 
-if SRSPKF.kappa/(L+SRSPKF.kappa) < 0
-    [S_k_m, p] = cholupdate(S_k_m, SRSPKF.kappa/(L+SRSPKF.kappa)*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6)), '-');
+if sqrt((lambda/(L+lambda)+(1-SRSPKF.alpha^2+SRSPKF.beta))) < 0
+    S_k_m = cholupdate(S_k_m, sqrt(-(lambda/(L+lambda)+(1-SRSPKF.alpha^2+SRSPKF.beta)))*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6)), '-');
 else
-    S_k_m = cholupdate(S_k_m, SRSPKF.kappa/(L+SRSPKF.kappa)*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6)), '+');
+    S_k_m = cholupdate(S_k_m, sqrt((lambda/(L+lambda)+(1-SRSPKF.alpha^2+SRSPKF.beta)))*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6)), '+');
 end
 
 
@@ -138,10 +155,9 @@ if ~SRSPKF.use_acc
     
     for ii = 1:2*L+1
         rotMat = quat2rotmat(q_k_m_sig(:,ii));       
-        Sigma_Y(1:3,ii) = rotMat*(mag);% + Sigma_pts_k_m(13:15,ii); %magnetometer        
+        Sigma_Y(1:3,ii) = rotMat*(mag) + Sigma_pts_k_m(13:15,ii); %magnetometer        
     end
     
-    R_k =  diag(sensParams.var_mag.^0.5);
     
     meas_size = 3;
     
@@ -154,47 +170,41 @@ else
         
         rotMat = quat2rotmat(q_k_m_sig(:,ii));
         
-        Sigma_Y(1:3,ii) = rotMat*([0;0;g]) + bias_acc;% + Sigma_pts_k_m(16:18,ii); %accel
-        Sigma_Y(4:6,ii) = rotMat*(mag);% + Sigma_pts_k_m(13:15,ii); %magnetometer
+        Sigma_Y(1:3,ii) = rotMat*([0;0;g]) + bias_acc + Sigma_pts_k_m(13:15,ii); %accel
+        Sigma_Y(4:6,ii) = rotMat*(mag) + Sigma_pts_k_m(16:18,ii); %magnetometer
         
     end
     
-    R_k = diag([sensParams.var_acc; 
-                sensParams.var_mag].^0.5);
+    
             
     meas_size = 6;
 end
 
 
-y_k_hat = 1/(L+SRSPKF.kappa)*(SRSPKF.kappa*Sigma_Y(:,1)+0.5*sum(Sigma_Y(:,2:2*L+1),2));
+y_k_hat = 1/(L+lambda)*(lambda*Sigma_Y(:,1)+0.5*sum(Sigma_Y(:,2:2*L+1),2));
 
 %now find matrices needed for kalman gain
 
-[~, S_y_k] = qr([0.5/(L+SRSPKF.kappa)*(bsxfun(@minus, Sigma_Y(:, 2:2*L+1), y_k_hat)), R_k]');
+[~, S_y_k] = qr([sqrt(0.5/(L+lambda))*(bsxfun(@minus, Sigma_Y(:, 2:2*L+1), y_k_hat))]');
 
-S_y_k = S_y_k(1:meas_size,1:meas_size)';
+S_y_k = S_y_k(1:meas_size,1:meas_size);
 
-if SRSPKF.kappa/(L+SRSPKF.kappa) < 0
-    S_y_k = cholupdate(S_y_k, SRSPKF.kappa/(L+SRSPKF.kappa)*(Sigma_Y(:,1)-y_k_hat), '-');
+if (lambda/(L+lambda)+(1-SRSPKF.alpha^2+SRSPKF.beta)) < 0
+    S_y_k = cholupdate(S_y_k, sqrt(abs(lambda/(L+lambda)+(1-SRSPKF.alpha^2+SRSPKF.beta)))*(Sigma_Y(:,1)-y_k_hat), '-')';
 else
-    S_y_k = cholupdate(S_y_k, SRSPKF.kappa/(L+SRSPKF.kappa)*(Sigma_Y(:,1)-y_k_hat), '+');
+    S_y_k = cholupdate(S_y_k, sqrt((lambda/(L+lambda)+(1-SRSPKF.alpha^2+SRSPKF.beta)))*(Sigma_Y(:,1)-y_k_hat), '+')';
 end
-    
 
-% V_k = SRSPKF.kappa/(L+SRSPKF.kappa)*(Sigma_Y(:,1)-y_k_hat)*(Sigma_Y(:,1)-y_k_hat)';
-% for ii = 2:2*L+1
-%     V_k = V_k+.5/(L+SRSPKF.kappa)*(Sigma_Y(:,ii)-y_k_hat)*(Sigma_Y(:,ii)-y_k_hat)';
-% end
-% V_k = V_k + R_k;
 
-U_k = SRSPKF.kappa/(L+SRSPKF.kappa)*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6))*(Sigma_Y(:,1)-y_k_hat)';
+
+U_k = (lambda/(L+lambda)+(1-SRSPKF.alpha^2+SRSPKF.beta))*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6))*(Sigma_Y(:,1)-y_k_hat)';
 
 for ii =2:2*L+1
-    U_k = U_k + .5/(L+SRSPKF.kappa)*(Sigma_pts_k_m(1:6,ii)-X_k_m(1:6))*(Sigma_Y(:,ii)-y_k_hat)';
+    U_k = U_k + .5/(L+lambda)*(Sigma_pts_k_m(1:6,ii)-X_k_m(1:6))*(Sigma_Y(:,ii)-y_k_hat)';
 end
 
 %kalman gain
-K_k = (U_k/S_y_k)/S_y_k';
+K_k = (U_k/S_y_k')/S_y_k;
 
 if SRSPKF.use_acc
     DX_k = K_k*([u_b_acc; u_b_mag] - y_k_hat);
@@ -216,12 +226,13 @@ q_k_upd(2:4,1) = (1+q_k_upd(1))*DX_k(1:3);
 SRSPKF.X_hat.q_hat = quatmultiply(q_k_upd,q_k_m_sig(:,1));
 
 
-upd =  K_k*S_y_k';
-for ii = 1:6
-    S_k_m = cholupdate(S_k_m', upd(:,ii), '-');
+upd =  K_k*S_y_k;
+for ii = 1:meas_size
+    S_k_m = cholupdate(S_k_m, upd(:,ii), '-');
 end
 
-SRSPKF.S_hat = S_k_m;
+
+SRSPKF.S_hat = S_k_m';
 
 
 

@@ -1,5 +1,5 @@
 function [ASPKF] = initASPKF(Est_ICs)
-ASPKF.kappa = -2; % SPKF scaling factor
+ASPKF.kappa = 0; % SPKF scaling factor
 
 %initial states ang_vel, quat, gyro bias
 ASPKF.X_hat.q_hat = Est_ICs.q;
@@ -14,7 +14,7 @@ ASPKF.P_hat = Est_ICs.P_init_att([1:3,5:7],[1:3,5:7]); % initial covariance
 
 ASPKF.accel_bound = 1; % +/- how much larger thna gravity before not used in update
 
-ASPKF.innov_tresh = 2; % innovation sum threshold
+ASPKF.innov_tresh = 1; % innovation sum threshold
 
 ASPKF.G_max = 5; % max adaptive gain
 
@@ -23,11 +23,15 @@ ASPKF.G_rate = 0.25; % how fast the adaptive gain grows when innov sum above thr
 ASPKF.G_k = 1; %initial adaptive gain 1 = regular EKF
 
 
-ASPKF.innov_k = zeros(30,1); % length of this vector decide how far back to look at innovation
+ASPKF.innov_k = zeros(15,1); % length of this vector decide how far back to look at innovation
 
-ASPKF.gamma = blkdiag(ones(3),ones(3)*400); % estimator measurement weights in innovation sum. might need to scale magnetometer?
+ASPKF.gamma = diag([ones(1,3),ones(1,3)*400]); % estimator measurement weights in innovation sum. might need to scale magnetometer?
 
 ASPKF.use_acc = 1; %use accelerometer if within magnitude bounds
+
+ASPKF.alpha = 1; %dictates spread of sigma points
+
+ASPKF.beta = 2; %2 is optimal for gaussian noise
 
 
 

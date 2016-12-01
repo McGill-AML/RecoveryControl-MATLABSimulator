@@ -6,7 +6,7 @@ timer = zeros(10,1);
 angle_head = 1;
 posn_hit = 0;
 
-for loop_no = 5:5
+for loop_no = 1:20
   
     clearvars -except loop_no timer rmse angle_head posn_hit
     

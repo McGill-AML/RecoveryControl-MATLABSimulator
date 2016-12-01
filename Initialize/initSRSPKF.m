@@ -1,6 +1,6 @@
 function [SRSPKF] = initSRSPKF(Est_ICs)
 %estimator constants
-SRSPKF.kappa = 3; % SRSPKF scaling factor
+SRSPKF.kappa = 0; % SRSPKF scaling factor
 
 %initial states ang_vel, quat, gyro bias
 SRSPKF.X_hat.q_hat = Est_ICs.q;
@@ -16,11 +16,12 @@ Y = blkdiag(P_hat);
 
 SRSPKF.S_hat = chol(Y, 'lower'); %set initial cholesky factorization estimate
 
-SRSPKF.alpha = 0.1;
-
-SRSPKF.beta = 2;
-
 
 SRSPKF.accel_bound = 1; % +/- how much larger thna gravity before not used in update
 
 SRSPKF.use_acc = 1; % whether or not accelerometer reading is used in update
+
+SRSPKF.alpha = 1; %dictates spread of sigma points
+
+SRSPKF.beta = 2; %2 is optimal for gaussian noise
+

@@ -1,6 +1,6 @@
-function [SPKF_full] = initSPKF_full(Est_ICs,SPKF_full)
+function [SPKF_full] = initSPKF_full(Est_ICs)
 %estimator constants
-SPKF_full.kappa = 3; % SPKF_full scaling factor
+SPKF_full.kappa = 0; % SPKF_full scaling factor
 
 %initial states ang_vel, quat, gyro bias
 SPKF_full.X_hat.pos_hat = Est_ICs.posn;
@@ -18,3 +18,7 @@ SPKF_full.P_hat = blkdiag(Est_ICs.P_init_pos(1:6,1:6), Est_ICs.P_init_att(1:3,1:
 
 
 SPKF_full.accel_bound = 1; % +/- how much larger thna gravity before not used in update
+
+SPKF_full.alpha = 1; %dictates spread of sigma points
+
+SPKF_full.beta = 2; %2 is optimal for gaussian noise
