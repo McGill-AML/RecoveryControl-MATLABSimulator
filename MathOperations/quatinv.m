@@ -1,6 +1,5 @@
 function [ q_inv ] = quatinv( q )
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+% Returns conjugate of quaternion
 q_inv = quatconj(q)/norm(q)^2;
 
 end

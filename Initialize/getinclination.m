@@ -1,16 +1,22 @@
 function [ inclination] = getinclination( rotMat, heading )
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
-% Inclination is positive if quadrotor tilted towards wall, and negative
-% otherwise
+%getinclination.m Returns quadrotor inclination to wall spanning YZ plane
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------%
+wallNormalWorld = [-1;0;0];
+wallTangentWorld = cross([0;0;1],wallNormalWorld);
 
-axisHeadingBody = invar2rotmat('Z',heading)*[1;0;0]; %Axis in plane with body xy plane, in same direction as world X axis, represented in body frame
+negBodyZ = [0;0;-1]; %[0;0;1] for NWU, %[0;0;-1] for NED [IMU mounting]
+bodyZProjection = rotMat'*negBodyZ - dot((rotMat'*negBodyZ),wallTangentWorld)*wallTangentWorld;
+dotProductWithWorldZ = dot(bodyZProjection,[0;0;1]); %[0;0;1] for NWU, %[0;0;-1] for NED [World Frame]
+inclinationAngle = acos(dotProductWithWorldZ/norm(bodyZProjection));
 
-axisHeadingWorld = rotMat'*axisHeadingBody;
+dotProductWithWorldNormal = dot(bodyZProjection,wallNormalWorld);
+angleWithWorldNormal = acos(dotProductWithWorldNormal/(norm(bodyZProjection)*norm(wallNormalWorld)));  
 
-inclinationSign = sign(acos([0 0 1]*axisHeadingWorld)-pi/2);
-inclination = inclinationSign*acos([1 0 0]*axisHeadingWorld);
-
+inclinationSign = sign(angleWithWorldNormal - pi/2);                  
+inclination = inclinationSign*(inclinationAngle);
 
 end
 

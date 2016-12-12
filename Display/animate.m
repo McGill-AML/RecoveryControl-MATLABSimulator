@@ -1,12 +1,14 @@
-function [ ] =animate( recordAnimation,frameStep,Hist,sideview,ImpactParams,timeImpact,videoFileName )
- 
-%UNTITLED6 Summary of this function goes here
-%   Detailed explanation goes here
+function [ ] =animate( recordAnimation,frameStep,Hist,sideview,ImpactParams,timeImpact,videoFileName,endFrame )
+%animate.m Animation of simulation using recorded quadrotor states 
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------%
 global BUMP_RADII BUMP_ANGLE BUMP_POSNS
 
 %% Define recording parameters
 if recordAnimation == 1
-    recordRate = 200;%200/2.5; %Hz %set to same as tStep
+    recordRate = 200; %Hz %set to same as tStep from startsim.m
     writerObj = VideoWriter(videoFileName);
     writerObj.FrameRate = recordRate;
     open(writerObj);
@@ -42,7 +44,6 @@ bodyPoint3 = [-0.1;0;0]-CoM;
 bodyPoint4 = [0;-0.0575;0]-CoM;
 bodyPoint5 = [0.08;-0.0115;0]-CoM;
 
-
 % Body-fixed origin (CoM) and x,y,z axes
 comBody = [0;0;0];
 axisXBody = [0.1;0;0];
@@ -62,7 +63,7 @@ impactZPosn = stateHist(vlookup(t,timeImpact),9);
                                                   
 
 %% Animate!
-for iFrame = 1:frameStep:size(t,1) %set step to 1 for recording
+for iFrame = 1:frameStep:endFrame %size(t,1) %set step to 1 for recording
     %% Rotate body-fixed points to world-frame points
     q = [stateHist(iFrame,10);stateHist(iFrame,11);stateHist(iFrame,12);stateHist(iFrame,13)];
     q = q/norm(q);
@@ -136,6 +137,7 @@ for iFrame = 1:frameStep:size(t,1) %set step to 1 for recording
 %     elseif recoverystage == 4 %stabilize position
 %         fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'g','FaceAlpha',0.4);
 %     end
+
     %% Figure settings
     axis([axisMin,axisMax,axisMin,axisMax,axisMin,axisMax]);
 
@@ -148,17 +150,11 @@ for iFrame = 1:frameStep:size(t,1) %set step to 1 for recording
     title(strcat('t = ',num2str(t(iFrame),'%.2f'),' s'));
     
     setsimulationview(sideview);
-    
-%     ax = gca;
-%     set(ax,'XTick',[0 0.5 1 1.5 2]);
-%     set(ax,'YTick',[-1 -0.5 0 0.5 1]);
-%     set(ax,'ZTick',[-0.5 0 0.5 1 1.5]);
-    
+   
     grid on;
     axis square;
 
     drawnow;
-%     pause(0.05);
 
     if recordAnimation == 1
         frame = getframe;

@@ -1,5 +1,10 @@
 function ContHist = initconthist(timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, globalFlag, Sensor)
-                    
+%initconthist.m Initialize ContHist struct for recording data
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------% 
+
 % Initialize history of the state and its derivative
 ContHist.states = state;
 ContHist.stateDerivs = stateDeriv;

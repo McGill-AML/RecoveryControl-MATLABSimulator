@@ -1,5 +1,10 @@
 function ContHist = updateconthist(ContHist, stateDeriv, Pose, Twist, Control, PropState, Contact, globalFlag, Sensor)
-                    
+%updateconthist.m Update "ContHist", which records "continous" data
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------%
+
     ContHist.stateDerivs = [ContHist.stateDerivs, stateDeriv];
     
     ContHist.poses = [ContHist.poses;Pose];

@@ -1,5 +1,9 @@
 function [ ref_posn, ref_head ] = createtrajectory( posn,heading,t,timeStep )
-%Creates array of trajectory positions and headings
+%createtrajectory.m Creates array of trajectory positions and headings
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------%
 
 ref_x = posn(2,1);
 ref_y = posn(2,2);

@@ -1,4 +1,12 @@
 function [ wallPts, wallLines ] = getwallpts(wallLoc,wallPlane,wallBottom,wallMiddle,wallHeight,wallWidth)
+%getwallpts.m 
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%       Returns points needed to to display wall using fill3, and points to plot
+%       lines representing middle of wall
+%-------------------------------------------------------------------------%
+
 %Returns points needed to to display wall using fill3, and points to plot
 %lines representing middle of wall
 

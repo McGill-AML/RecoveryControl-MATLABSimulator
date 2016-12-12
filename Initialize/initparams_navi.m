@@ -1,6 +1,9 @@
 function [ImpactParams]= initparams_navi()
-%UNTITLED5 Summary of this function goes here
-%   Detailed explanation goes here
+%initparams_navi.m Initialize Navi parameters
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: All inertial, geometric, propeller parameters
+%-------------------------------------------------------------------------%   
 
 global g m I Ixx Iyy Izz
 

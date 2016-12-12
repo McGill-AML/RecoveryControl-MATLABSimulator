@@ -1,5 +1,9 @@
 function localFlag = initflags
-
+%initflags.m Initialize global and local flags
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------% 
 global globalFlag   
     
     % Contact flags

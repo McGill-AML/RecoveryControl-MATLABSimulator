@@ -1,10 +1,10 @@
 function [ rotMat ] = invar2rotmat( rotationAxis, rotationAngle )
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
-% if ~strcmp(class(angle),'sym')
-%     error('Input angle must be symbolic');
-% end
-
+%invar2rotmat.m Converts rotation representation
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: Converts rotation representation from rotation axis +
+%   rotation angle around that axis to a rotation matrix
+%-------------------------------------------------------------------------%
 if rotationAxis == 'x' || rotationAxis == 'X'
     rotMat = [1 0 0;0 cos(rotationAngle) sin(rotationAngle);0 -sin(rotationAngle) cos(rotationAngle)];
 elseif rotationAxis == 'y' || rotationAxis == 'Y'

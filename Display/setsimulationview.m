@@ -1,5 +1,9 @@
 function [  ] = setsimulationview( sideview )
-
+%setsimulationview.m Set animate.m or snapshot.m view 
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------%
 switch sideview
     case 'XZ'
         view([0 0]); %view XZ plane

@@ -1,4 +1,9 @@
 function [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput()
+%initfuzzyinput.m Initialize FLP input calculation times and FLP object in MATLAB
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------%
 
 % Number of previous steps to calculate pre-impact attitude at
 PREIMPACT_ATT_CALCSTEPFWD = 2; %2

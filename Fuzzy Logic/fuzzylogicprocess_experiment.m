@@ -1,5 +1,14 @@
 function [FuzzyInfo,timeCalc] = fuzzylogicprocess_experiment(iSim, ImpactInfo, ImpactIdentification,...
                                     Sensor,currentPose, SimParams, Control, FuzzyInfo)
+%fuzzylogicprocess.m Calculates FLP inputs and output for experiment
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: Same as fuzzylogicprocess.m, except signs in Inclination
+%                calculation for IMU mounting and world frame convention
+%                are changed to match experiment convention (both IMU and
+%                world frame are NED).
+%-------------------------------------------------------------------------%
+
 timeCalc = [0;0;0;0];
 if SimParams.useRecovery == 1 && Control.recoveryStage == 0
     if ImpactInfo.firstImpactDetected == 1 && Control.accelRefCalculated == 0%Calculate fuzzy inputs

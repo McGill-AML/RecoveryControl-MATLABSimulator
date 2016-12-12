@@ -1,11 +1,32 @@
-% function [ImpactIdentification,FuzzyInfo,Plot,timeImpact] = startsim(VxImpact, rollImpact, pitchImpact, yawImpact)
+%startsim.m Main script/function for running quadrotor simulation
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: Main script/function for running quadrotor simulation.
+%-------------------------------------------------------------------------%
 
-% clear all;
-VxImpact = 0.5;
-rollImpact = 0;
-pitchImpact = -5;
-yawImpact = 0;
+%% Toggle startsim as Script/Function
+% Uncomment section to use startsim.m as function for use in
+% sim_MonteCarlo.m and sim_Batch.m. Also need to uncomment "end" at end of
+% file.
+%
+% Comment section if using startsim.m as standalone script.
 
+% function [ImpactIdentification,FuzzyInfo,Plot,timeImpact] = startsim(VxImpact, rollImpact, pitchImpact, yawImpact,iBatch)
+% clearvars -except VxImpact rollImpact pitchImpact yawImpact iBatch
+
+%% Prescribe Initial Conditions
+% (comment section if prescribing from outside function like
+% sim_MonteCarlo.m or sim_Batch.m)
+
+VxImpact = 2;
+inclinationImpact = 25; %degrees
+yawImpact = 45; %degrees
+
+angle = (inclinationImpact - 0.0042477)/1.3836686;
+rollImpact = -angle; %degrees
+pitchImpact = -angle; %degrees
+
+%% Declare Globals
 global g
 global timeImpact
 global globalFlag
@@ -19,14 +40,14 @@ ImpactParams = initparams_navi;
 
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 0;%Use Faessler recovery
-SimParams.useRecovery = 0; 
-SimParams.timeFinal = 1;
+SimParams.useRecovery = 0;
+SimParams.timeFinal = 3;
 tStep = 1/200;%1/200;
 
-ImpactParams.wallLoc = 1;%1.5;
+ImpactParams.wallLoc = 1.5;%1.5;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5; %Desired time of impact. Does nothing
-ImpactParams.frictionModel.muSliding = 0.3;
+ImpactParams.frictionModel.muSliding = 0.3;%0.3;
 ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
 timeStabilized = 10000;
@@ -46,8 +67,10 @@ ImpactIdentification = initimpactidentification;
 
 %%%%%%%%%%%% ***** SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%%%%
 Control.twist.posnDeriv(1) = VxImpact; %World X Velocity at impact      %%%
-IC.attEuler = [deg2rad(rollImpact);deg2rad(pitchImpact);deg2rad(yawImpact)];%%%
-IC.posn = [ImpactParams.wallLoc-0.32;0;2];                               %%%
+IC.attEuler = [deg2rad(rollImpact);...                                  %%%
+               deg2rad(pitchImpact);...                                 %%%
+               deg2rad(yawImpact)];                                     %%%
+IC.posn = [ImpactParams.wallLoc-0.32;0;2];                              %%%
 Setpoint.posn(3) = IC.posn(3);                                          %%%
 xAcc = 0;                                                               %%%
 %%%%%%%%%%% ***** END SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%
@@ -135,11 +158,6 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         Control.pose.posn(3) = Trajectory(end).posn(3);
         Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Control,[]);
         Control.type = 'att';
-        
-%         Control.pose.posn = [0;0;2];
-%         Trajectory(end).head = 0;
-%         Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
-%             
     end
     
     
@@ -198,7 +216,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 
     %% End loop conditions
-    % Navi has crashed:
+%     Navi has crashed:
     if state(9) <= 0
         display('Navi has hit the floor :(');
         ImpactInfo.isStable = 0;
@@ -211,11 +229,20 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         ImpactInfo.isStable = 1;
         break;
     end
+    
+%     if Control.recoveryStage == 3
+%         display('Navi has recovered to hover orientation');
+%         ImpactInfo.isStable = 1;
+%         break;
+%     end
 
 end
 
 
 %% Generate plottable arrays
 Plot = hist2plot(Hist);
+
+%% Toggle startsim as Script/Function
+% uncomment "end" if using startsim.m as function
 
 % end

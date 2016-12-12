@@ -1,4 +1,9 @@
 function [rpm,u] = initrpm(rotMat, worldLinAcc)
+%initrpm.m Initialize thruster RPMs
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description:
+%-------------------------------------------------------------------------%   
 
 global m g u2RpmMat
 

@@ -1,4 +1,10 @@
 function [Pose, Twist] = updatekinematics(state, stateDeriv)
+%updatekinematics.m Update quadrotor pose and twist variables
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------%
+
     % Initialize structs Twist Pose and Control.
 
     % Position in world frame

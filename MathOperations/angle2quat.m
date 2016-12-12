@@ -1,3 +1,5 @@
+% From MATLAB Aerospace Toolbox
+
 function q = angle2quat( r1, r2, r3, varargin )
 %  ANGLE2QUAT Convert rotation angles to quaternion.
 %   Q = ANGLE2QUAT( R1, R2, R3 ) calculates the quaternion, Q, for given,

@@ -1,7 +1,12 @@
 function Control = controlleroffboard(state,stateDeriv,iSim,timeInit,tStep,Control)
-
-% based on "Minimum Snap Trajectory Generation and Control for Quadrotors"
-% by Mellinger & Kumar, to match px4 offboard control
+%controlleroffboard.m High-level offboard/position controller
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%       Based on "Minimum Snap Trajectory Generation and Control for Quadrotors"
+%       by Mellinger & Kumar, to match px4 offboard control. 
+%       Gains tuned to mimic Crash Set VII (unstable heading control)
+%-------------------------------------------------------------------------%
 
 global m g Ixx Iyy Izz u2RpmMat motorDir
 
@@ -106,10 +111,13 @@ u = [u1;u2;u3;u4];
 %Propeller RPM Control Signal
 temp = u2RpmMat*u;
 rpmsquare = temp.*(temp>0);
-rpm = sqrt(rpmsquare);
-rpm = max(min(sqrt(rpmsquare),7500),3500); %saturate motor speeds
+% rpm = sqrt(rpmsquare);
+rpm = max(min(sqrt(rpmsquare),8000),3000); %saturate motor speeds
+% rpm = max(min(sqrt(rpmsquare),7500),3500); %saturate motor speeds
 % rpm = max(min(sqrt(rpmsquare),7800),3600); %saturate motor speeds
-rpm = motorDir*[-rpm(1);rpm(2);-rpm(3);rpm(4)]; %in RPM
+% rpm = motorDir*[-rpm(1);rpm(2);-rpm(3);rpm(4)]; %in RPM
+rpm = [-rpm(1);rpm(2);-rpm(3);rpm(4)]; %in RPM
+
 
 %% Assign values to output Control
 Control.rpm = rpm;

@@ -1,15 +1,19 @@
 function [ImpactParams]= initparams_spiri()
-%UNTITLED5 Summary of this function goes here
-%   Detailed explanation goes here
+%initparams_spiri.m Initialize Spiri parameters
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: All inertial, geometric, propeller parameters
+%-------------------------------------------------------------------------%   
 
 global g m I Ixx Iyy Izz
 
-global Jr Dt Kt PROP_POSNS BUMP_RADIUS BUMP_ANGLE
+global Jr Dt Kt PROP_POSNS BUMP_RADII BUMP_ANGLE
 
 global AERO_AREA AERO_DENS Cd Tv Kp Kq Kr ALPHA BETA
 
 global u2RpmMat BUMP_NORMS BUMP_TANGS BUMP_POSNS
 
+global IMU_POSN
 
 g = 9.81;
 
@@ -38,9 +42,9 @@ Kt = 8.7e-8; %Calculated from thrust needed for Spiri to hover w/ white 8" props
 %Kt = 7.015e-8; %Calculated from 8x4.5 APC Prop
 
 %Drag Torque factor of coaxial rotor pairs
-Dt = 9.61e-10; %Calculated from 8x4.5 APC Prop
+% Dt = 9.61e-10; %Calculated from 8x4.5 APC Prop
 % Dt = 3.47e-9; %Measured by Thomas
-
+Dt = 0.1*Kt;
 
 u2RpmMat = inv([-Kt -Kt -Kt -Kt;...
     -Kt*PROP_POSNS(2,1) -Kt*PROP_POSNS(2,2) -Kt*PROP_POSNS(2,3) -Kt*PROP_POSNS(2,4);...
@@ -59,7 +63,7 @@ ALPHA = 0;
 BETA = 0;
 
 % Bumper things
-BUMP_RADIUS = 0.11;
+BUMP_RADII = [0.11; 0.11; 0.11; 0.11];
 BUMP_ANGLE = deg2rad(11);
 
 BUMP_NORMS(:,1) = invar2rotmat('Z',deg2rad(45))'*invar2rotmat('Y',BUMP_ANGLE + deg2rad(90))'* [1;0;0];
@@ -77,6 +81,9 @@ BUMP_POSNS = PROP_POSNS;
 ImpactParams.compliantModel.e = 0.9;
 ImpactParams.compliantModel.k = 40;
 ImpactParams.compliantModel.n = 0.54;
+
+%% IMU Parameters
+IMU_POSN = [0;0;0]; %IMU posn relative to CM
 
 end
 

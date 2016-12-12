@@ -1,4 +1,10 @@
 function plotCircle3D(center,normal,radius,linewidthvalue)
+%plotCircle3D.m Plot 3D circle
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: Can change linewidthvalue through function input, but
+%                line colour must be changed manually below 
+%-------------------------------------------------------------------------%
 
 theta=0:0.01:2*pi;
 v=null(normal');

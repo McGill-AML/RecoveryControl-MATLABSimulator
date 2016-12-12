@@ -1,5 +1,11 @@
 function [FuzzyInfo,timeCalc] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
                                     Sensor,currentPose, SimParams, Control, FuzzyInfo)
+%fuzzylogicprocess.m Calculates FLP inputs and output
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------%
+
 timeCalc = [0;0;0;0];
 if Control.recoveryStage == 0
 

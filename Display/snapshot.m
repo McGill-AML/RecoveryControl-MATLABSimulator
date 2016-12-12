@@ -1,14 +1,19 @@
 function [ ] =snapshot( frame,Hist,sideview,ImpactParams,timeImpact)
- 
-%UNTITLED6 Summary of this function goes here
-%   Detailed explanation goes here
+%snapshot.m Displays single snapshot of simulation
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: To display snapshot at a certain "time", use:
+%                   snapshot(vlookup(Plot.times,time),Hist,...)
+%                Example for snapshot of initial collision conditions:
+%                   snapshot(vlookup(Plot.times,timeImpact),Hist,'ZX',ImpactParams,timeImpact);
+%-------------------------------------------------------------------------%
 global BUMP_POSNS BUMP_RADII BUMP_ANGLE
 
 %% Save inputs to arrays
 t = Hist.times;
 stateHist = Hist.states';
 
-figure('Position',[962 25 960 949]);
+fig = figure('Position',[962 25 960 949]);
 
 %% Define body-fixed points and axes
 
@@ -61,9 +66,10 @@ axisMax = max([max(stateHist(:,7))+0.4,max(stateHist(:,8))+0.4,max(stateHist(:,9
 impactYPosn = stateHist(vlookup(t,timeImpact),8);
 impactZPosn = stateHist(vlookup(t,timeImpact),9);
 % [wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,roundn(impactZPosn,-1)-axisWidth/2,roundn(impactYPosn,-1)+0.5,(axisWidth),1.8);
-                                                  %bottom,center, height, width  
+%                                                   bottom,center, height, width  
 [wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,roundn(impactZPosn,-1)-(axisMax-axisMin)/2,roundn(impactYPosn,-1)+0.5,(axisMax-axisMin),2);
-    
+% [wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,0,0,1,1);
+
 %% Plot Frame
 %% Rotate body-fixed points to world-frame points
 q = [stateHist(frame,10);stateHist(frame,11);stateHist(frame,12);stateHist(frame,13)];
@@ -134,16 +140,14 @@ zlhand = zlabel('Z(m)','Interpreter','LaTex');
 set(xlhand,'fontsize',14);
 set(ylhand,'fontsize',14);
 set(zlhand,'fontsize',14);
-title(strcat('t = ',num2str(t(frame),'%.2f'),' s'));
 
+% title(strcat('t = ',num2str(t(frame),'%.2f'),' s'));
 setsimulationview(sideview);
 
 grid on;
 axis square;
 drawnow;
 hold off;
-
-
 
 end
 

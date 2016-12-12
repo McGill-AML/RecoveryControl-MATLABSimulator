@@ -1,5 +1,9 @@
 function Contact = initcontact(impactOccured)
-    
+%initcontact.m Initialize Contact struct
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------%    
     Contact.hasOccured = impactOccured;
     Contact.firstImpactOccured = 0;
     

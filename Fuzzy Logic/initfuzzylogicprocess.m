@@ -1,5 +1,9 @@
 function [ flp ] =initfuzzylogicprocess( )
-%Initialize membership functions and rules for Fuzzy Logic Process
+%itfuzzylogicprocess.m Initialize membership functions and rules for FLP
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------%
 
 %%
 flp = newfis('responseIntensity');

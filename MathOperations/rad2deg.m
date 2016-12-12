@@ -1,6 +1,5 @@
 function [ angle_deg ] = rad2deg( angle_rad )
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%deg2rad Converts angle from radians to degrees
     angle_deg = angle_rad*180/pi;
 
 end

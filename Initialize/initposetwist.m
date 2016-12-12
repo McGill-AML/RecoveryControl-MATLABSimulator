@@ -1,5 +1,9 @@
 function [Pose, Twist] = initposetwist
-    % Initialize structs Pose and Twist 
+%initposetwist.m Initialize Pose and Twist structs
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description:
+%-------------------------------------------------------------------------%   
 
     % Position in world frame
     Pose.posn = zeros(3,1);

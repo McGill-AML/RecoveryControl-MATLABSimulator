@@ -1,4 +1,9 @@
-tic
+%startsim_trajectory.m Prescribe quadrotor trajectory via position
+%waypoints
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: Prescribe quadrotor trajectory via position waypoints
+%-------------------------------------------------------------------------%
 
 clear all;
 
@@ -56,6 +61,8 @@ globalFlag.experiment.rpmChkptIsPassed = zeros(1,4);
 PropState.rpm = IC.rpm;
 
 %% Waypoint Trajectory
+% Can add/delete waypoints as desired
+
 % Setpt 1
 Setpoint.head = 0;
 Setpoint.time = 0;
@@ -235,8 +242,6 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         break;
     end
 end
-
-toc
 
 %% Generate plottable arrays
 Plot = hist2plot(Hist);

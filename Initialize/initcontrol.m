@@ -1,4 +1,10 @@
 function [Control] = initcontrol()
+%initcontrol.m Initialize Control struct
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------% 
+
     global m g
 
     [Pose, Twist] = initposetwist;

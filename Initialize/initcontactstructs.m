@@ -1,5 +1,9 @@
 function [Contact, ImpactInfo] = initcontactstructs
-  
+%initcontactstructs.m Initialize contact model related structs
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------%   
     Contact = initcontact(0);
     
     ImpactInfo.isStable = 1;

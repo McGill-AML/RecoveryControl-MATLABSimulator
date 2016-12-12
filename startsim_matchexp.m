@@ -1,23 +1,27 @@
-% function [ImpactIdentification,FuzzyInfo,Plot,timeImpact] = startsim(VxImpact, pitchImpact, yawImpact)
+%startsim_matchexp.m Main script for running quadrotor simulation to match
+%experimental Crash Set I
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: Main script for running quadrotor simulation to match
+%                experimental Crash Set I (only attitude control, no 
+%                offboard mode, motor speeds are matched upon impact to
+%                mimic motor stall)
+%-------------------------------------------------------------------------%
 
-% matches motor speeds;
+clear all;
 
-% clear all;
-
-crash = 'VII-08';
+crash = 'I-11';
 
 global g
 global timeImpact
 global globalFlag
 
-global motorDir
-motorDir = -1;
-
 %% Initialize Fuzzy Logic Process
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
 
 %% Initialize Simulation Parameters
-ImpactParams = initparams_navi;
+% ImpactParams = initparams_navi;
+ImpactParams = initparams_spiri;
 
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 0;%Use Faessler recovery
@@ -25,10 +29,10 @@ SimParams.useRecovery = 0;
 SimParams.timeFinal = 3;
 tStep = 1/200;%1/200;
 
-ImpactParams.wallLoc = 1;%1.5;
+ImpactParams.wallLoc = 1.5;%1.5;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5; %Desired time of impact. Does nothing
-ImpactParams.frictionModel.muSliding = 0.3;
+ImpactParams.frictionModel.muSliding = 0.15;
 ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
 timeStabilized = 10000;
@@ -46,18 +50,18 @@ ImpactIdentification = initimpactidentification;
 
 %% Set initial Conditions
 
-[VxImpact, IC.attEuler, IC.posn(3), Setpoint.posn(3), ~, Experiment] = matchexperimentIC(crash);
+[VxImpact, IC.attEuler, IC.posn(3), Setpoint.posn(3), xAcc, Experiment] = matchexperimentIC(crash);
 
 %%%%%%%%%%%% ***** SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%%%%
 Control.twist.posnDeriv(1) = VxImpact; %World X Velocity at impact      %%%
-IC.posn(1) = ImpactParams.wallLoc-0.32;                                 %%%
-xAcc = 0;                                                               %%%
+% IC.posn(1) = ImpactParams.wallLoc-0.32;                                 %%%
+% xAcc = 0;                                                               %%%
 %%%%%%%%%%% ***** END SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%
 
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 
-% [IC.posn(1), VxImpact, SimParams.timeInit, xAcc ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
-SimParams.timeInit = 0; %% comment out if using getinitworldx()
+[IC.posn(1), VxImpact, SimParams.timeInit, xAcc ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
+% SimParams.timeInit = 0; %% comment out if using getinitworldx()
 
 Setpoint.head = IC.attEuler(3);
 Setpoint.time = SimParams.timeInit;
@@ -214,5 +218,3 @@ end
 
 %% Generate plottable arrays
 Plot = hist2plot(Hist);
-
-% end

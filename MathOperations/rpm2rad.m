@@ -1,6 +1,5 @@
 function [ speedRad ] = rpm2rad( speedRPM )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+%Converts rotation speed from rotations per minute (RPM) to rad/s
 speedRad = speedRPM *(2*pi/60);
 
 end

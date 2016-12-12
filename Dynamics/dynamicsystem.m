@@ -1,5 +1,9 @@
 function [stateDeriv, Contact, PropState] = dynamicsystem(t,state,tStep,rpmControl,ImpactParams,rpmPrev,propCmds)
-%Continuous dynamics of quadrotor, including:
+%dynamicsystem.m Continuous dynamics of quadrotor, including contact
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%     Continuous dynamics of quadrotor, including:
 %         - normal flight dynamics based on control input rpm
 %         - wall contact dynamics (normal force & friction force)
 %         - propeller rpm rate saturation
@@ -15,6 +19,7 @@ function [stateDeriv, Contact, PropState] = dynamicsystem(t,state,tStep,rpmContr
 %         - stateDeriv: state rates
 %         - Contact: struct containing contact dynamics calculated variables
 %         - PropState: actual propeller rpm (different from controller input rpm)
+%-------------------------------------------------------------------------%
 
 global g m I Kt Dt Jr PROP_POSNS %Inertial and Geometric Parameters
 global AERO_AREA AERO_DENS Cd Tv Kp Kq Kr %Aerodynamic Parameters

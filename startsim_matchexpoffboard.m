@@ -1,5 +1,13 @@
-% function [ImpactIdentification,FuzzyInfo,Plot,timeImpact] = startsim(VxImpact, pitchImpact, yawImpact)
-
+%startsim_matchexpoffboard.m Main script for running quadrotor simulation to match
+%experimental Crash Set VII
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: Main script for running quadrotor simulation to match
+%                experimental Crash Set VII. Before the collision, attitude
+%                control is used. After the collision, control switches to
+%                controlleroffboard, which mimics the unstable/suboptimal
+%                PX4 offboard controller used during experiments. 
+%-------------------------------------------------------------------------%
 clear all;
 
 crash = 'VII-15';
@@ -7,8 +15,6 @@ crash = 'VII-15';
 global g
 global timeImpact
 global globalFlag
-global motorDir
-motorDir = 1;
 
 %% Initialize Fuzzy Logic Process
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
@@ -22,7 +28,7 @@ SimParams.useRecovery = 1;
 SimParams.timeFinal = 2;
 tStep = 1/200;%1/200;
 
-ImpactParams.wallLoc = 1;%1.5;
+ImpactParams.wallLoc = 1.5;%1.5;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5; %Desired time of impact. Does nothing
 ImpactParams.frictionModel.muSliding = 0.3;
@@ -231,5 +237,3 @@ end
 
 %% Generate plottable arrays
 Plot = hist2plot(Hist);
-
-% end

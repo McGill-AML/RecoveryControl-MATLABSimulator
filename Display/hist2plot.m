@@ -1,6 +1,12 @@
 function [ Plot ] = hist2plot( Hist )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+%hist2plot.m Returns plottable arrays 
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: If you append new fields to existing structs in
+%   intialization (e.g. initcontact.m), they must be added to the bottom of
+%   the file. If you don't, it will mess up the conversions in this
+%   function.
+%-------------------------------------------------------------------------%
 
 Plot.times = Hist.times;
 
@@ -17,13 +23,14 @@ Plot.quaternionDerivs = Hist.stateDerivs(10:13,:);
 temp = struct2cell(Hist.twists);
 Plot.angVels = [temp{4,:}];
 Plot.linVels = [temp{1,:}];
+Plot.eulerAngleRates = [temp{5,:}];
+
 
 Plot.posnDerivs = Hist.stateDerivs(7:9,:);
 Plot.bodyAccs = Hist.stateDerivs(1:3,:);
 Plot.angAccs = Hist.stateDerivs(4:6,:);
 
 temp = struct2cell(Hist.contacts);
-% Plot.normalForces = [temp{5,:}];
 Plot.normalForces = reshape([temp{6,:}],[4,size(temp,2)]);
 temp2 = [temp{8,:}];
 Plot.slidingDirectionWorlds_bump1 =  temp2(:,1:4:end)';
@@ -62,7 +69,7 @@ Plot.muSlidings = [temp{11,:}];
 
 temp = struct2cell(Hist.controls);
 Plot.errEulers = [temp{5,:}];
-Plot.desEulers = [temp{13,:}];
+Plot.desEulers = [temp{15,:}];
 Plot.desYawDerivs = [temp{14,:}];
 Plot.controlAccDes = [temp{3,:}];
 Plot.controlUs = [temp{17,:}]; 
@@ -81,6 +88,18 @@ temp = struct2cell(Hist.sensors);
 Plot.accelerometers = [temp{1,:}];
 Plot.gyros = [temp{2,:}];
 Plot.CMaccelerometers = [temp{3,:}];
+
+Plot.worldAcc = zeros(3,numel(Hist.times));
+Plot.worldAcc2 = zeros(3,numel(Hist.times));
+
+for iSim = 1:numel(Hist.times)
+    rotMat = quat2rotmat(Plot.quaternions(:,iSim));
+    bodyAcc = Hist.stateDerivs(1:3,iSim);
+    angVel = Hist.states(4:6,iSim);
+    linVel = Hist.states(1:3,iSim);
+    Plot.worldAcc(:,iSim) = rotMat'*(bodyAcc+cross(angVel,linVel));
+    Plot.worldAcc2(:,iSim) = rotMat'*bodyAcc;
+end
 
 
 end

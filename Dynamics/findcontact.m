@@ -1,5 +1,9 @@
 function [ Contact ] = findcontact( rotMat,state,wallLoc)
-%Returns contact information based on current state and wall location
+%findcontact.m Returns contact information based on current state and wall location
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------%
 
 global BUMP_RADII BUMP_POSNS BUMP_NORMS BUMP_TANGS
 

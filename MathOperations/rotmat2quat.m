@@ -1,6 +1,10 @@
 function [ q ] = rotmat2quat( R )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+%rotmat2quat.m Converts rotation representation
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: Converts rotation representation from rotation matrix to 
+%                quaternion
+%-------------------------------------------------------------------------%
 q0 = ( R(1,1) + R(2,2) + R(3,3) + 1.0) / 4.0;
 q1 = ( R(1,1) - R(2,2) - R(3,3) + 1.0) / 4.0;
 q2 = (-R(1,1) + R(2,2) - R(3,3) + 1.0) / 4.0;

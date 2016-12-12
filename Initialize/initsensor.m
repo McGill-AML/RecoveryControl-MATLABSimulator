@@ -1,4 +1,9 @@
 function Sensor = initsensor(state, stateDeriv)
+%initsensor.m Initialize Sensor struct
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: 
+%-------------------------------------------------------------------------%   
 
 global IMU_POSN g
 

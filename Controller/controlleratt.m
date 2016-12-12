@@ -1,7 +1,14 @@
 function Control = controlleratt(state,iSim,timeInit,tStep,Control,manualCmds)
-% [control,errAltitude,errAltitudeDeriv,evx,evy,errAttYaw,errAttRoll,errAttPitch,errAttYawDeriv,omega,roll_des,pitch_des,attYawDerivDes,u1,u2,u3,u4] = controllerposn(state,iSim,timeInit,tStep,posnDes,attYawDes,errAltitudePrev,errAltitudeDerivPrev,errAttRollPrev,errAttPitchPrev,errAttYawPrev,errAttYawDerivPrev)
-global m g Ixx Iyy Izz u2RpmMat timeImpact
+%controlleratt.m Low level attitude controller
+%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
+%   Last Updated: December 12, 2016
+%   Description: Based on controller from --- 
+%                Zhang, Mingfeng, Adam Harmat, and Inna Sharf.
+%                "Autonomous Flight of a Quadrotor Using Multi-Camera Visual SLAM."
+%                Int. Conf. on Intelligent Unmanned Systems. Vol. 10. 2014.
+%-------------------------------------------------------------------------%
 
+global m g Ixx Iyy Izz u2RpmMat timeImpact
 
 %% Save inputs 
 altitudeDes = Control.pose.posn(3);

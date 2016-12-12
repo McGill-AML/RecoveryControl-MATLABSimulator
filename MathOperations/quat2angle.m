@@ -1,3 +1,5 @@
+% from MATLAB Aerospace Toolbox
+
 function [r1 r2 r3] = quat2angle( q, varargin )
 %  QUAT2ANGLE Convert quaternion to rotation angles.
 %   [R1 R2 R3] = QUAT2ANGLE( Q ) calculates the calculates the set of
