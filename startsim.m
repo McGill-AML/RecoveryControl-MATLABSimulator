@@ -43,7 +43,7 @@ Monte = initmontecarlo(IC);
 for k = 1:num_iter
     display(k);
  
-    ImpactParams.frictionModel.muSliding = 0.3; % 0.2 - 0.4 possible
+    ImpactParams.frictionModel.muSliding = 0.0; % 0.2 - 0.4 possible
     ImpactParams.wallLoc = 0.0; % as close as possible so that impact ICs are same as when simulation starts
     ImpactParams.wallPlane = 'YZ';
     ImpactParams.timeDes = 0.5; % irrelevant
@@ -205,6 +205,6 @@ Plot = monte2plot(Monte);
   
 %% Generate plottable arrays
 Plot = hist2plot(Hist);
-close all
-animate(0,Hist,'ZX',ImpactParams,timeImpact)
-
+% close all
+% animate(0,Hist,'ZX',ImpactParams,timeImpact)
+save('Results\monte_high_friction.mat','Monte')

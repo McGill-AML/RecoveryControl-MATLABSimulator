@@ -1,13 +1,8 @@
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % Monte Carlo Simulation of Crash Recovery using Fuzzy Logic  %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
-% % ICs:
-% %   -pitch +/- 45 deg
-% %   -roll  +/- 15 deg
-% %   -45 < yaw < 45 deg 
+
 % %   RPM max acceleration 70,000 rpm/s
-% 
 % % For all trials:
 % %   Thrust coefficient: 8.7e-8
 % %   Drag coefficient:   8.7e-9
@@ -22,7 +17,7 @@
 % % See /Controller/controllerrecovery.m for recovery method
 % % See /Results/plot_monte.m for plotting results
 % % See /Fuzzy\Logic/initfuzzylogicprocess.m for fuzzy logic parameters
-% 
+
 tic
 clear all;
 global g timeImpact globalFlag
@@ -35,7 +30,7 @@ SimParams.useRecovery = 1;
 SimParams.timeFinal = 3;
 tStep = 1/200;
  
-num_iter = 10000;
+num_iter = 10;
  
 IC = initIC; % dummy initialization
 Monte = initmontecarlo(IC);
@@ -43,8 +38,8 @@ Monte = initmontecarlo(IC);
 for k = 1:num_iter
     display(k);
  
-    ImpactParams.frictionModel.muSliding = 0.3; % 0.2 - 0.4 possible
-    ImpactParams.wallLoc = 0.0; % as close as possible so that impact ICs are same as when simulation starts
+    ImpactParams.frictionModel.muSliding = 0.3; %kinetic friction
+    ImpactParams.wallLoc = 0.0; 
     ImpactParams.wallPlane = 'YZ';
     ImpactParams.timeDes = 0.5; % irrelevant
     ImpactParams.frictionModel.velocitySliding = 1e-4; % m/s
@@ -65,10 +60,10 @@ for k = 1:num_iter
     
     % Randomized ICs    
     % World X velocity at impact
-    xVelocity = rand*2.6 + 0.7;
+    xVelocity = rand*2.6 + 0.7; % randomize incoming velocity
     Control.twist.posnDeriv(1) = xVelocity; 
     % -11 to 23, 0.7 to 3.3
-    IC.attEuler = [0;deg2rad(34*(rand-11/34));deg2rad(45*rand)];     %%%
+    IC.attEuler = [0;deg2rad(34*(rand-11/34));deg2rad(45*rand)]; % randomize initial Euler angles
 
     % starts next to the wall 5 meter up
     IC.posn = [-0.32; 0; 5];                             

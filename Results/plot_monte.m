@@ -1,5 +1,5 @@
 %% Plot Monte Carlo Results
-load('icra.mat');
+load('monte_high_friction.mat');
 
 %% Post-processing for plots
 Plot = monte2plot(Monte);
@@ -16,13 +16,14 @@ success = find(Monte.recovery(:,4)~=0);
 p1 = plot(Monte.fuzzyInput(success,2),Monte.xVelocity(success,1),'bo','MarkerSize',3,'MarkerFaceColor','b');
 p2 = plot(Monte.fuzzyInput(failed,2),Monte.xVelocity(failed,1),'rx','MarkerSize',3,'LineWidth',3);
 
-ylabel('Incoming velocity (m/s)')
-xlabel('Inclination angle (deg)')
+ylabel('Incoming velocity (m/s)','FontSize',20)
+xlabel('Inclination angle (deg)','FontSize',20)
 % title('Successes and failures for 51 trials');
 legend([p1 p2],'Successful recovery','Failed recovery')
 grid on
 % histogram(Monte.xVelocity(:,1),30,'FaceColor','w');
 axis([-60 60 0.5 2.5]);
+set(gca,'FontSize',20)
 % legend('Successful Recoveries','Failed Recoveries')
 %%
 histogram(Monte.recovery(:,4),8)
