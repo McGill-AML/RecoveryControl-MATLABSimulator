@@ -1,15 +1,16 @@
 %% plot script for plotting RMSE
 
-plot_SPKF = 0;
+plot_SPKF = 1;
 plot_ASPKF = 0;
-plot_EKF = 0;
+plot_EKF = 1;
 plot_AEKF = 0;
 plot_COMP = 0;
-plot_HINF = 1;
-plot_SPKF_full =0;
-plot_EKF_att = 1;
+plot_HINF =0;
+plot_SPKF_full =1;
+plot_EKF_att = 0;
 plot_ASPKF_opt = 0;
-plot_AHINF = 1;
+plot_AHINF = 0;
+plot_SPKF_norm = 0;
 
 
 %% plot quaternion crash RMSE
@@ -40,6 +41,9 @@ if plot_ASPKF_opt == 1
 end
 if plot_AHINF == 1
      plot(PlotRMSE.crash.AHINF_quat,'g--','Linewidth',line_width);
+end
+if plot_SPKF_norm == 1
+    plot(PlotRMSE.crash.SPKF_norm_quat,'r:','Linewidth',line_width);
 end
 xlabel('Run No','fontsize',font_size,'Interpreter','latex');
 ylabel('RMSE','fontsize',font_size,'Interpreter','latex');
@@ -77,6 +81,9 @@ end
 if plot_AHINF == 1
      plot(PlotRMSE.not_crash.AHINF_quat,'g--','Linewidth',line_width);
 end
+if plot_SPKF_norm == 1
+    plot(PlotRMSE.not_crash.SPKF_norm_quat,'r:','Linewidth',line_width);
+end
 xlabel('Run No','fontsize',font_size,'Interpreter','latex');
 ylabel('RMSE','fontsize',font_size,'Interpreter','latex');
 set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
@@ -113,6 +120,9 @@ end
 if plot_AHINF == 1
      plot(PlotRMSE.total.AHINF_quat,'g--','Linewidth',line_width);
 end
+if plot_SPKF_norm == 1
+    plot(PlotRMSE.total.SPKF_norm_quat,'r:','Linewidth',line_width);
+end
 xlabel('Run No','fontsize',font_size,'Interpreter','latex');
 ylabel('RMSE','fontsize',font_size,'Interpreter','latex');
 set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
@@ -147,13 +157,27 @@ end
 if plot_AHINF == 1
      plot(mean(PlotRMSE.crash.AHINF_gyr_bias),'g--','Linewidth',line_width);
 end
+if plot_SPKF_norm == 1
+    plot(mean(PlotRMSE.crash.SPKF_norm_gyr_bias),'r:','Linewidth',line_width);
+end
 xlabel('Run No','fontsize',font_size,'Interpreter','latex');
 ylabel('RMSE','fontsize',font_size,'Interpreter','latex');
 set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
 grid on;
 title('bias RMSE during crash');
-legend('H-Inf', 'EKF', 'AH-Inf', 'H-Inf', 'SPKF Full', 'EKF', 'Opt ASPKF', 'AHINF');
+% legend('H-Inf', 'EKF', 'AH-Inf', 'H-Inf', 'SPKF Full', 'EKF', 'Opt ASPKF', 'AHINF');
 
-% legend('SPKF', 'ASPKF', 'Opt ASPKF', 'H-Inf', 'SPKF Full', 'EKF', 'Opt ASPKF', 'AHINF');
+ legend('SPKF', 'ASPKF', 'Opt ASPKF', 'H-Inf', 'SPKF Full', 'EKF', 'Opt ASPKF', 'AHINF');
 
+%% used for computing total RMSE over all of the runs
 
+% tmp = struct2cell(PlotRMSE);
+% tmp2 = struct2cell(tmp{3});
+% 
+% for ii = 1:length(tmp2)/2
+%     crash_RMSE(ii,1) = max(tmp2{ii});
+% end
+% 
+% for ii = length(tmp2)/2+1:length(tmp2)
+%     crash_RMSE(ii,1) = max(mean(tmp2{ii}));
+% end

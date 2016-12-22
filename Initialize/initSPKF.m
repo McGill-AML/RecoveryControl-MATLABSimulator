@@ -1,6 +1,6 @@
-function [SPKF] = initSPKF(Est_ICs)
+function [SPKF] = initSPKF(Est_ICs, loop_no)
 %estimator constants
-SPKF.kappa = 0; % SPKF scaling factor
+SPKF.kappa = 3; % SPKF scaling factor
 
 %initial states ang_vel, quat, gyro bias
 SPKF.X_hat.q_hat = Est_ICs.q;
@@ -10,8 +10,11 @@ SPKF.X_hat.bias_gyr = Est_ICs.bias_gyr;
 %ang vel is the noise value
 SPKF.P_hat = Est_ICs.P_init_att([1:3,5:7],[1:3,5:7]); % initial covariance 
 
+SPKF.P_hat(1:3,1:3)  = SPKF.P_hat(1:3,1:3)*0.1;
 
-SPKF.accel_bound = 1; % +/- how much larger thna gravity before not used in update
+
+SPKF.accel_bound = 0.5; % +/- how much larger thna gravity before not used in update
+
 
 SPKF.use_acc = 1; % whether or not accelerometer reading is used in update
 

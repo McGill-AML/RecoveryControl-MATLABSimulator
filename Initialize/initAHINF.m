@@ -15,9 +15,9 @@ AHINF.P_hat_eps = AHINF.P_hat;
 %adaptive values
 AHINF.innov_tresh = 0.5; % innovation sum threshold
 
-AHINF.delta_max = 40; % max adaptive gain
+AHINF.delta_max = 70; % max adaptive gain
 
-AHINF.delta_rate = 40; % how fast the adaptive gain grows when innov sum above threshold
+AHINF.delta_rate = 35; % how fast the adaptive gain grows when innov sum above threshold
 
 AHINF.delta = 0; %initial adaptive gain 0 = regular EKF
 

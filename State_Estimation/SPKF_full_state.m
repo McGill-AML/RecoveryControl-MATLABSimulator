@@ -7,6 +7,9 @@ function [SPKF_full] = SPKF_full_state(Sensor, SPKF_full, sensParams, tStep, iSi
 %notation - _k_1 is previous timestep, _k_m is predicted, _k is corrected
 %estimate
 
+%YO YOUR VELOCITY IS ESTIMATED IN INERTIAL FRAME HERE - SO IT'S GONNA LOOK
+%DIFFERENT THAN YOUR TRUE STATE
+
 global g mag
 %unpackage
 %states
@@ -21,9 +24,9 @@ omega_k_1 = SPKF_full.X_hat.omega_hat;
 rotMat = quat2rotmat(q_k_1);
 
 %bias terms
-% bias_acc = SPKF_full.X_hat.bias_acc;
+bias_acc = SPKF_full.X_hat.bias_acc;
 bias_gyr = SPKF_full.X_hat.bias_gyr;
-bias_acc = sensParams.bias.acc;
+% bias_acc = sensParams.bias.acc;
 
 %measurements
 u_b_acc = Sensor.acc;
@@ -40,7 +43,7 @@ height_0 = sensParams.gps_init(3);
 Me  = sensParams.gps_init(4);
 Ne  = sensParams.gps_init(5);
 
-baro_0 = sensParams.baro_init;
+% baro_0 = sensParams.baro_init;
 
 MRP_0 = zeros(3,1); %q_k_1(2:4)/(1+q_k_1(1));
 
@@ -49,13 +52,19 @@ MRP_0 = zeros(3,1); %q_k_1(2:4)/(1+q_k_1(1));
 %sig for prediction (process)
 Q_k_1 = diag([sensParams.var_acc;
               sensParams.var_gyr;
-              sensParams.var_bias_acc;
+              sensParams.var_bias_acc*10;
               sensParams.var_bias_gyr]); 
 
-%sig for correct (update)        
-R_k = diag([sensParams.var_mag;
-            sensParams.var_gps;
-            sensParams.var_baro]);
+%sig for correct (update)       
+if mod(iSim,sensParams.GPS_rate) == 0
+    R_k = diag([sensParams.var_mag;
+                sensParams.var_gps;
+                sensParams.var_baro]);
+        
+else
+    R_k = diag([sensParams.var_mag
+                sensParams.var_baro]);
+end
         
 P_k_1 = SPKF_full.P_hat;
 
@@ -69,7 +78,11 @@ L = length(S);
 Sigma_pts_k_1 = zeros(L,2*L+1);
 
 % sigma points are generated for MRP error, gyro bias and noise terms
-Sigma_pts_k_1(:,1) = [pos_k_1; vel_k_1; MRP_0; bias_acc; bias_gyr; zeros(21,1)];
+if mod(iSim,sensParams.GPS_rate) == 0
+    Sigma_pts_k_1(:,1) = [pos_k_1; vel_k_1; MRP_0; bias_acc; bias_gyr; zeros(21,1)];
+else
+    Sigma_pts_k_1(:,1) = [pos_k_1; vel_k_1; MRP_0; bias_acc; bias_gyr; zeros(16,1)];
+end
 
 q_k_1_err = zeros(4,2*L+1);
 q_k_1_sig = zeros(4,2*L+1);
@@ -158,8 +171,8 @@ if mod(iSim,sensParams.GPS_rate) == 0
         rotMat = quat2rotmat(q_k_m_sig(:,ii));       
         Sigma_Y(1:3,ii) = rotMat*(mag) + Sigma_pts_k_m(28:30,ii); %magnetometer    
         
-        Sigma_Y(4,ii) = Sigma_pts_k_m(1,ii)/(Me+height_0-Sigma_pts_k_m(3,ii))*180/pi + lat_0 + Sigma_pts_k_m(31,ii);
-        Sigma_Y(5,ii) = Sigma_pts_k_m(2,ii)/((Ne+height_0-Sigma_pts_k_m(3,ii))*cos(lat_0*pi/180.0))*180/pi + long_0 + Sigma_pts_k_m(32,ii);
+        Sigma_Y(4,ii) = Sigma_pts_k_m(1,ii)/(Me+height_0+Sigma_pts_k_m(3,ii))*180/pi + lat_0 + Sigma_pts_k_m(31,ii);
+        Sigma_Y(5,ii) = -Sigma_pts_k_m(2,ii)/((Ne+height_0+Sigma_pts_k_m(3,ii))*cos(lat_0*pi/180.0))*180/pi + long_0 + Sigma_pts_k_m(32,ii);
         Sigma_Y(6,ii) = Sigma_pts_k_m(3,ii) + height_0 + Sigma_pts_k_m(33,ii);
         Sigma_Y(7,ii) = Sigma_pts_k_m(4,ii) + Sigma_pts_k_m(34,ii);
         Sigma_Y(8,ii) = Sigma_pts_k_m(5,ii) + Sigma_pts_k_m(35,ii);
@@ -176,7 +189,7 @@ else
     for ii = 1:2*L+1
         rotMat = quat2rotmat(q_k_m_sig(:,ii));       
         Sigma_Y(1:3,ii) = rotMat*(mag) + Sigma_pts_k_m(28:30,ii); %magnetometer       
-        Sigma_Y(4,ii) = 101325*(1-2.25577*10^-5*(Sigma_pts_k_m(3,ii)+height_0))^5.25588 + Sigma_pts_k_m(36,ii);
+        Sigma_Y(4,ii) = 101325*(1-2.25577*10^-5*(Sigma_pts_k_m(3,ii)+height_0))^5.25588 + Sigma_pts_k_m(31,ii);
     end
     
 end
@@ -224,6 +237,11 @@ q_k_upd(1) = (1-DX_k(7:9)'*DX_k(7:9))/(1+DX_k(7:9)'*DX_k(7:9));
 q_k_upd(2:4,1) = (1+q_k_upd(1))*DX_k(7:9);
 
 SPKF_full.X_hat.q_hat = quatmultiply(q_k_upd,q_k_m_sig(:,1));
+
+%added this so velocity estimates could be compared to truth (which is in
+%body frame)
+rotMat = quat2rotmat(SPKF_full.X_hat.q_hat); 
+SPKF_full.X_hat.vel_hat_body = rotMat*SPKF_full.X_hat.vel_hat;
 
 
 upd =  K_k*V_k*K_k';

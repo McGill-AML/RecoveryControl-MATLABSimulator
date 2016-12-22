@@ -31,7 +31,6 @@ Control = initcontrol;
 PropState = initpropstate;
 % Setpoint = initsetpoint;
 
-sensParams = initsensor_params; % initialize sensor parameters for use in measurement model
 
 move_avg_acc = zeros(3,6);
 
@@ -42,9 +41,12 @@ localFlag = initflags;
 ImpactIdentification = initimpactidentification;
 
 %% Set initial Conditions
-IC.posn = [ImpactParams.wallLoc-0.5;0;5];  
+IC.posn = [ImpactParams.wallLoc-1.125;0;5]; 
+
+Trajectory(1).posn = IC.posn;
+
 IC.angVel = [0;0;0];
-IC.attEuler = [0;0;pi/5];
+IC.attEuler = [0;0;angle_head];
 IC.linVel = [0;0;0];
 SimParams.timeInit = 0;
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
@@ -82,7 +84,7 @@ PropState.rpm = IC.rpm;
 % Setpoint.head = 0;
 % Setpoint.time = Setpoint.time + 5;
 % Setpoint.posn = [0;1;2];
-% Trajectory = [Trajectory;Setpoint];
+Trajectory = [Trajectory;Setpoint];
 % 
 % % Setpt 5
 % Setpoint.head = 0;
@@ -97,26 +99,29 @@ iTrajectory = 1;
 [Pose, Twist] = updatekinematics(state, stateDeriv);
 
 %% Initialize sensors
+sensParams = initsensor_params; % initialize sensor parameters for use in measurement model
+
 Sensor = initsensor(state, stateDeriv, sensParams); % init sensor values
 sensParams = initgps_baro(Sensor, sensParams); %init initial GPS and baro in order to initialize cartesian coord at starting spot
 
 Est_sensParams = initEst_sensPars(sensParams); %initialize sensor parameters for use in estimators (to add error, etc.)
 
 %% Initialize state estimators
-Est_ICs = initSE_ICs(IC, sensParams); % set initial condition estimate in order to add errors
+Est_ICs = initSE_ICs(IC, sensParams, loop_no); % set initial condition estimate in order to add errors
 
 EKF = initEKF(Est_ICs);
 AEKF = initAEKF(Est_ICs);
-SPKF = initSPKF(Est_ICs);
+SPKF = initSPKF(Est_ICs, loop_no);
 ASPKF = initASPKF(Est_ICs);
 COMP = initCOMP(Est_ICs);
 HINF = initHINF(Est_ICs);
-SPKF_full = initSPKF_full(Est_ICs);
-EKF_att = initEKF_att(Est_ICs);
+SPKF_full = initSPKF_full(Est_ICs, loop_no);
+EKF_att = initEKF_att(Est_ICs, loop_no);
 SRSPKF = initSRSPKF(Est_ICs);
 SRSPKF_full = initSRSPKF_full(Est_ICs);
 ASPKF_opt = initASPKF_opt(Est_ICs);
 AHINF = initAHINF(Est_ICs);
+SPKF_norm = initSPKF_norm(Est_ICs, loop_no);
 
 
 
@@ -125,7 +130,7 @@ time_to_break = 0; %var so sim doesn't stop once it's stabilized
 
 % Initialize history 
 Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
-                sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full,EKF_att,SRSPKF, SRSPKF_full, ASPKF_opt, AHINF);
+                sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full,EKF_att,SRSPKF, SRSPKF_full, ASPKF_opt, AHINF,SPKF_norm);
             
 % Initialize Continuous History
 if SimParams.recordContTime == 1 
@@ -209,44 +214,50 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     tic;
     SPKF = SPKF_attitude(Sensor, SPKF, EKF, Est_sensParams, tStep);
     timer(1) = timer(1) + toc;
+% %     
+%     tic;
+%     ASPKF = ASPKF_attitude(Sensor, ASPKF, EKF, Est_sensParams, tStep);
+%     timer(2) = timer(2) + toc;
 %     
-    tic;
-    ASPKF = ASPKF_attitude(Sensor, ASPKF, EKF, Est_sensParams, tStep);
-    timer(2) = timer(2) + toc;
-%     
-    tic;
-    EKF_att = EKF_attitude(Sensor, EKF_att, EKF, Est_sensParams, tStep);
-    timer(3) = timer(3) + toc;
-%     
+%     tic;
+%     EKF_att = EKF_attitude(Sensor, EKF_att, EKF, Est_sensParams, tStep);
+%     timer(3) = timer(3) + toc;
+% %     
     tic;
     SPKF_full = SPKF_full_state(Sensor, SPKF_full, Est_sensParams, tStep, iSim);
     timer(4) = timer(4) + toc;
-%     
-    tic;
-    COMP = CompFilt_attitude(Sensor, COMP, EKF, Est_sensParams, tStep);
-    timer(5) = timer(5) + toc;
-%     
-    tic;
-    HINF = HINF_attitude(Sensor, HINF, EKF, Est_sensParams, tStep);
-    timer(6) = timer(6) + toc;
+% %     
+%     tic;
+%     COMP = CompFilt_attitude(Sensor, COMP, EKF, Est_sensParams, tStep);
+%     timer(5) = timer(5) + toc;
+% %     
+%     tic;
+%     HINF = HINF_attitude(Sensor, HINF, EKF, Est_sensParams, tStep);
+%     timer(6) = timer(6) + toc;
     
 %     tic;
 %     SRSPKF = SRSPKF_attitude(Sensor, SRSPKF, EKF, Est_sensParams, tStep);
 %     timer(7) = timer(7) + toc;
-    
+%     
 %     tic;
 %     SRSPKF_full = SRSPKF_full_state(Sensor, SRSPKF_full, Est_sensParams, tStep, iSim);
 %     timer(8) = timer(8) + toc;
-    
-    tic;
-    ASPKF_opt = ASPKF_opt_attitude(Sensor, ASPKF_opt, AEKF, sensParams, tStep);
-    timer(9) = timer(9) + toc;
-    
-    tic;
-    AHINF = AHINF_attitude(Sensor, AHINF, EKF, Est_sensParams, tStep);
-    timer(10) = timer(10) + toc;
 %     
+%     tic;
+%     ASPKF_opt = ASPKF_opt_attitude(Sensor, ASPKF_opt, EKF, Est_sensParams, tStep);
+%     timer(9) = timer(9) + toc;
+% %     
+%     tic;
+%     AHINF = AHINF_attitude(Sensor, AHINF, EKF, Est_sensParams, tStep);
+%     timer(10) = timer(10) + toc;
+
+    tic;
+    SPKF_norm = SPKF_norm_const(Sensor, SPKF_norm, EKF, Est_sensParams, tStep);
+    timer(11) = timer(11) + toc;
+% %     
+
     EKF = EKF_position(Sensor, EKF, SPKF, Hist.SPKF(end).X_hat.q_hat, Est_sensParams, tStep, iSim);
+    
 %     AEKF = AEKF_position(Sensor, AEKF, ASPKF, Hist.ASPKF(end).X_hat.q_hat, Est_sensParams, tStep, iSim);
     
 
@@ -304,7 +315,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 
     %Discrete Time recording @ 200 Hz
     Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
-                        sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full,EKF_att, SRSPKF, SRSPKF_full, ASPKF_opt, AHINF);
+                        sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full,EKF_att, SRSPKF, SRSPKF_full, ASPKF_opt, AHINF,SPKF_norm);
                     
     %% End loop conditions
     % Navi has crashed:
@@ -324,7 +335,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     % Recovery control has worked, altitude stabilized:
     if Control.recoveryStage == 4 && time_to_break == 0
         time_of_recovery = iSim;
-        time_to_break = iSim + 10;
+        time_to_break = iSim + 5;
     elseif iSim == time_to_break && iSim ~= 0
         display('Altitude has been stabilized');
         ImpactInfo.isStable = 1;

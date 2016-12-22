@@ -20,6 +20,9 @@ PlotRMSE.crash.SPKF_full_gyr_bias = [tempcrash{14,:}];
 PlotRMSE.crash.ASPKF_opt_gyr_bias = [tempcrash{15,:}];
 PlotRMSE.crash.AHINF_gyr_bias = [tempcrash{16,:}];
 
+PlotRMSE.crash.SPKF_norm_quat = [tempcrash{17,:}];
+PlotRMSE.crash.SPKF_norm_gyr_bias = [tempcrash{18,:}];
+
 
 tempcrash = struct2cell([temp{2,:}]);
 PlotRMSE.not_crash.SPKF_quat = [tempcrash{1,:}];
@@ -39,6 +42,9 @@ PlotRMSE.not_crash.COMP_gyr_bias = [tempcrash{13,:}];
 PlotRMSE.not_crash.SPKF_full_gyr_bias = [tempcrash{14,:}];
 PlotRMSE.not_crash.ASPKF_opt_gyr_bias = [tempcrash{15,:}];
 PlotRMSE.not_crash.AHINF_gyr_bias = [tempcrash{16,:}];
+% 
+PlotRMSE.not_crash.SPKF_norm_quat = [tempcrash{17,:}];
+PlotRMSE.not_crash.SPKF_norm_gyr_bias = [tempcrash{18,:}];
 
 tempcrash = struct2cell([temp{3,:}]);
 PlotRMSE.total.SPKF_quat = [tempcrash{1,:}];
@@ -58,4 +64,7 @@ PlotRMSE.total.COMP_gyr_bias = [tempcrash{13,:}];
 PlotRMSE.total.SPKF_full_gyr_bias = [tempcrash{14,:}];
 PlotRMSE.total.ASPKF_opt_gyr_bias = [tempcrash{15,:}];
 PlotRMSE.total.AHINF_gyr_bias = [tempcrash{16,:}];
+
+PlotRMSE.total.SPKF_norm_quat = [tempcrash{17,:}];
+PlotRMSE.total.SPKF_norm_gyr_bias = [tempcrash{18,:}];
 

@@ -81,9 +81,12 @@ P_k_m = F_k_1*P_k_1_pos*F_k_1' + L_k_1*Q_k*L_k_1';
 %% correct
 
 if mod(iSim,sensParams.GPS_rate) == 0
-    H_k = [blkdiag(1/(Me+height_0-pos_k_m(3))*180/pi, 1/((Ne+height_0-pos_k_m(3))*cos(lat_0*pi/180.0))*180/pi,  -1, eye(2), 0), zeros(6,3)];
+    H_k = [blkdiag(1/(Me+height_0+pos_k_m(3))*180/pi, -1/((Ne+height_0+pos_k_m(3))*cos(lat_0*pi/180.0))*180/pi,  1, eye(2), 0), zeros(6,3)];
+    H_k(1,3) = -(1/(Me+height_0+pos_k_m(3))^2*180/pi)*pos_k_m(1);
+    H_k(2,3) = -(1/((Ne+height_0+pos_k_m(3))^2*cos(lat_0*pi/180.0))*180/pi)*pos_k_m(1);
     
-    H_k(6,3) = 101325* 2.25577*10^ -5*5.25588*(1 - 2.25577*10^(-5)*(-pos_k_m(3)+height_0))^4.25588;
+    
+    H_k(6,3) = 101325* -2.25577*10^ -5*5.25588*(1 - 2.25577*10^(-5)*(pos_k_m(3)+height_0))^4.25588;
     
     R_k = diag([sensParams.var_gps;
         sensParams.var_baro]);
@@ -95,16 +98,16 @@ if mod(iSim,sensParams.GPS_rate) == 0
     
 
     
-    y_k_hat(6,1) = 101325*(1-2.25577*10^-5*(-pos_k_m(3)+height_0))^5.25588;
+    y_k_hat(6,1) = 101325*(1-2.25577*10^-5*(pos_k_m(3)+height_0))^5.25588;
     
 else
-    H_k = [zeros(1,2), 101325* 2.25577*10^ -5*5.25588*(1 - 2.25577*10^(-5)*(-pos_k_m(3)+height_0))^4.25588, zeros(1,6)];
+    H_k = [zeros(1,2), 101325* -2.25577*10^ -5*5.25588*(1 - 2.25577*10^(-5)*(pos_k_m(3)+height_0))^4.25588, zeros(1,6)];
     
     R_k = diag([sensParams.var_baro]);
     
     y_k = u_b_baro;
     
-    y_k_hat = 101325*(1-2.25577*10^-5*(-pos_k_m(3)+height_0))^5.25588;
+    y_k_hat = 101325*(1-2.25577*10^-5*(pos_k_m(3)+height_0))^5.25588;
 end
 
 

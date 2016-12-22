@@ -1,7 +1,13 @@
-function [AHINF] = AHINF_attitude(Sensor, AHINF, EKF, sensParams, tStep)
-% AHINF - kinematic prediction for orientation
+function [EKF_MRP] = EKF_MRP_att(Sensor, EKF_MRP, EKF_pos, sensParams, tStep)
+% EKF_MRP - kinematic prediction for orientation
 % unit norm constrained H infinity (min max) filter
 % using the predict correct structure
+
+% OKAY so the Error MEKF as given by Markley is probably more similar to
+% the MRP UKF derived by Crassidis. But the classic MEKF could also be a
+% valid representation, I'm just not too sure how you'd do the update step?
+% you might have to use MRPs in the update step anyways in a classic MEKF
+% IM NOT SURE IF IM ACTUALLY GOING TO CODE THIS ONE UP
 
 %notation - _k_1 is previous timestep, _k_m is predicted, _k is corrected
 %estimate
@@ -9,19 +15,19 @@ function [AHINF] = AHINF_attitude(Sensor, AHINF, EKF, sensParams, tStep)
 global g mag
 %unpackage
 %states
-pos_k_1 = EKF.X_hat.pos_hat;
+pos_k_1 = EKF_pos.X_hat.pos_hat;
 
-vel_k_1 = EKF.X_hat.vel_hat;
+vel_k_1 = EKF_pos.X_hat.vel_hat;
 
-q_k_1 = AHINF.X_hat.q_hat;
+q_k_1 = EKF_MRP.X_hat.q_hat;
 
-omega_k_1 = AHINF.X_hat.omega_hat;
+omega_k_1 = EKF_MRP.X_hat.omega_hat;
 
 rotMat = quat2rotmat(q_k_1);
 
 %bias terms
-% bias_acc = EKF.X_hat.bias_acc;
-bias_gyr = AHINF.X_hat.bias_gyr;
+% bias_acc = EKF_pos.X_hat.bias_acc;
+bias_gyr = EKF_MRP.X_hat.bias_gyr;
 bias_acc = sensParams.bias.acc; %no accel bias so comparison is better
 
 %measurements
@@ -71,12 +77,11 @@ A_k_1_2 = [q_k_m(2), q_k_m(3), q_k_m(4);
 A_k_1 = [ -0.5*tStep*[A_k_1_1, A_k_1_2];
           zeros(3,4), eye(3)];
 
-% process noise weighting matrix, could change if we know gyro noise is more?
-% B_k_1 = tStep*blkdiag(eye(4), eye(3)*0.1); 
-B_k_1 = tStep*diag([sensParams.var_gyr; sensParams.var_gyr(1); sensParams.var_bias_gyr(1:2);sensParams.var_bias_gyr(3)]); 
+% process noise 
+Q_k = tStep*diag([sensParams.var_gyr; sensParams.var_gyr(1); sensParams.var_bias_gyr]); 
 
 %predict covariance matrix
-AHINF.P_hat = A_k_1*AHINF.P_hat_eps*A_k_1' + B_k_1; %used to be B_k_1*B_k_1';
+EKF_MRP.P_hat = A_k_1*EKF_MRP.P_hat*A_k_1' + Q_k;
 
 %% update 
 
@@ -99,16 +104,16 @@ dR_dq_3 = [-q_k_m(4), -q_k_m(1), q_k_m(2);
          
 rotMat = quat2rotmat( q_k_m );
 
-if norm(u_b_acc,2) > norm(g,2) + AHINF.accel_bound || norm(u_b_acc,2) < norm(g,2) - AHINF.accel_bound
+if norm(u_b_acc,2) > norm(g,2) + EKF_MRP.accel_bound || norm(u_b_acc,2) < norm(g,2) - EKF_MRP.accel_bound
     
     %magnetometer only
     C_k = [dR_dq_0*mag, dR_dq_1*mag, dR_dq_2*mag, dR_dq_3*mag, zeros(3)];
     
+    R_k = diag(sensParams.var_mag);
+    
     y_k = u_b_mag;
     
     y_k_hat = C_k*[q_k_m; bias_gyr_k_m];
-    
-    R_k = diag(sensParams.var_mag);
     
     meas_size = 3;
 
@@ -117,67 +122,30 @@ else
     %magnetometer and accelerometer
     C_k = [dR_dq_0*[0;0;g], dR_dq_1*[0;0;g], dR_dq_2*[0;0;g], dR_dq_3*[0;0;g], zeros(3);
            dR_dq_0*mag, dR_dq_1*mag, dR_dq_2*mag, dR_dq_3*mag, zeros(3)];
+       
+    R_k = diag([sensParams.var_acc; sensParams.var_mag]);
     
     y_k = [u_b_acc; u_b_mag];
     
     y_k_hat = C_k*[q_k_m; bias_gyr_k_m];
     
-    R_k = diag([sensParams.var_acc; sensParams.var_mag]);
     
     meas_size = 6;
        
 end
 
-% adapt G_k based on hard values of innovation
-% cycle through prev innov
-AHINF.innov_k(2:end) = AHINF.innov_k(1:end-1);
-
-%innovation
-r_k = y_k - y_k_hat;
-
-%calc kalman update depending whether or not to use accelerometer data
-if AHINF.use_acc
-    
-    AHINF.innov_k(1) = norm(tStep*AHINF.gamma(1:6,1:6)*r_k,2); %update prev innovation norms
-else   
-
-    AHINF.innov_k(1) = norm(tStep*AHINF.gamma(4:6,4:6)*r_k,2); %update prev innovation norms
-end
-
-
-% update the adaptive gain
-if sum(AHINF.innov_k) > AHINF.innov_tresh
-    if AHINF.G_k < AHINF.G_max
-        AHINF.G_k = AHINF.G_k + AHINF.G_rate;
-    else
-        AHINF.G_k = AHINF.G_k;
-    end
-else
-    if AHINF.G_k > 1 && AHINF.G_k - AHINF.G_rate >= 1
-        AHINF.G_k = AHINF.G_k - AHINF.G_rate;
-    elseif AHINF.G_k > 1
-        AHINF.G_k = 1;
-    else
-        AHINF.G_k = AHINF.G_k;
-    end
-end
-
-
-
-
-
 %Here the process is broken down based on matrix inversions - in order to
 %more easily facilitate coding in c++ later on.
 
 % find kalman gain for the quaternion:
-D_3 = AHINF.P_hat*AHINF.G_k'/(eye(4)-AHINF.G_k*AHINF.P_hat*AHINF.G_k')*AHINF.G_k;
 
-D_1 = (D_3(1:4,1:4) + eye(4))*AHINF.P_hat(1:4,1:7)*C_k';
+D_1 = EKF_MRP.P_hat(1:4,:)*C_k';
 
-D_2 = C_k*D_3*AHINF.P_hat*C_k' + C_k*AHINF.P_hat*C_k' + R_k;
+D_2 = C_k*EKF_MRP.P_hat*C_k' + R_k;
 
 K_k1_p1 = D_1/D_2;
 
+r_k = y_k - y_k_hat;
 
 r_k_D_2 = r_k'/D_2;
 
@@ -191,25 +159,24 @@ K_k1 = K_k1_p1 + (1/norm(x_k_tilde,2) - 1)*x_k_tilde*r_k_D_2/r_k_tilde;
 %find kalman gain for the bias term - since G_k = 0 for bias just use basic
 %kalman equations
 
-K_k2 = AHINF.P_hat(5:7,:)*C_k'/(R_k + C_k*AHINF.P_hat*C_k')';
+K_k2 = EKF_MRP.P_hat(5:7,:)*C_k'/(R_k + C_k*EKF_MRP.P_hat*C_k')';
 
 K_k = [K_k1; K_k2];
 
-L_k = (eye(7) - K_k*C_k)*AHINF.P_hat*AHINF.G_k'/(eye(4) - AHINF.G_k*AHINF.P_hat*AHINF.G_k');
 
 %update covariance
-AHINF.P_hat_eps = (eye(7) - K_k*C_k + L_k*AHINF.G_k)*AHINF.P_hat*(eye(7) - K_k*C_k + L_k*AHINF.G_k)' + K_k*R_k*K_k' - L_k*L_k';
+EKF_MRP.P_hat = (eye(7) - K_k*C_k)*EKF_MRP.P_hat*(eye(7) - K_k*C_k)' + K_k*R_k*K_k';
 
 %update states
-AHINF.X_hat.q_hat = q_k_m + K_k1*r_k;
+EKF_MRP.X_hat.q_hat = q_k_m + K_k1*r_k;
 
-AHINF.X_hat.q_hat = AHINF.X_hat.q_hat/norm(AHINF.X_hat.q_hat,2); % renormalize
+EKF_MRP.X_hat.q_hat = EKF_MRP.X_hat.q_hat/norm(EKF_MRP.X_hat.q_hat,2); % renormalize
 
-AHINF.X_hat.bias_gyr = bias_gyr_k_m + K_k2*r_k;
+EKF_MRP.X_hat.bias_gyr = bias_gyr_k_m + K_k2*r_k;
 
-AHINF.X_hat.omega_hat = u_b_gyr - AHINF.X_hat.bias_gyr;
+EKF_MRP.X_hat.omega_hat = u_b_gyr - EKF_MRP.X_hat.bias_gyr;
 
-AHINF.P_hat_eps = 0.5*(AHINF.P_hat_eps + AHINF.P_hat_eps'); % make sure symetric
+EKF_MRP.P_hat = 0.5*(EKF_MRP.P_hat + EKF_MRP.P_hat'); % make sure symetric
 
 
 

@@ -37,6 +37,10 @@ rmse.crash.SPKF_full_gyr_bias = mean(sqrt(bsxfun(@minus,sensParams.bias.gyr, Plo
 rmse.crash.ASPKF_opt_gyr_bias = mean(sqrt(bsxfun(@minus,sensParams.bias.gyr, Plot.ASPKF_opt_gyr_bias(:,crash_start:crash_end)).^2),2);
 rmse.crash.AHINF_gyr_bias = mean(sqrt(bsxfun(@minus,sensParams.bias.gyr, Plot.AHINF_gyr_bias(:,crash_start:crash_end)).^2),2);
 
+
+rmse.crash.SPKF_norm_quat = quat_error(Plot.quaternions(:,crash_start:crash_end), Plot.SPKF_norm_quat(:,crash_start:crash_end));
+rmse.crash.SPKF_norm_gyr_bias = mean(sqrt(bsxfun(@minus,sensParams.bias.gyr, Plot.SPKF_norm_gyr_bias(:,crash_start:crash_end)).^2),2);
+
 %rmse when not crashing
 no_crash_ind = [1:crash_start,crash_end:length(Plot.quaternions)];
 
@@ -58,6 +62,10 @@ rmse.not_crash.SPKF_full_gyr_bias = mean(sqrt(bsxfun(@minus,sensParams.bias.gyr,
 rmse.not_crash.ASPKF_opt_gyr_bias = mean(sqrt(bsxfun(@minus,sensParams.bias.gyr, Plot.ASPKF_opt_gyr_bias(:,no_crash_ind)).^2),2);
 rmse.not_crash.AHINF_gyr_bias = mean(sqrt(bsxfun(@minus,sensParams.bias.gyr, Plot.AHINF_gyr_bias(:,no_crash_ind)).^2),2);
 
+
+rmse.not_crash.SPKF_norm_quat = quat_error(Plot.quaternions(:,no_crash_ind), Plot.SPKF_norm_quat(:,no_crash_ind));
+rmse.not_crash.SPKF_norm_gyr_bias = mean(sqrt(bsxfun(@minus,sensParams.bias.gyr, Plot.SPKF_norm_gyr_bias(:,no_crash_ind)).^2),2);
+
 %total rmse full sim
 rmse.total.SPKF_quat = quat_error(Plot.quaternions, Plot.SPKF_quat);
 rmse.total.ASPKF_quat = quat_error(Plot.quaternions, Plot.ASPKF_quat);
@@ -76,5 +84,9 @@ rmse.total.COMP_gyr_bias = mean(sqrt(bsxfun(@minus,sensParams.bias.gyr, Plot.COM
 rmse.total.SPKF_full_gyr_bias = mean(sqrt(bsxfun(@minus,sensParams.bias.gyr, Plot.SPKF_full_gyr_bias).^2),2);
 rmse.total.ASPKF_opt_gyr_bias = mean(sqrt(bsxfun(@minus,sensParams.bias.gyr, Plot.ASPKF_opt_gyr_bias).^2),2);
 rmse.total.AHINF_gyr_bias = mean(sqrt(bsxfun(@minus,sensParams.bias.gyr, Plot.AHINF_gyr_bias).^2),2);
+
+
+rmse.total.SPKF_norm_quat = quat_error(Plot.quaternions, Plot.SPKF_norm_quat);
+rmse.total.SPKF_norm_gyr_bias = mean(sqrt(bsxfun(@minus,sensParams.bias.gyr, Plot.SPKF_norm_gyr_bias).^2),2);
 
 % record ICs for run

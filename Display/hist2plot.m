@@ -114,10 +114,10 @@ temp2 = struct2cell([temp{2,:}]);
 Plot.SPKF_quat = [temp2{1,:}];
 Plot.SPKF_omega = [temp2{2,:}];
 Plot.SPKF_gyr_bias = [temp2{3,:}];
-% tempP = [temp{2,:}];
-% for ii = 1:6
-%     Plot.SPKF_P_hat(ii,:) = tempP(ii,ii:6:end);
-% end
+tempP = [temp{3,:}];
+for ii = 1:6
+    Plot.SPKF_P_hat(ii,:) = tempP(ii,ii:6:end);
+end
 
 temp = struct2cell(Hist.ASPKF);
 temp2 = struct2cell([temp{2,:}]);
@@ -147,7 +147,7 @@ Plot.HINF_gyr_bias = [temp2{3,:}];
 temp = struct2cell(Hist.SPKF_full);
 temp2 = struct2cell([temp{2,:}]);
 Plot.SPKF_full_pos = [temp2{1,:}];
-Plot.SPKF_full_vel = [temp2{2,:}];
+Plot.SPKF_full_vel = [temp2{7,:}]; % use body frame velocity.
 Plot.SPKF_full_quat = [temp2{3,:}];
 Plot.SPKF_full_omega = [temp2{4,:}];
 Plot.SPKF_full_acc_bias = [temp2{5,:}];
@@ -194,6 +194,17 @@ for ii = 1:length([temp{8,:}])
     Plot.AHINF_innov(ii) = sum(temp{8,ii});
 end
 
+
+
+temp = struct2cell(Hist.SPKF_norm);
+temp2 = struct2cell([temp{2,:}]);
+Plot.SPKF_norm_quat = [temp2{1,:}];
+Plot.SPKF_norm_omega = [temp2{2,:}];
+Plot.SPKF_norm_gyr_bias = [temp2{3,:}];
+tempP = [temp{3,:}];
+for ii = 1:7
+    Plot.SPKF_norm_P_hat(ii,:) = tempP(ii,ii:7:end);
+end
 
 % tempP = [temp{2,:}];
 % for ii = 1:6
