@@ -1,5 +1,5 @@
 function [ASPKF] = initASPKF(Est_ICs)
-ASPKF.kappa = 3; % SPKF scaling factor
+ASPKF.kappa = -3; % SPKF scaling factor
 
 %initial states ang_vel, quat, gyro bias
 ASPKF.X_hat.q_hat = Est_ICs.q;
@@ -15,7 +15,7 @@ ASPKF.P_hat(1:3,1:3) = ASPKF.P_hat(1:3,1:3)*0.1;
 
 ASPKF.accel_bound = 0.5; % +/- how much larger thna gravity before not used in update
 
-ASPKF.innov_tresh = 1; % innovation sum threshold
+ASPKF.innov_tresh = 8; % innovation sum threshold
 
 ASPKF.G_max = 5; % max adaptive gain
 

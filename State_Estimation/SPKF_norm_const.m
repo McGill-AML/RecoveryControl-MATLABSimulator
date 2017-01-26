@@ -50,6 +50,10 @@ else
     SPKF_norm.use_acc = 1;
 end
         
+% %normalize mag and accel measurements now
+% u_b_acc = u_b_acc/norm(u_b_acc);
+% u_b_mag = u_b_mag/norm(u_b_mag);
+
 P_k_1_att = SPKF_norm.P_hat;
 
 %construct matrix to find sigma point modifiers
@@ -154,7 +158,7 @@ V_k = SPKF_norm.kappa/(L+SPKF_norm.kappa)*(Sigma_Y(:,1)-y_k_hat)*(Sigma_Y(:,1)-y
 for ii = 2:2*L+1
     V_k = V_k+.5/(L+SPKF_norm.kappa)*(Sigma_Y(:,ii)-y_k_hat)*(Sigma_Y(:,ii)-y_k_hat)';
 end
-% V_k = V_k;
+% V_k = V_k+R_k;
 
 U_k = SPKF_norm.kappa/(L+SPKF_norm.kappa)*(Sigma_pts_k_m(1:7,1)-X_k_m(1:7))*(Sigma_Y(:,1)-y_k_hat)';
 

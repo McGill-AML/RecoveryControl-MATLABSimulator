@@ -1,19 +1,19 @@
 % loop to test variables
-clear;
+% clear;
 
-timer = zeros(11,1);
+% timer = zeros(17,1);
 
 angle_head = 1;
 posn_hit = 0;
 
-for loop_no = 41:46
-  
-    clearvars -except loop_no timer rmse angle_head posn_hit 
+for loop_no = 297:300
+    loop_no
+    clearvars -except loop_no timer rmse angle_head posn_hit rmse_position
     
 
 
     angle_head = rand*pi;
-    posn_hit = rand*2 + 2;
+    posn_hit = rand*3 + 2;
 
     
     
@@ -23,16 +23,45 @@ for loop_no = 41:46
     
     % Setpt 1
     Setpoint.head = angle_head;
-    Setpoint.time = 20;
-    Setpoint.posn = [0;0;5];
+    Setpoint.time = 0.5;
+    Setpoint.posn = [-0.6;0;5];
     Trajectory = Setpoint;
     
-    % Setpt 2
+    % Setpt 1
     Setpoint.head = angle_head;
-    Setpoint.time = Setpoint.time + 10;
-    Setpoint.posn = [posn_hit;0;5];
+    Setpoint.time = 4;
+    Setpoint.posn = [-0.6;0;5];
     Trajectory = [Trajectory;Setpoint];
     
+% %     Setpt 2 - crash
+%     Setpoint.head = angle_head;
+%     Setpoint.time = Setpoint.time + 10;
+%     Setpoint.posn = [posn_hit;0;5];
+%     Trajectory = [Trajectory;Setpoint];
+    
+    % Setpt 2 - square
+    Setpoint.head = angle_head;
+    Setpoint.time = Setpoint.time + 5;
+    Setpoint.posn = [-1.6;0;5];
+    Trajectory = [Trajectory;Setpoint];
+    
+    % Setpt 3 - square
+    Setpoint.head = angle_head;
+    Setpoint.time = Setpoint.time + 5;
+    Setpoint.posn = [-1.6;-1;5];
+    Trajectory = [Trajectory;Setpoint];
+    
+    % Setpt 4 - square
+    Setpoint.head = angle_head;
+    Setpoint.time = Setpoint.time + 5;
+    Setpoint.posn = [-0.6;-1;5];
+    Trajectory = [Trajectory;Setpoint];
+    
+    % Setpt 5 - square
+    Setpoint.head = angle_head;
+    Setpoint.time = Setpoint.time + 5;
+    Setpoint.posn = [-0.6;0;5];
+    Trajectory = [Trajectory;Setpoint];
     
     startsim_trajectory;
     
@@ -42,18 +71,20 @@ for loop_no = 41:46
     end
     rmse(loop_no,:) = rmse_att(Plot,sensParams,time_of_recovery/tStep);
     
-    rmse_position(loop_no,:) = rmse_pos(Plot,sensParams,time_of_recovery/tStep);
+%     rmse_position(loop_no,:) = rmse_pos(Plot,sensParams,time_of_recovery/tStep);
     
     
     
 
-%     save('acc_bound_0.5_12-21','rmse');
+    save('square_low_ICs','rmse');
     
 
 
 
     
 end
+
+save('square_low_ICs_all');
 
 PlotRMSE = RMSE_to_plot(rmse);
 

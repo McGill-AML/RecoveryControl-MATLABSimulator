@@ -1,16 +1,17 @@
 %% plot script for plotting RMSE
 
 plot_SPKF = 1;
-plot_ASPKF = 0;
+plot_ASPKF =1;
 plot_EKF = 1;
 plot_AEKF = 0;
-plot_COMP = 0;
-plot_HINF =0;
-plot_SPKF_full =1;
-plot_EKF_att = 0;
-plot_ASPKF_opt = 0;
-plot_AHINF = 0;
-plot_SPKF_norm = 0;
+plot_COMP = 1;
+plot_HINF =1;
+plot_SPKF_full =0;
+plot_EKF_att = 1;
+plot_ASPKF_opt =1;
+plot_AHINF = 1;
+plot_SPKF_norm = 1;
+plot_SRSPKF =1;
 
 
 %% plot quaternion crash RMSE
@@ -19,31 +20,34 @@ plot_SPKF_norm = 0;
 figure;
 hold on;
 if plot_SPKF == 1
-    plot(PlotRMSE.crash.SPKF_quat,'Linewidth',line_width, 'Color', 'r');
+    plot(PlotRMSE.crash.SPKF_quat_noN,'Linewidth',line_width, 'Color', 'r');
 end
 if plot_ASPKF == 1
-    plot(PlotRMSE.crash.ASPKF_quat,'Linewidth',line_width, 'Color', 'y');
+    plot(PlotRMSE.crash.ASPKF_quat_noN,'Linewidth',line_width, 'Color', 'g');
 end
 if plot_COMP == 1
      plot(PlotRMSE.crash.COMP_quat,'Linewidth',line_width, 'Color', 'm');
 end
 if plot_HINF == 1
-     plot(PlotRMSE.crash.HINF_quat,'Linewidth',line_width, 'Color', 'g');
+     plot(PlotRMSE.crash.HINF_quat_noN,'Linewidth',line_width, 'Color', 'g');
 end
 if plot_SPKF_full == 1
     plot(PlotRMSE.crash.SPKF_full_quat,'Linewidth',line_width, 'Color', 'c');
 end
 if plot_EKF_att == 1
-    plot(PlotRMSE.crash.EKF_att_quat,'Linewidth',line_width, 'Color', 'k');
+    plot(PlotRMSE.crash.EKF_att_quat_noN,'Linewidth',line_width, 'Color', 'k');
 end
 if plot_ASPKF_opt == 1
-    plot(PlotRMSE.crash.ASPKF_opt_quat,'y--','Linewidth',line_width);
+    plot(PlotRMSE.crash.ASPKF_opt_quat_noN,'g--','Linewidth',line_width);
 end
 if plot_AHINF == 1
-     plot(PlotRMSE.crash.AHINF_quat,'g--','Linewidth',line_width);
+     plot(PlotRMSE.crash.AHINF_quat_noN,'g--','Linewidth',line_width);
 end
 if plot_SPKF_norm == 1
     plot(PlotRMSE.crash.SPKF_norm_quat,'r:','Linewidth',line_width);
+end
+if plot_SRSPKF == 1
+    plot(PlotRMSE.crash.SRSPKF_quat,'r--', 'Linewidth',line_width);
 end
 xlabel('Run No','fontsize',font_size,'Interpreter','latex');
 ylabel('RMSE','fontsize',font_size,'Interpreter','latex');
@@ -58,31 +62,34 @@ title('Quaternion RMSE during crash');
 figure;
 hold on;
 if plot_SPKF == 1
-    plot(PlotRMSE.not_crash.SPKF_quat,'Linewidth',line_width, 'Color', 'r');
+    plot(PlotRMSE.not_crash.SPKF_quat_noN,'Linewidth',line_width, 'Color', 'r');
 end
 if plot_ASPKF == 1
-    plot(PlotRMSE.not_crash.ASPKF_quat,'Linewidth',line_width, 'Color', 'y');
+    plot(PlotRMSE.not_crash.ASPKF_quat_noN,'Linewidth',line_width, 'Color', 'g');
 end
 if plot_COMP == 1
      plot(PlotRMSE.not_crash.COMP_quat,'Linewidth',line_width, 'Color', 'm');
 end
 if plot_HINF == 1
-     plot(PlotRMSE.not_crash.HINF_quat,'Linewidth',line_width, 'Color', 'g');
+     plot(PlotRMSE.not_crash.HINF_quat_noN,'Linewidth',line_width, 'Color', 'g');
 end
 if plot_SPKF_full == 1
     plot(PlotRMSE.not_crash.SPKF_full_quat,'Linewidth',line_width, 'Color', 'c');
 end
 if plot_EKF_att == 1
-    plot(PlotRMSE.not_crash.EKF_att_quat,'Linewidth',line_width, 'Color', 'k');
+    plot(PlotRMSE.not_crash.EKF_att_quat_noN,'Linewidth',line_width, 'Color', 'k');
 end
 if plot_ASPKF_opt == 1
-    plot(PlotRMSE.not_crash.ASPKF_opt_quat,'y--','Linewidth',line_width);
+    plot(PlotRMSE.not_crash.ASPKF_opt_quat_noN,'g--','Linewidth',line_width);
 end
 if plot_AHINF == 1
-     plot(PlotRMSE.not_crash.AHINF_quat,'g--','Linewidth',line_width);
+     plot(PlotRMSE.not_crash.AHINF_quat_noN,'g--','Linewidth',line_width);
 end
 if plot_SPKF_norm == 1
     plot(PlotRMSE.not_crash.SPKF_norm_quat,'r:','Linewidth',line_width);
+end
+if plot_SRSPKF == 1
+    plot(PlotRMSE.not_crash.SRSPKF_quat,'r--', 'Linewidth',line_width);
 end
 xlabel('Run No','fontsize',font_size,'Interpreter','latex');
 ylabel('RMSE','fontsize',font_size,'Interpreter','latex');
@@ -97,31 +104,34 @@ title('Quaternion RMSE not crash');
 figure;
 hold on;
 if plot_SPKF == 1
-    plot(PlotRMSE.total.SPKF_quat,'Linewidth',line_width, 'Color', 'r');
+    plot(PlotRMSE.total.SPKF_quat_noN,'Linewidth',line_width, 'Color', 'r');
 end
 if plot_ASPKF == 1
-    plot(PlotRMSE.total.ASPKF_quat,'Linewidth',line_width, 'Color', 'y');
+    plot(PlotRMSE.total.ASPKF_quat_noN,'Linewidth',line_width, 'Color', 'g');
 end
 if plot_COMP == 1
      plot(PlotRMSE.total.COMP_quat,'Linewidth',line_width, 'Color', 'm');
 end
 if plot_HINF == 1
-     plot(PlotRMSE.total.HINF_quat,'Linewidth',line_width, 'Color', 'g');
+     plot(PlotRMSE.total.HINF_quat_noN,'Linewidth',line_width, 'Color', 'g');
 end
 if plot_SPKF_full == 1
     plot(PlotRMSE.total.SPKF_full_quat,'Linewidth',line_width, 'Color', 'c');
 end
 if plot_EKF_att == 1
-    plot(PlotRMSE.total.EKF_att_quat,'Linewidth',line_width, 'Color', 'k');
+    plot(PlotRMSE.total.EKF_att_quat_noN,'Linewidth',line_width, 'Color', 'k');
 end
 if plot_ASPKF_opt == 1
-    plot(PlotRMSE.total.ASPKF_opt_quat,'y--','Linewidth',line_width);
+    plot(PlotRMSE.total.ASPKF_opt_quat_noN,'g--','Linewidth',line_width);
 end
 if plot_AHINF == 1
-     plot(PlotRMSE.total.AHINF_quat,'g--','Linewidth',line_width);
+     plot(PlotRMSE.total.AHINF_quat_noN,'g--','Linewidth',line_width);
 end
 if plot_SPKF_norm == 1
     plot(PlotRMSE.total.SPKF_norm_quat,'r:','Linewidth',line_width);
+end
+if plot_SRSPKF == 1
+    plot(PlotRMSE.total.SRSPKF_quat,'r--', 'Linewidth',line_width);
 end
 xlabel('Run No','fontsize',font_size,'Interpreter','latex');
 ylabel('RMSE','fontsize',font_size,'Interpreter','latex');
@@ -134,31 +144,34 @@ title('Quaternion RMSE total');
 figure;
 hold on;
 if plot_SPKF == 1
-    plot(mean(PlotRMSE.crash.SPKF_gyr_bias),'Linewidth',line_width, 'Color', 'r');
+    plot(mean(PlotRMSE.total.SPKF_gyr_bias),'Linewidth',line_width, 'Color', 'r');
 end
 if plot_ASPKF == 1
-    plot(mean(PlotRMSE.crash.ASPKF_gyr_bias),'Linewidth',line_width, 'Color', 'y');
+    plot(mean(PlotRMSE.total.ASPKF_gyr_bias),'Linewidth',line_width, 'Color', 'g');
 end
 if plot_COMP == 1
-     plot(mean(PlotRMSE.crash.COMP_gyr_bias),'Linewidth',line_width, 'Color', 'm');
+     plot(mean(PlotRMSE.total.COMP_gyr_bias),'Linewidth',line_width, 'Color', 'm');
 end
 if plot_HINF == 1
-     plot(mean(PlotRMSE.crash.HINF_gyr_bias),'Linewidth',line_width, 'Color', 'g');
+     plot(mean(PlotRMSE.total.HINF_gyr_bias),'Linewidth',line_width, 'Color', 'g');
 end
 if plot_SPKF_full == 1
-    plot(mean(PlotRMSE.crash.SPKF_full_gyr_bias),'Linewidth',line_width, 'Color', 'c');
+    plot(mean(PlotRMSE.total.SPKF_full_gyr_bias),'Linewidth',line_width, 'Color', 'c');
 end
 if plot_EKF_att == 1
-    plot(mean(PlotRMSE.crash.EKF_att_gyr_bias),'Linewidth',line_width, 'Color', 'k');
+    plot(mean(PlotRMSE.total.EKF_att_gyr_bias),'Linewidth',line_width, 'Color', 'k');
 end
 if plot_ASPKF_opt == 1
-    plot(mean(PlotRMSE.crash.ASPKF_opt_gyr_bias),'y--','Linewidth',line_width);
+    plot(mean(PlotRMSE.total.ASPKF_opt_gyr_bias),'g--','Linewidth',line_width);
 end
 if plot_AHINF == 1
-     plot(mean(PlotRMSE.crash.AHINF_gyr_bias),'g--','Linewidth',line_width);
+     plot(mean(PlotRMSE.total.AHINF_gyr_bias),'g--','Linewidth',line_width);
 end
 if plot_SPKF_norm == 1
-    plot(mean(PlotRMSE.crash.SPKF_norm_gyr_bias),'r:','Linewidth',line_width);
+    plot(mean(PlotRMSE.total.SPKF_norm_gyr_bias),'r:','Linewidth',line_width);
+end
+if plot_SRSPKF == 1
+    plot(mean(PlotRMSE.total.SRSPKF_gyr_bias),'r--', 'Linewidth',line_width);
 end
 xlabel('Run No','fontsize',font_size,'Interpreter','latex');
 ylabel('RMSE','fontsize',font_size,'Interpreter','latex');

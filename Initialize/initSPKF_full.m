@@ -1,6 +1,6 @@
 function [SPKF_full] = initSPKF_full(Est_ICs, loop_no)
 %estimator constants
-SPKF_full.kappa = -16 + (loop_no - 40)*3; % SPKF_full scaling factor -18 worked well for attitude
+SPKF_full.kappa = 15; % SPKF_full scaling factor -3 worked well for attitude
 
 %initial states ang_vel, quat, gyro bias
 SPKF_full.X_hat.pos_hat = Est_ICs.posn;
@@ -24,3 +24,5 @@ SPKF_full.accel_bound = 0.5; % +/- how much larger thna gravity before not used 
 SPKF_full.alpha = 1; %dictates spread of sigma points
 
 SPKF_full.beta = 0; %2 is optimal for gaussian noise
+
+SPKF_full.use_acc = 0;

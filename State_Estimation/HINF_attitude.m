@@ -101,6 +101,10 @@ rotMat = quat2rotmat( q_k_m );
 
 if norm(u_b_acc,2) > norm(g,2) + HINF.accel_bound || norm(u_b_acc,2) < norm(g,2) - HINF.accel_bound
     
+    % normalize mag and accel measurements now
+    u_b_mag = u_b_mag/norm(u_b_mag);
+
+    
     %magnetometer only
     C_k = [dR_dq_0*mag, dR_dq_1*mag, dR_dq_2*mag, dR_dq_3*mag, zeros(3)];
     
@@ -114,8 +118,13 @@ if norm(u_b_acc,2) > norm(g,2) + HINF.accel_bound || norm(u_b_acc,2) < norm(g,2)
 
 else
     
+    %normalize mag and accel measurements now
+    u_b_acc = u_b_acc/norm(u_b_acc);
+    u_b_mag = u_b_mag/norm(u_b_mag);
+
+    
     %magnetometer and accelerometer
-    C_k = [dR_dq_0*[0;0;g], dR_dq_1*[0;0;g], dR_dq_2*[0;0;g], dR_dq_3*[0;0;g], zeros(3);
+    C_k = [dR_dq_0*[0;0;1], dR_dq_1*[0;0;1], dR_dq_2*[0;0;1], dR_dq_3*[0;0;1], zeros(3);
            dR_dq_0*mag, dR_dq_1*mag, dR_dq_2*mag, dR_dq_3*mag, zeros(3)];
     
     y_k = [u_b_acc; u_b_mag];
@@ -154,7 +163,7 @@ K_k1 = K_k1_p1 + (1/norm(x_k_tilde,2) - 1)*x_k_tilde*r_k_D_2/r_k_tilde;
 %find kalman gain for the bias term - since G_k = 0 for bias just use basic
 %kalman equations
 
-K_k2 = HINF.P_hat(5:7,:)*C_k'/(R_k + C_k*HINF.P_hat*C_k')';
+K_k2 = HINF.P_hat(5:7,:)*C_k'/(R_k + C_k*HINF.P_hat*C_k');
 
 K_k = [K_k1; K_k2];
 

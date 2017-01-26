@@ -1,8 +1,10 @@
 function Hist = inithist(timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag,...
                         Sensor, sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full,EKF_att,SRSPKF,...
-                        SRSPKF_full, ASPKF_opt, AHINF,SPKF_norm)
+                        SRSPKF_full, ASPKF_opt, AHINF,SPKF_norm, useExpData, SPKF_noN, ASPKF_noN, ASPKF_opt_noN,...
+                        EKF_att_noN, HINF_noN, AHINF_noN)
                 
 % Initialize history of the state and its derivative
+if useExpData == 0
 Hist.states = state;
 Hist.stateDerivs = stateDeriv;
 Hist.times = timeInit;
@@ -17,12 +19,15 @@ Hist.propStates = PropState;
 Hist.localFlag.contact.isContacts = localFlag.contact.isContact;
 Hist.localFlag.contact.initialNormalVels = localFlag.contact.initialNormalVel;
 
+Hist.crash = sensParams.crash;
+end
+
 Hist.sensors = Sensor;
 
-Hist.crash = sensParams.crash;
 
-Hist.EKF = EKF;
-Hist.AEKF = AEKF;
+% Hist.EKF = EKF;
+% Hist.AEKF = AEKF;
+
 Hist.SPKF = SPKF;
 Hist.ASPKF = ASPKF;
 
@@ -30,13 +35,21 @@ Hist.COMP = COMP;
 
 Hist.HINF = HINF;
 
-Hist.SPKF_full = SPKF_full;
+% Hist.SPKF_full = SPKF_full;
 
 Hist.EKF_att = EKF_att;
 Hist.SRSPKF = SRSPKF;
-Hist.SRSPKF_full = SRSPKF_full;
+% Hist.SRSPKF_full = SRSPKF_full;
 Hist.ASPKF_opt = ASPKF_opt;
 Hist.AHINF = AHINF;
 Hist.SPKF_norm = SPKF_norm;
+
+Hist.SPKF_noN = SPKF_noN;
+Hist.ASPKF_noN = ASPKF_noN;
+Hist.ASPKF_opt_noN = ASPKF_opt_noN;
+Hist.EKF_att_noN = EKF_att_noN;
+Hist.HINF_noN = HINF_noN;
+Hist.AHINF_noN = AHINF_noN;
+
 
 end

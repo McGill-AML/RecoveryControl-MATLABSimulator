@@ -1,9 +1,12 @@
-function [sensParams] = initsensor_params()
+function [sensParams] = initsensor_params(useExpData)
     global mag
     
     % actual montreal mag field
-    mag = [0.3;-.07;0.94];
-%     mag = [0.9; .2; 0];
+    if useExpData == 0
+        mag = [0.3;-.07;0.94];
+        %     mag = [0.9; .2; 0];
+        mag = mag/norm(mag);
+    end
     
     % sendor variances
     
@@ -13,9 +16,9 @@ function [sensParams] = initsensor_params()
 
     sensParams.var_gyr = [1.8*1e-3; 1.8*1e-3; 1.8*1e-3];
 
-    sensParams.var_mag = [7*1e-4;  7*1e-4;  7*1e-4];
+    sensParams.var_mag = [7*1e-3;  7*1e-3;  7*1e-3];
 
-    sensParams.var_gps = [0.6*1e-7; 0.6*1e-7; 0.6*1e-2; 0.1*1e-2; 0.1*1e-2]; %x, y, height, x-dot y-dot
+    sensParams.var_gps = [0.06*1e-7; 0.06*1e-7; 0.6*1e-2; 0.1*1e-2; 0.1*1e-2]; %x, y, height, x-dot y-dot
 
     sensParams.var_baro = 0.9670*1e-0;
 
@@ -38,11 +41,11 @@ function [sensParams] = initsensor_params()
 
     %% set constant sensor biases
 
-    sensParams.bias.acc = randn(3,1)*0.1;
+    sensParams.bias.acc = randn(3,1)*0.05;
 
     sensParams.bias.gyr = randn(3,1)*0.01;% [ -0.0173; -0.0056; 0.0218]; %
 
-    sensParams.bias.mag = randn(3,1)*0.001;
+    sensParams.bias.mag = [0;0;0];%randn(3,1)*0.001;
 
     sensParams.bias.gps = [0;0;0]; %randn(3,1)*0.000003;
 

@@ -38,9 +38,12 @@ MRP_0 = zeros(3,1); %q_k_1(2:4)/(1+q_k_1(1));
 
 %%
 %init covariance for sig pt calcs
-%sig for prediction (process)
-Q_k_1 = tStep^2*diag([sensParams.var_gyr;  
-              sensParams.var_bias_gyr]); 
+% %sig for prediction (process)
+% Q_k_1 = tStep*[diag(sensParams.var_gyr)+1/3*diag(sensParams.var_bias_gyr)*tStep^2, -1/2*diag(sensParams.var_bias_gyr)*tStep; 
+%               -1/2*diag(sensParams.var_bias_gyr)*tStep, diag(sensParams.var_bias_gyr)]; 
+              
+Q_k_1 = tStep*diag([sensParams.var_gyr;
+                    sensParams.var_bias_gyr]); 
 
 %sig for correct (update)  only use acc if within bounds
 if norm(u_b_acc,2) > norm(g,2) + SPKF.accel_bound || norm(u_b_acc,2) < norm(g,2) - SPKF.accel_bound
@@ -51,7 +54,12 @@ else
                 sensParams.var_mag]);
     SPKF.use_acc = 1;
 end
-        
+
+%normalize mag and accel measurements now
+u_b_acc = u_b_acc/norm(u_b_acc);
+u_b_mag = u_b_mag/norm(u_b_mag);
+
+
 P_k_1_att = SPKF.P_hat;
 
 %construct matrix to find sigma point modifiers
@@ -93,6 +101,9 @@ for ii = 1:L
     
     q_k_1_sig(:,ii+1) = quatmultiply(q_k_1_err(:,ii+1),q_k_1_sig(:,1)); %compute quaternion sigma pts
     q_k_1_sig(:,L+ii+1) = quatmultiply(q_k_1_err(:,L+ii+1),q_k_1_sig(:,1));
+    
+%     q_k_1_sig(:,ii+1) = q_k_1_sig(:,ii+1)/norm(q_k_1_sig(:,ii+1)); %renorm just incase
+%     q_k_1_sig(:,L+ii+1) = q_k_1_sig(:,L+ii+1)/norm(q_k_1_sig(:,L+ii+1));
 end 
 
 
@@ -108,14 +119,22 @@ for ii = 1:2*L+1
     %first calc estimated angular vel with sigma pt modified bias terms
     omega_sig(:,ii) = u_b_gyr - Sigma_pts_k_1(4:6,ii) - Sigma_pts_k_1(7:9,ii); %angular velocity
 
+%     %estimate orientation using estimated ang vel
+%     psi_norm = norm(omega_sig(:,ii),2);
+%     psi_k_p = sin(0.5*psi_norm*tStep)*omega_sig(:,ii)/psi_norm;
+%     
+%     Omega_k_p = [cos(0.5*psi_norm*tStep), -psi_k_p';
+%                   psi_k_p, cos(0.5*psi_norm*tStep)*eye(3)-cross_mat(psi_k_p)];
+              
     %estimate orientation using estimated ang vel
     psi_norm = norm(omega_sig(:,ii),2);
     psi_k_p = sin(-0.5*psi_norm*tStep)*omega_sig(:,ii)/psi_norm;
     
     Omega_k_p = [cos(-0.5*psi_norm*tStep), -psi_k_p';
-                  psi_k_p, cos(-0.5*psi_norm*tStep)*eye(3)+cross_mat(psi_k_p)];
+                  psi_k_p, cos(-0.5*psi_norm*tStep)*eye(3)+cross_mat(psi_k_p)]; % this is fionas way
     
     q_k_m_sig(:,ii) = Omega_k_p*q_k_1_sig(:,ii); %predicted quaternion sigma points
+%     q_k_m_sig(:,ii) = q_k_m_sig(:,ii)/norm(q_k_m_sig(:,ii)); %renorm just incase
     
     q_k_err(:,ii) = quatmultiply(q_k_m_sig(:,ii),[q_k_m_sig(1,1);-q_k_m_sig(2:4,1)]); %convert back to error
     %orientation propagated values
@@ -125,6 +144,7 @@ for ii = 1:2*L+1
     Sigma_pts_k_m(4:6,ii) = Sigma_pts_k_1(4:6,ii) + tStep*Sigma_pts_k_1(10:12,ii) ;
     Sigma_pts_k_m(13:end,ii) = Sigma_pts_k_1(13:end,ii);
 end
+
 %find state and covariance predictions
 X_k_m = 1/(L+SPKF.kappa)*(SPKF.kappa*Sigma_pts_k_m(1:6,1)+0.5*sum(Sigma_pts_k_m(1:6,2:2*L+1),2));
 
@@ -155,7 +175,7 @@ else
         
         rotMat = quat2rotmat(q_k_m_sig(:,ii));
         
-        Sigma_Y(1:3,ii) = rotMat*([0;0;g]) + bias_acc + Sigma_pts_k_m(13:15,ii); %accel
+        Sigma_Y(1:3,ii) = rotMat*([0;0;1]) + bias_acc + Sigma_pts_k_m(13:15,ii); %accel
         Sigma_Y(4:6,ii) = rotMat*(mag) + Sigma_pts_k_m(16:18,ii); %magnetometer
         
     end
@@ -199,9 +219,10 @@ q_k_upd(1) = (1-DX_k(1:3)'*DX_k(1:3))/(1+DX_k(1:3)'*DX_k(1:3));
 
 q_k_upd(2:4,1) = (1+q_k_upd(1))*DX_k(1:3);
 
-q_k_upd = q_k_upd/norm(q_k_upd);
 
 SPKF.X_hat.q_hat = quatmultiply(q_k_upd,q_k_m_sig(:,1));
+
+SPKF.X_hat.q_hat =SPKF.X_hat.q_hat/norm(SPKF.X_hat.q_hat);
 
 
 upd =  K_k*V_k*K_k';

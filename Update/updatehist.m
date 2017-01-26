@@ -1,6 +1,9 @@
 function Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
-                        sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full, EKF_att, SRSPKF, SRSPKF_full, ASPKF_opt, AHINF,SPKF_norm)
-                    
+                        sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full, EKF_att, SRSPKF,...
+                        SRSPKF_full, ASPKF_opt, AHINF,SPKF_norm, useExpData, SPKF_noN, ASPKF_noN, ASPKF_opt_noN,...
+                        EKF_att_noN, HINF_noN, AHINF_noN)
+    
+    if useExpData == 0
     Hist.times = [Hist.times;t];
     Hist.states = [Hist.states, state];
     Hist.stateDerivs = [Hist.stateDerivs, stateDeriv];
@@ -14,22 +17,33 @@ function Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, Pro
     Hist.localFlag.contact.initialNormalVels = [Hist.localFlag.contact.initialNormalVels,localFlag.contact.initialNormalVel];
     Hist.localFlag.contact.isContacts = [Hist.localFlag.contact.isContacts,localFlag.contact.isContact];
     
-    Hist.sensors = [Hist.sensors; Sensor];
     
     Hist.crash = [Hist.crash; sensParams.crash];
+    end
     
-    Hist.EKF = [Hist.EKF; EKF];
-    Hist.AEKF = [Hist.AEKF; AEKF];
+    Hist.sensors = [Hist.sensors; Sensor];
+    
+    
+%     Hist.EKF = [Hist.EKF; EKF];
+%     Hist.AEKF = [Hist.AEKF; AEKF];
+
     Hist.SPKF = [Hist.SPKF; SPKF];
     Hist.ASPKF = [Hist.ASPKF; ASPKF];
     Hist.COMP = [Hist.COMP; COMP];
     Hist.HINF = [Hist.HINF; HINF];
-    Hist.SPKF_full = [Hist.SPKF_full; SPKF_full];
+%     Hist.SPKF_full = [Hist.SPKF_full; SPKF_full];
     Hist.EKF_att = [Hist.EKF_att; EKF_att];
     Hist.SRSPKF = [Hist.SRSPKF; SRSPKF]; 
-    Hist.SRSPKF_full = [Hist.SRSPKF_full; SRSPKF_full]; 
+%     Hist.SRSPKF_full = [Hist.SRSPKF_full; SRSPKF_full]; 
     Hist.ASPKF_opt = [Hist.ASPKF_opt; ASPKF_opt];
     Hist.AHINF = [Hist.AHINF; AHINF];
     Hist.SPKF_norm = [Hist.SPKF_norm; SPKF_norm];
+    
+    Hist.SPKF_noN = [Hist.SPKF_noN; SPKF_noN];
+    Hist.ASPKF_noN = [Hist.ASPKF_noN; ASPKF_noN];
+    Hist.ASPKF_opt_noN = [Hist.ASPKF_opt_noN; ASPKF_opt_noN];
+    Hist.EKF_att_noN = [Hist.EKF_att_noN; EKF_att_noN];
+    Hist.HINF_noN = [Hist.HINF_noN; HINF_noN];
+    Hist.AHINF_noN = [Hist.AHINF_noN; AHINF_noN];
     
 end

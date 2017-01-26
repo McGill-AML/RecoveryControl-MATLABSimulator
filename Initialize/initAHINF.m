@@ -15,9 +15,9 @@ AHINF.P_hat_eps = AHINF.P_hat;
 %adaptive values
 AHINF.innov_tresh = 0.5; % innovation sum threshold
 
-AHINF.delta_max = 70; % max adaptive gain
+AHINF.delta_max = 24; % max adaptive gain
 
-AHINF.delta_rate = 35; % how fast the adaptive gain grows when innov sum above threshold
+AHINF.delta_rate = 2; % how fast the adaptive gain grows when innov sum above threshold
 
 AHINF.delta = 0; %initial adaptive gain 0 = regular EKF
 
@@ -30,6 +30,6 @@ AHINF.gamma = diag([ones(1,3),ones(1,3)*400]); % scales magnetometer to be same 
 AHINF.G_k = [eye(4), zeros(4,3)]; % the H inf gain
 
 
-AHINF.accel_bound = 1; % +/- how much larger thna gravity before not used in update
+AHINF.accel_bound = 0.5; % +/- how much larger thna gravity before not used in update
 
 AHINF.use_acc = 1; % values for if it should use accelerometer reading

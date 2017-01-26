@@ -72,6 +72,11 @@ else
     ASPKF_opt.use_acc(1) = 1;
 end
 
+% %normalize mag and accel measurements now
+% u_b_acc = u_b_acc/norm(u_b_acc);
+% u_b_mag = u_b_mag/norm(u_b_mag);
+
+
 
 % construct matrix to find sigma points
 Y = blkdiag(P_k_1_att,Q_k_1_G,R_k_G); 
@@ -220,35 +225,62 @@ DX_k = K_k*innov;
 %adapt R_k gain ( adaptation based on Hajiyev 2013 Robust adaptive kalman
 % filt.) ish
 % update innovation error matrix
+% ASPKF_opt.innov_error(:,:,2:end) = ASPKF_opt.innov_error(:,:,1:end-1);
+% 
+% 
+% if  ASPKF_opt.use_acc(1) == 1
+% ASPKF_opt.innov_error(:,:,1) = innov*innov'; % use full innovation matrix
+% 
+% else
+% ASPKF_opt.innov_error(:,:,1) = zeros(6); % only have magnetometer error in innovation matrix
+% ASPKF_opt.innov_error(4:6,4:6,1) = innov*innov'; 
+% 
+% end
+% 
+% %update each block of adaptive gain individually as there are not as many
+% %acceleromter measurements used as there are magnetometer
+% if ASPKF_opt.use_acc(1) == 0
+%     
+%     innov_sum = sum(ASPKF_opt.innov_error(4:6,4:6),3)/ASPKF_opt.moving_win ;
+%     ASPKF_opt.S_k(4:6,4:6) = innov_sum - V_k;
+%     
+% else
+%     innov_sum(1:3,1:3) = sum(ASPKF_opt.innov_error(1:3,1:3),3)/sum(ASPKF_opt.use_acc);
+%     innov_sum(4:6,1:3) = sum(ASPKF_opt.innov_error(4:6,1:3),3)/sum(ASPKF_opt.use_acc);
+%     innov_sum(1:3,4:6) = sum(ASPKF_opt.innov_error(1:3,4:6),3)/sum(ASPKF_opt.use_acc);
+%     
+%     innov_sum(4:6,4:6) = sum(ASPKF_opt.innov_error(4:6,4:6),3)/ASPKF_opt.moving_win;
+%     ASPKF_opt.S_k = innov_sum - V_k;
+% 
+% end
 ASPKF_opt.innov_error(:,:,2:end) = ASPKF_opt.innov_error(:,:,1:end-1);
 
 
 if  ASPKF_opt.use_acc(1) == 1
-ASPKF_opt.innov_error(:,:,1) = innov*innov'; % use full innovation matrix
+    temp = innov*innov' - V_k; % use full innovation matrix
+    temp(temp < 0) = 0; % only use positive terms - doesn't make sense to shrink covariance
+    ASPKF_opt.innov_error(:,:,1) = temp;
 
 else
-ASPKF_opt.innov_error(:,:,1) = zeros(6); % only have magnetometer error in innovation matrix
-ASPKF_opt.innov_error(4:6,4:6,1) = innov*innov'; 
-
+    temp = zeros(6); % only have magnetometer error in innovation matrix
+    temp(4:6,4:6) = innov*innov' - V_k;
+    temp(temp < 0) = 0; % only use positive terms - doesn't make sense to shrink covariance
+    ASPKF_opt.innov_error(:,:,1) = temp;
 end
 
 %update each block of adaptive gain individually as there are not as many
 %acceleromter measurements used as there are magnetometer
-if ASPKF_opt.use_acc(1) == 0
-    
-    innov_sum = sum(ASPKF_opt.innov_error(4:6,4:6),3)/ASPKF_opt.moving_win ;
-    ASPKF_opt.S_k(4:6,4:6) = innov_sum - V_k;
-    
-else
+if sum(ASPKF_opt.use_acc) ~= 0
     innov_sum(1:3,1:3) = sum(ASPKF_opt.innov_error(1:3,1:3),3)/sum(ASPKF_opt.use_acc);
     innov_sum(4:6,1:3) = sum(ASPKF_opt.innov_error(4:6,1:3),3)/sum(ASPKF_opt.use_acc);
     innov_sum(1:3,4:6) = sum(ASPKF_opt.innov_error(1:3,4:6),3)/sum(ASPKF_opt.use_acc);
-    
-    innov_sum(4:6,4:6) = sum(ASPKF_opt.innov_error(4:6,4:6),3)/ASPKF_opt.moving_win;
-    ASPKF_opt.S_k = innov_sum - V_k;
-
+else
+    innov_sum = zeros(6);
 end
 
+innov_sum(4:6,4:6) = sum(ASPKF_opt.innov_error(4:6,4:6),3)/ASPKF_opt.moving_win;
+
+ASPKF_opt.S_k = innov_sum;
     
 % only use diagonal terms of gain and set to 0 if less than 0
 S_k_tmp = diag(ASPKF_opt.S_k);

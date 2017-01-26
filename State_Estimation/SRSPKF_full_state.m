@@ -154,6 +154,12 @@ end
 % only use gps at the GPS udate rate, must be multiple of timestep -
 % otherwise wont use properly
 if mod(iSim,sensParams.GPS_rate) == 0
+    
+    %normalize mag and accel measurements now
+    u_b_acc = u_b_acc/norm(u_b_acc);
+    u_b_mag = u_b_mag/norm(u_b_mag);
+
+    
     R_k = diag([sensParams.var_mag
                 sensParams.var_gps
                 sensParams.var_baro]);
@@ -174,6 +180,12 @@ if mod(iSim,sensParams.GPS_rate) == 0
     meas_size = 9;
 
 else
+    
+    %normalize mag and accel measurements now
+    u_b_acc = u_b_acc/norm(u_b_acc);
+    u_b_mag = u_b_mag/norm(u_b_mag);
+
+    
     R_k = diag([sensParams.var_mag
                 sensParams.var_baro]);
     

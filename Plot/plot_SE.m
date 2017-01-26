@@ -1,23 +1,23 @@
 % Plot scripts
 
 plot_SPKF = 1;
-plot_ASPKF = 0;
-plot_EKF = 1;
+plot_ASPKF =1;
+plot_EKF = 0;
 plot_AEKF = 0;
-plot_COMP = 0;
-plot_HINF = 0;
-plot_SPKF_full =1;
+plot_COMP = 1;
+plot_HINF =1;
+plot_SPKF_full = 0;
 plot_EKF_att = 1;
 plot_SRSPKF = 0;
 plot_SRSPKF_full = 0;
 plot_ASPKF_opt = 1;
-plot_AHINF = 0;
-plot_SPKF_norm = 1;
+plot_AHINF = 1;
+plot_SPKF_norm = 0;
 
-plot_pos =1;
+plot_pos = 1;
 plot_cov = 0;
-plot_vel = 1;
-plot_quat = 1;
+plot_vel = 0;
+plot_quat =1;
 plot_ASPKF_stuff = 0;
 plot_angvel = 0;
 plot_eul_ang = 0;
@@ -26,7 +26,7 @@ plot_gyros = 0;
 plot_mag = 0;
 plot_crash_occur = 0;
 plot_gyro_bias = 1;
-plot_accel_bias = 1;
+plot_accel_bias = 0;
 plot_gps = 0;
 plot_baro = 0;
 plot_animate = 0;
@@ -411,7 +411,10 @@ end
 if plot_acceleroms ==1
     figure
     subplot(3,1,1)
+    title(['Accelerometer / body accs, run no', num2str(loop_no)]);
+    if useExpData == 0
     plot(Plot.times,Plot.bodyAccs(1,:),'Linewidth',line_width);
+    end
     hold on
     plot(Plot.times,Plot.accelerometers(1,:),'Linewidth',line_width, 'Color', 'r');
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
@@ -419,7 +422,9 @@ if plot_acceleroms ==1
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
     grid on
     subplot(3,1,2)
+    if useExpData == 0
     plot(Plot.times,Plot.bodyAccs(2,:),'Linewidth',line_width);
+    end
     hold on
     plot(Plot.times,Plot.accelerometers(2,:),'Linewidth',line_width,'Color', 'r');
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
@@ -427,14 +432,15 @@ if plot_acceleroms ==1
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
     grid on
     subplot(3,1,3)
+    if useExpData == 0
     plot(Plot.times,Plot.bodyAccs(3,:),'Linewidth',line_width);
+    end
     hold on
     plot(Plot.times,Plot.accelerometers(3,:),'Linewidth',line_width,'Color', 'r');
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$a_{b3}$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
     grid on
-    title(['Accelerometer / body accs, run no', num2str(loop_no)]);
     legend('body acc','acceleroms');
 end
 
@@ -442,9 +448,12 @@ end
 
 if plot_gyros == 1
     figure
-    title(['Gyroscope measurements, run no', num2str(loop_no)]);
     subplot(3,1,1)
+    
+    title(['Gyroscope measurements, run no', num2str(loop_no)]);
+    if useExpData == 0
     plot(Plot.times,Plot.angVels(1,:),'Linewidth',line_width);
+    end
     hold on
     plot(Plot.times,Plot.gyros(1,:),'Linewidth',line_width, 'Color', 'r');
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
@@ -452,7 +461,9 @@ if plot_gyros == 1
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
     grid on
     subplot(3,1,2)
+    if useExpData == 0
     plot(Plot.times,Plot.angVels(2,:),'Linewidth',line_width);
+    end
     hold on
     plot(Plot.times,Plot.gyros(2,:),'Linewidth',line_width, 'Color', 'r');
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
@@ -460,7 +471,9 @@ if plot_gyros == 1
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
     grid on
     subplot(3,1,3)
+    if useExpData == 0
     plot(Plot.times,Plot.angVels(3,:),'Linewidth',line_width);
+    end
     hold on
     plot(Plot.times,Plot.gyros(3,:),'Linewidth',line_width, 'Color', 'r');
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
@@ -474,26 +487,26 @@ end
 
 if plot_mag == 1
     figure
-    title(['Magnetometer measurements, run no', num2str(loop_no)]);
     subplot(3,1,1)
+    title(['Magnetometer measurements, run no', num2str(loop_no)]);
     
     plot(Plot.times,Plot.mag(1,:),'Linewidth',line_width, 'Color', 'r');
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
-    ylabel('$\omega_{1}$ (m)','fontsize',font_size,'Interpreter','latex');
+    ylabel('$X$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
     grid on
     subplot(3,1,2)
     
     plot(Plot.times,Plot.mag(2,:),'Linewidth',line_width, 'Color', 'r');
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
-    ylabel('$\omega_{2}$ (m)','fontsize',font_size,'Interpreter','latex');
+    ylabel('$Y$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
     grid on
     subplot(3,1,3)
     
     plot(Plot.times,Plot.mag(3,:),'Linewidth',line_width, 'Color', 'r');
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
-    ylabel('$\omega_{3}$ (m)','fontsize',font_size,'Interpreter','latex');
+    ylabel('$Z$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
     grid on
 end

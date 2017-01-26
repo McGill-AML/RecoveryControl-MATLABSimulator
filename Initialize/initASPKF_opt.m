@@ -1,5 +1,5 @@
 function [ASPKF_opt] = initASPKF_opt(Est_ICs)
-ASPKF_opt.kappa = 3; % SPKF scaling factor
+ASPKF_opt.kappa = -3; % SPKF scaling factor
 
 %initial states ang_vel, quat, gyro bias
 ASPKF_opt.X_hat.q_hat = Est_ICs.q;

@@ -35,6 +35,10 @@ u_b_baro = Sensor.baro;
 
 if norm(u_b_acc,2) > norm(g,2) + COMP.accel_bound || norm(u_b_acc,2) < norm(g,2) - COMP.accel_bound
 
+    
+    %normalize mag and accel measurements now
+    u_b_mag = u_b_mag/norm(u_b_mag);
+
     v_b_mag = rotMat_k_1*mag;
     
     w_mes = -vex(COMP.mag_k_i/2*(u_b_mag*v_b_mag' - v_b_mag*u_b_mag'));
@@ -42,8 +46,12 @@ if norm(u_b_acc,2) > norm(g,2) + COMP.accel_bound || norm(u_b_acc,2) < norm(g,2)
 
 else
     
+    %normalize mag and accel measurements now
+    u_b_acc = u_b_acc/norm(u_b_acc);
+    u_b_mag = u_b_mag/norm(u_b_mag);
+
     v_b_mag = rotMat_k_1*mag;
-    v_b_acc = rotMat_k_1*[0;0;g];
+    v_b_acc = rotMat_k_1*[0;0;1];
     
     w_mes = -vex(COMP.mag_k_i/2*(u_b_mag*v_b_mag' - v_b_mag*u_b_mag')+COMP.acc_k_i/2*((u_b_acc-bias_acc)*v_b_acc' - v_b_acc*(u_b_acc-bias_acc)'));  
     

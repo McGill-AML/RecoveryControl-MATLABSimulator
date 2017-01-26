@@ -170,9 +170,11 @@ Mz =  [-Dt Dt -Dt Dt]*(rpm.^2)-Kr*state(6)^2 -Jr*sum(rpmDeriv) + totalContactMom
 
 %% Update State Derivative
 stateDeriv(1:3) = (Fg + Fa + Ft + totalContactForce - m*cross(state(4:6),state(1:3)))/m;
-stateDeriv(4:6) = inv(I)*([Mx;My;Mz]-cross(state(4:6),I*state(4:6)));
+stateDeriv(4:6) = I\([Mx;My;Mz]-cross(state(4:6),I*state(4:6)));
 stateDeriv(7:9) = rotMat'*state(1:3);
-stateDeriv(10:13) = -0.5*quatmultiply([0;state(4:6)],q);
+stateDeriv(10:13) = -0.5*quatmultiply([0;state(4:6)],q); %this is what it
+% used to be
+% stateDeriv(10:13) = 0.5*quatmultiply([0;state(4:6)],q);
 
 
 end

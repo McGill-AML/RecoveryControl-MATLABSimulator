@@ -50,15 +50,15 @@ MRP_0 = zeros(3,1); %q_k_1(2:4)/(1+q_k_1(1));
 %%
 %init covariance for sig pt calcs
 %sig for prediction (process)
-Q_k_1 = diag([sensParams.var_acc;
+Q_k_1 = tStep*diag([sensParams.var_acc;
               sensParams.var_gyr;
-              sensParams.var_bias_acc*10;
+              sensParams.var_bias_acc;
               sensParams.var_bias_gyr]); 
 
 %sig for correct (update)       
 if mod(iSim,sensParams.GPS_rate) == 0
     R_k = diag([sensParams.var_mag;
-                sensParams.var_gps;
+                sensParams.var_gps*10;
                 sensParams.var_baro]);
         
 else
@@ -92,18 +92,36 @@ q_k_1_sig(:,1) = q_k_1;
 %cholesky decomposition.
 % this loop generates sigma points for estimated MRP and bias and generates
 % the associated quaternion SPs as well
+
+lambda = SPKF_full.alpha^2*(L-SPKF_full.kappa)-L;
+
+a = 1;
+f = 1.5;
+
 for ii = 1:L
     
     %make sigma points
-    Sigma_pts_k_1(:,ii+1) = Sigma_pts_k_1(:,1) + sqrt(L+SPKF_full.kappa)*S(:,ii);
-    Sigma_pts_k_1(:,L+ii+1) = Sigma_pts_k_1(:,1) - sqrt(L+SPKF_full.kappa)*S(:,ii);
+    Sigma_pts_k_1(:,ii+1) = Sigma_pts_k_1(:,1) + sqrt(L+lambda)*S(:,ii);
+    Sigma_pts_k_1(:,L+ii+1) = Sigma_pts_k_1(:,1) - sqrt(L+lambda)*S(:,ii);
     
-    %convert MRP sigma points into quaternions by crassidis' chose a = f = 1
-    eta_k_d_pos = (1-Sigma_pts_k_1(7:9,ii+1)'*Sigma_pts_k_1(7:9,ii+1))/(1+Sigma_pts_k_1(7:9,ii+1)'*Sigma_pts_k_1(7:9,ii+1));
-    eta_k_d_neg = (1-Sigma_pts_k_1(7:9,L+ii+1)'*Sigma_pts_k_1(7:9,L+ii+1))/(1+Sigma_pts_k_1(7:9,L+ii+1)'*Sigma_pts_k_1(7:9,L+ii+1));
+    %convert MRP sigma points into quaternions by crassidis'
+    % old version where a = f = 1
+%     eta_k_d_pos = (1-Sigma_pts_k_1(7:9,ii+1)'*Sigma_pts_k_1(7:9,ii+1))/(1+Sigma_pts_k_1(7:9,ii+1)'*Sigma_pts_k_1(7:9,ii+1));
+%     eta_k_d_neg = (1-Sigma_pts_k_1(7:9,L+ii+1)'*Sigma_pts_k_1(7:9,L+ii+1))/(1+Sigma_pts_k_1(7:9,L+ii+1)'*Sigma_pts_k_1(7:9,L+ii+1));
+%     
+%     q_k_1_err(:,ii+1) = [eta_k_d_pos; (1+eta_k_d_pos)*Sigma_pts_k_1(7:9,ii+1)]; %positive error quaternion
+%     q_k_1_err(:,L+ii+1) = [eta_k_d_neg; (1+eta_k_d_neg)*Sigma_pts_k_1(7:9,L+ii+1)]; %neg error quaternion
+%     
+% new version with a = f as given by crassidis'
+    sigNorm_pos= norm(Sigma_pts_k_1(7:9,ii+1),2);
+    sigNorm_neg = norm(Sigma_pts_k_1(7:9,L+ii+1),2);
+    eta_k_d_pos = (-a*sigNorm_pos^2 + f*sqrt(f^2 + (1-a^2)*sigNorm_pos^2))/(f^2+sigNorm_pos^2);
+    eta_k_d_neg = (-a*sigNorm_neg^2 + f*sqrt(f^2 + (1-a^2)*sigNorm_neg^2))/(f^2+sigNorm_neg^2);
     
-    q_k_1_err(:,ii+1) = [eta_k_d_pos; (1+eta_k_d_pos)*Sigma_pts_k_1(7:9,ii+1)]; %positive error quaternion
-    q_k_1_err(:,L+ii+1) = [eta_k_d_neg; (1+eta_k_d_neg)*Sigma_pts_k_1(7:9,L+ii+1)]; %neg error quaternion
+    q_k_1_err(:,ii+1) = [eta_k_d_pos; (a+eta_k_d_pos)/f*Sigma_pts_k_1(7:9,ii+1)]; %positive error quaternion
+    q_k_1_err(:,L+ii+1) = [eta_k_d_neg; (a+eta_k_d_neg)/f*Sigma_pts_k_1(7:9,L+ii+1)]; %neg error quaternion
+    
+    
     
     q_k_1_sig(:,ii+1) = quatmultiply(q_k_1_err(:,ii+1),q_k_1_sig(:,1)); %compute quaternion sigma pts
     q_k_1_sig(:,L+ii+1) = quatmultiply(q_k_1_err(:,L+ii+1),q_k_1_sig(:,1));
@@ -148,7 +166,6 @@ for ii = 1:2*L+1
 end
 %find state and covariance predictions
 
-lambda = SPKF_full.alpha^2*(L-SPKF_full.kappa)-L;
 
 X_k_m = 1/(L+lambda)*(lambda*Sigma_pts_k_m(1:15,1)+0.5*sum(Sigma_pts_k_m(1:15,2:2*L+1),2));
 
@@ -161,6 +178,12 @@ end
 %measurement sigma and correct
 % only use gps at the GPS udate rate, must be multiple of timestep -
 % otherwise wont use properly
+
+%normalize mag and accel measurements now
+u_b_acc = u_b_acc/norm(u_b_acc); %here we dont end up using the acceleration again, but incase we end up at some point
+u_b_mag = u_b_mag/norm(u_b_mag);
+
+
 if mod(iSim,sensParams.GPS_rate) == 0
     R_k = diag([sensParams.var_mag
                 sensParams.var_gps
@@ -203,7 +226,7 @@ V_k = (lambda/(L+lambda)+(1-SPKF_full.alpha^2+SPKF_full.beta))*(Sigma_Y(:,1)-y_k
 for ii = 2:2*L+1
     V_k = V_k+0.5/(L+lambda)*(Sigma_Y(:,ii)-y_k_hat)*(Sigma_Y(:,ii)-y_k_hat)';
 end
-V_k = V_k;
+% V_k = V_k + R_k;
 
 U_k = (lambda/(L+lambda)+(1-SPKF_full.alpha^2+SPKF_full.beta))*(Sigma_pts_k_m(1:15,1)-X_k_m(1:15))*(Sigma_Y(:,1)-y_k_hat)';
 
@@ -231,10 +254,12 @@ SPKF_full.X_hat.bias_gyr = X_k_m(13:15) + DX_k(13:15);
 SPKF_full.X_hat.omega_hat = u_b_gyr - SPKF_full.X_hat.bias_gyr; %ang vel is just gyro minus bias
 
 %need to convert MRP to quaternions
+pNorm = norm(DX_k(7:9),2);
+q_k_upd(1) = (-a*pNorm^2 + f*sqrt(f^2+(1-a^2)*pNorm^2))/(f^2+pNorm^2);
 
-q_k_upd(1) = (1-DX_k(7:9)'*DX_k(7:9))/(1+DX_k(7:9)'*DX_k(7:9));
+q_k_upd(2:4,1) = (a+q_k_upd(1))/f*DX_k(7:9);
 
-q_k_upd(2:4,1) = (1+q_k_upd(1))*DX_k(7:9);
+q_k_upd = q_k_upd/norm(q_k_upd);
 
 SPKF_full.X_hat.q_hat = quatmultiply(q_k_upd,q_k_m_sig(:,1));
 

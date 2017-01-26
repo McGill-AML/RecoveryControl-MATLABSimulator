@@ -39,7 +39,7 @@ MRP_0 = zeros(3,1); %q_k_1(2:4)/(1+q_k_1(1));
 
 %%
 
-Q_k_1 = diag([sensParams.var_gyr;  
+Q_k_1 = tStep*diag([sensParams.var_gyr;  
               sensParams.var_bias_gyr].^0.5); 
           
           
@@ -59,6 +59,12 @@ else
     SRSPKF.use_acc = 1;
     
 end
+
+
+%normalize mag and accel measurements now
+% u_b_acc = u_b_acc/norm(u_b_acc);
+% u_b_mag = u_b_mag/norm(u_b_mag);
+
 
 S = blkdiag(SRSPKF.S_hat,Q_k_1, R_k);
 
@@ -80,11 +86,15 @@ q_k_1_sig(:,1) = q_k_1;
 %cholesky decomposition.
 % this loop generates sigma points for estimated MRP and bias and generates
 % the associated quaternion SPs as well
+
+
+lambda = SRSPKF.alpha^2*(L-SRSPKF.kappa)-L;
+
 for ii = 1:L
     
     %make sigma points
-    Sigma_pts_k_1(:,ii+1) = Sigma_pts_k_1(:,1) + sqrt(L+SRSPKF.kappa)*S(:,ii);
-    Sigma_pts_k_1(:,L+ii+1) = Sigma_pts_k_1(:,1) - sqrt(L+SRSPKF.kappa)*S(:,ii);
+    Sigma_pts_k_1(:,ii+1) = Sigma_pts_k_1(:,1) + sqrt(L+lambda)*S(:,ii);
+    Sigma_pts_k_1(:,L+ii+1) = Sigma_pts_k_1(:,1) - sqrt(L+lambda)*S(:,ii);
     
     %convert MRP sigma points into quaternions by crassidis' chose a = f = 1
     eta_k_d_pos = (1-Sigma_pts_k_1(1:3,ii+1)'*Sigma_pts_k_1(1:3,ii+1))/(1+Sigma_pts_k_1(1:3,ii+1)'*Sigma_pts_k_1(1:3,ii+1));
