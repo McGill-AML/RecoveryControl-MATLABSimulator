@@ -19,7 +19,7 @@ rotMat_k_1 = quat2rotmat(q_k_1);
 %bias terms
 % bias_acc = EKF.X_hat.bias_acc;
 bias_gyr = COMP.X_hat.bias_gyr;
-bias_acc = sensParams.bias.acc; % for the sake of comparing attitude estimators ignore accel bias
+bias_acc = [0;0;0]; %sensParams.bias.acc; % for the sake of comparing attitude estimators ignore accel bias
 
 
 %measurements

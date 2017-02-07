@@ -1,7 +1,6 @@
 function Hist = inithist(timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag,...
                         Sensor, sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full,EKF_att,SRSPKF,...
-                        SRSPKF_full, ASPKF_opt, AHINF,SPKF_norm, useExpData, SPKF_noN, ASPKF_noN, ASPKF_opt_noN,...
-                        EKF_att_noN, HINF_noN, AHINF_noN)
+                        SRSPKF_full, ASPKF_opt, AHINF,SPKF_norm, useExpData)
                 
 % Initialize history of the state and its derivative
 if useExpData == 0
@@ -44,12 +43,6 @@ Hist.ASPKF_opt = ASPKF_opt;
 Hist.AHINF = AHINF;
 Hist.SPKF_norm = SPKF_norm;
 
-Hist.SPKF_noN = SPKF_noN;
-Hist.ASPKF_noN = ASPKF_noN;
-Hist.ASPKF_opt_noN = ASPKF_opt_noN;
-Hist.EKF_att_noN = EKF_att_noN;
-Hist.HINF_noN = HINF_noN;
-Hist.AHINF_noN = AHINF_noN;
 
 
 end

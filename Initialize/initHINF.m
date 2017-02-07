@@ -12,7 +12,7 @@ HINF.P_hat = Est_ICs.P_init_att;
 HINF.P_hat_eps = HINF.P_hat;
 
 
-HINF.G_k = 20*[eye(4), zeros(4,3)];
+HINF.G_k = 2*[eye(4), zeros(4,3)];
 
 
 HINF.accel_bound = 0.5; % +/- how much larger thna gravity before not used in update

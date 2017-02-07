@@ -24,7 +24,7 @@ rotMat_k_1 = quat2rotmat(q_k_1);
 %bias terms
 % bias_acc = AEKF.X_hat.bias_acc;
 bias_gyr = ASPKF_opt.X_hat.bias_gyr;
-bias_acc = sensParams.bias.acc; % for the sake of comparing attitude estimators assume no accelerometer bias.
+bias_acc = [0;0;0]; %sensParams.bias.acc; % for the sake of comparing attitude estimators assume no accelerometer bias.
 
 
 %measurements
@@ -72,9 +72,7 @@ else
     ASPKF_opt.use_acc(1) = 1;
 end
 
-% %normalize mag and accel measurements now
-% u_b_acc = u_b_acc/norm(u_b_acc);
-% u_b_mag = u_b_mag/norm(u_b_mag);
+
 
 
 

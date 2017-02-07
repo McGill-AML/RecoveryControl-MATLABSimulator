@@ -24,7 +24,7 @@ rotMat = quat2rotmat(q_k_1);
 %bias terms
 % bias_acc = EKF.X_hat.bias_acc;
 bias_gyr = SRSPKF.X_hat.bias_gyr;
-bias_acc = sensParams.bias.acc;
+bias_acc = [0;0;0]; %sensParams.bias.acc;
 
 %measurements
 u_b_acc = Sensor.acc;
@@ -61,9 +61,7 @@ else
 end
 
 
-%normalize mag and accel measurements now
-% u_b_acc = u_b_acc/norm(u_b_acc);
-% u_b_mag = u_b_mag/norm(u_b_mag);
+
 
 
 S = blkdiag(SRSPKF.S_hat,Q_k_1, R_k);

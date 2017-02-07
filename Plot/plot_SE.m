@@ -1,20 +1,20 @@
 % Plot scripts
 
 plot_SPKF = 1;
-plot_ASPKF =1;
+plot_ASPKF =0;
 plot_EKF = 0;
 plot_AEKF = 0;
-plot_COMP = 1;
+plot_COMP = 0;
 plot_HINF =1;
 plot_SPKF_full = 0;
 plot_EKF_att = 1;
 plot_SRSPKF = 0;
 plot_SRSPKF_full = 0;
-plot_ASPKF_opt = 1;
+plot_ASPKF_opt = 0;
 plot_AHINF = 1;
 plot_SPKF_norm = 0;
 
-plot_pos = 1;
+plot_pos = 0;
 plot_cov = 0;
 plot_vel = 0;
 plot_quat =1;
@@ -25,7 +25,7 @@ plot_acceleroms = 0;
 plot_gyros = 0;
 plot_mag = 0;
 plot_crash_occur = 0;
-plot_gyro_bias = 1;
+plot_gyro_bias =0;
 plot_accel_bias = 0;
 plot_gps = 0;
 plot_baro = 0;

@@ -132,15 +132,7 @@ for ii = 1:6
     Plot.SPKF_P_hat(ii,:) = tempP(ii,ii:6:end);
 end
 
-temp = struct2cell(Hist.SPKF_noN);
-temp2 = struct2cell([temp{2,:}]);
-Plot.SPKF_quat_noN = [temp2{1,:}];
-Plot.SPKF_omega_noN = [temp2{2,:}];
-Plot.SPKF_gyr_bias_noN = [temp2{3,:}];
-tempP = [temp{3,:}];
-for ii = 1:6
-    Plot.SPKF_P_hat_noN(ii,:) = tempP(ii,ii:6:end);
-end
+
 
 temp = struct2cell(Hist.ASPKF);
 temp2 = struct2cell([temp{2,:}]);
@@ -157,15 +149,7 @@ for ii = 1:6
     Plot.ASPKF_P_hat(ii,:) = tempP(ii,ii:6:end);
 end
 
-temp = struct2cell(Hist.ASPKF_noN);
-temp2 = struct2cell([temp{2,:}]);
-Plot.ASPKF_quat_noN = [temp2{1,:}];
-Plot.ASPKF_omega_noN = [temp2{2,:}];
-Plot.ASPKF_gyr_bias_noN = [temp2{3,:}];
-Plot.ASPKF_G_k_noN = [temp{8,:}];
-for ii = 1:length([temp{9,:}])
-    Plot.ASPKF_innov_noN(ii) = sum(temp{9,ii});
-end
+
 
 
 temp = struct2cell(Hist.COMP);
@@ -181,11 +165,7 @@ Plot.HINF_quat = [temp2{1,:}];
 Plot.HINF_omega = [temp2{2,:}];
 Plot.HINF_gyr_bias = [temp2{3,:}];
 
-temp = struct2cell(Hist.HINF_noN);
-temp2 = struct2cell([temp{1,:}]);
-Plot.HINF_quat_noN = [temp2{1,:}];
-Plot.HINF_omega_noN = [temp2{2,:}];
-Plot.HINF_gyr_bias_noN = [temp2{3,:}];
+
 
 % temp = struct2cell(Hist.SPKF_full);
 % temp2 = struct2cell([temp{2,:}]);
@@ -206,15 +186,7 @@ for ii = 1:7
     Plot.EKF_att_P_hat(ii,:) = tempP(ii,ii:7:end);
 end
 
-temp = struct2cell(Hist.EKF_att_noN);
-temp2 = struct2cell([temp{1,:}]);
-Plot.EKF_att_quat_noN = [temp2{1,:}];
-Plot.EKF_att_omega_noN = [temp2{2,:}];
-Plot.EKF_att_gyr_bias_noN = [temp2{3,:}];
-tempP = [temp{2,:}];
-for ii = 1:7
-    Plot.EKF_att_P_hat_noN(ii,:) = tempP(ii,ii:7:end);
-end
+
 
 
 temp = struct2cell(Hist.SRSPKF);
@@ -244,11 +216,6 @@ for ii = 1:6
     Plot.ASPKF_opt_P_hat(ii,:) = tempP(ii,ii:6:end);
 end
 
-temp = struct2cell(Hist.ASPKF_opt_noN);
-temp2 = struct2cell([temp{2,:}]);
-Plot.ASPKF_opt_quat_noN = [temp2{1,:}];
-Plot.ASPKF_opt_omega_noN = [temp2{2,:}];
-Plot.ASPKF_opt_gyr_bias_noN = [temp2{3,:}];
 
 
 temp = struct2cell(Hist.AHINF);
@@ -261,27 +228,21 @@ for ii = 1:length([temp{8,:}])
     Plot.AHINF_innov(ii) = sum(temp{8,ii});
 end
 
-temp = struct2cell(Hist.AHINF_noN);
-temp2 = struct2cell([temp{1,:}]);
-Plot.AHINF_quat_noN = [temp2{1,:}];
-Plot.AHINF_omega_noN = [temp2{2,:}];
-Plot.AHINF_gyr_bias_noN = [temp2{3,:}];
-Plot.AHINF_bound_noN = [temp{7,:}];
-for ii = 1:length([temp{8,:}])
-    Plot.AHINF_innov_noN(ii) = sum(temp{8,ii});
-end
+
 
 
 
 temp = struct2cell(Hist.SPKF_norm);
-temp2 = struct2cell([temp{2,:}]);
+temp2 = struct2cell([temp{1,:}]);
 Plot.SPKF_norm_quat = [temp2{1,:}];
 Plot.SPKF_norm_omega = [temp2{2,:}];
 Plot.SPKF_norm_gyr_bias = [temp2{3,:}];
-tempP = [temp{3,:}];
+tempP = [temp{2,:}];
 for ii = 1:7
     Plot.SPKF_norm_P_hat(ii,:) = tempP(ii,ii:7:end);
 end
+
+
 
 % tempP = [temp{2,:}];
 % for ii = 1:6

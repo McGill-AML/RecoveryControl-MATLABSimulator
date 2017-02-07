@@ -23,7 +23,7 @@ rotMat = quat2rotmat(q_k_1);
 %bias terms
 % bias_acc = EKF.X_hat.bias_acc;
 bias_gyr = SPKF.X_hat.bias_gyr;
-bias_acc = sensParams.bias.acc;
+bias_acc = [0;0;0]; %sensParams.bias.acc;
 
 %measurements
 u_b_acc = Sensor.acc;
@@ -55,9 +55,6 @@ else
     SPKF.use_acc = 1;
 end
 
-%normalize mag and accel measurements now
-u_b_acc = u_b_acc/norm(u_b_acc);
-u_b_mag = u_b_mag/norm(u_b_mag);
 
 
 P_k_1_att = SPKF.P_hat;
@@ -175,7 +172,7 @@ else
         
         rotMat = quat2rotmat(q_k_m_sig(:,ii));
         
-        Sigma_Y(1:3,ii) = rotMat*([0;0;1]) + bias_acc + Sigma_pts_k_m(13:15,ii); %accel
+        Sigma_Y(1:3,ii) = rotMat*([0;0;g]) + bias_acc + Sigma_pts_k_m(13:15,ii); %accel
         Sigma_Y(4:6,ii) = rotMat*(mag) + Sigma_pts_k_m(16:18,ii); %magnetometer
         
     end

@@ -68,40 +68,60 @@ q_k_m = q_k_m/norm(q_k_m,2);
 bias_gyr_k_m = bias_gyr;
 
 %discretized (euler discretization) then linearized state transition matrix
-A_k_1_1 = eye(4)+[0, -omega_hat_m'; omega_hat_m, cross_mat(omega_hat_m)];
+% A_k_1_1 = eye(4)+[0, -omega_hat_m'; omega_hat_m, cross_mat(omega_hat_m)];
+% 
+% A_k_1_2 = [q_k_m(2), q_k_m(3), q_k_m(4);
+%            -q_k_m(1), -q_k_m(4), q_k_m(3);
+%            q_k_m(4), -q_k_m(1), -q_k_m(2);
+%            -q_k_m(3), q_k_m(2), -q_k_m(1)];
+%        
+% A_k_1 = [ -0.5*tStep*[A_k_1_1, A_k_1_2];
+%           zeros(3,4), eye(3)];
 
-A_k_1_2 = [q_k_m(2), q_k_m(3), q_k_m(4);
-           -q_k_m(1), -q_k_m(4), q_k_m(3);
-           q_k_m(4), -q_k_m(1), -q_k_m(2);
-           -q_k_m(3), q_k_m(2), -q_k_m(1)];
+% try 1 - went to [0 0 0 1]??
+% A_k_1_1 = eye(3)-cross_mat(omega_hat_m)*sin(psi_norm*tStep)/psi_norm + cross_mat(omega_hat_m)^2*(1-cos(psi_norm*tStep))/psi_norm^2;
+% 
+% A_k_1_2 = -cross_mat(omega_hat_m)*(1-cos(psi_norm*tStep))/psi_norm^2 + eye(3)*tStep + cross_mat(omega_hat_m)^2*(psi_norm*tStep-sin(psi_norm*tStep))/psi_norm^3;
+% 
+% A_k_1 = [ 1, zeros(1,6);
+%         zeros(3,1), A_k_1_1,  A_k_1_2;
+%         zeros(3,4), eye(3)];
+
+A_k_1_1 = eye(4)+tStep*[zeros(1,4); zeros(3,1), -cross_mat(omega_hat_m)];
+
+A_k_1_2 = 0.5*tStep*[zeros(1,3); eye(3)];
        
-A_k_1 = [ -0.5*tStep*[A_k_1_1, A_k_1_2];
+A_k_1 = [ A_k_1_1, A_k_1_2;
           zeros(3,4), eye(3)];
 
+
 % process noise 
-Q_k = tStep*diag([sensParams.var_gyr; sensParams.var_gyr(1); sensParams.var_bias_gyr]); 
+Q_k = tStep*diag([sensParams.var_gyr; sensParams.var_gyr(1); sensParams.var_bias_gyr*.001]); 
+
+% Q_k = [(sensParams.var_gyr(1)*tStep+1/3*sensParams.var_bias_gyr(1)*tStep^3)*eye(4), -(0.5*sensParams.var_bias_gyr(1)*tStep^2)*[zeros(1,3); eye(3)];
+%         -(0.5*sensParams.var_bias_gyr(1)*tStep^2)*[zeros(3,1), eye(3)], sensParams.var_bias_gyr(1)*tStep*eye(3)];
 
 %predict covariance matrix
 EKF_att.P_hat = A_k_1*EKF_att.P_hat*A_k_1' + Q_k;
 
 %% update 
 
-dR_dq_0 = [q_k_m(1), -q_k_m(4), q_k_m(3);
-             q_k_m(4), q_k_m(1), -q_k_m(2);
-             -q_k_m(3), q_k_m(2), q_k_m(1)];
-
-dR_dq_1 = [q_k_m(2), q_k_m(3), q_k_m(4);
-             q_k_m(3), -q_k_m(2), -q_k_m(1);
-             q_k_m(4), q_k_m(1), -q_k_m(2)];
-         
-dR_dq_2 = [-q_k_m(3), q_k_m(2), q_k_m(1);
-             q_k_m(2), q_k_m(3), q_k_m(4);
-             -q_k_m(1), q_k_m(4), -q_k_m(3)];
-         
-         
-dR_dq_3 = [-q_k_m(4), -q_k_m(1), q_k_m(2);
-             q_k_m(1), -q_k_m(4), q_k_m(3);
-             q_k_m(2), q_k_m(3), q_k_m(4)];
+% dR_dq_0 = [q_k_m(1), -q_k_m(4), q_k_m(3);
+%              q_k_m(4), q_k_m(1), -q_k_m(2);
+%              -q_k_m(3), q_k_m(2), q_k_m(1)];
+% 
+% dR_dq_1 = [q_k_m(2), q_k_m(3), q_k_m(4);
+%              q_k_m(3), -q_k_m(2), -q_k_m(1);
+%              q_k_m(4), q_k_m(1), -q_k_m(2)];
+%          
+% dR_dq_2 = [-q_k_m(3), q_k_m(2), q_k_m(1);
+%              q_k_m(2), q_k_m(3), q_k_m(4);
+%              -q_k_m(1), q_k_m(4), -q_k_m(3)];
+%          
+%          
+% dR_dq_3 = [-q_k_m(4), -q_k_m(1), q_k_m(2);
+%              q_k_m(1), -q_k_m(4), q_k_m(3);
+%              q_k_m(2), q_k_m(3), q_k_m(4)];
          
 rotMat = quat2rotmat( q_k_m );
 
@@ -113,13 +133,16 @@ if norm(u_b_acc,2) > norm(g,2) + EKF_att.accel_bound || norm(u_b_acc,2) < norm(g
 
     
     %magnetometer only
-    C_k = [dR_dq_0*mag, dR_dq_1*mag, dR_dq_2*mag, dR_dq_3*mag, zeros(3)];
+%     C_k = [dR_dq_0*mag, dR_dq_1*mag, dR_dq_2*mag, dR_dq_3*mag, zeros(3)];
+
+    C_k = [zeros(3,1), -cross_mat(rotMat*mag), zeros(3,3)];
     
     R_k = diag(sensParams.var_mag);
     
     y_k = u_b_mag;
     
-    y_k_hat = C_k*[q_k_m; bias_gyr_k_m];
+%     y_k_hat = C_k*[q_k_m; bias_gyr_k_m];
+    y_k_hat = rotMat*mag;
     
     meas_size = 3;
 
@@ -133,14 +156,18 @@ else
 
     
     
-    C_k = [dR_dq_0*[0;0;g], dR_dq_1*[0;0;g], dR_dq_2*[0;0;g], dR_dq_3*[0;0;g], zeros(3);
-           dR_dq_0*mag, dR_dq_1*mag, dR_dq_2*mag, dR_dq_3*mag, zeros(3)];
+%     C_k = [dR_dq_0*[0;0;g], dR_dq_1*[0;0;g], dR_dq_2*[0;0;g], dR_dq_3*[0;0;g], zeros(3);
+%            dR_dq_0*mag, dR_dq_1*mag, dR_dq_2*mag, dR_dq_3*mag, zeros(3)];
+
+    C_k = [zeros(3,1), -cross_mat(rotMat*[0; 0; g]), zeros(3,3);
+            zeros(3,1), -cross_mat(rotMat*mag), zeros(3,3)];
        
     R_k = diag([sensParams.var_acc; sensParams.var_mag]);
     
     y_k = [u_b_acc; u_b_mag];
     
-    y_k_hat = C_k*[q_k_m; bias_gyr_k_m];
+%     y_k_hat = C_k*[q_k_m; bias_gyr_k_m];
+    y_k_hat = [rotMat*[0; 0; g]; rotMat*mag];
     
     
     meas_size = 6;
@@ -181,7 +208,10 @@ K_k = [K_k1; K_k2];
 EKF_att.P_hat = (eye(7) - K_k*C_k)*EKF_att.P_hat*(eye(7) - K_k*C_k)' + K_k*R_k*K_k';
 
 %update states
-EKF_att.X_hat.q_hat = q_k_m + K_k1*r_k;
+q_upd =  K_k1*r_k;
+q_upd = [1; 0.5*q_upd(2:4)];
+
+EKF_att.X_hat.q_hat = quatmultiply(q_upd, q_k_m);
 
 EKF_att.X_hat.q_hat = EKF_att.X_hat.q_hat/norm(EKF_att.X_hat.q_hat,2); % renormalize
 

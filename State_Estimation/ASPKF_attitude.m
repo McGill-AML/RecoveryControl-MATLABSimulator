@@ -24,7 +24,7 @@ rotMat_k_1 = quat2rotmat(q_k_1);
 %bias terms
 % bias_acc = AEKF.X_hat.bias_acc;
 bias_gyr = ASPKF.X_hat.bias_gyr;
-bias_acc = sensParams.bias.acc; % for the sake of comparing attitude estimators assume no accelerometer bias.
+bias_acc = [0;0;0]; % sensParams.bias.acc; % for the sake of comparing attitude estimators assume no accelerometer bias.
 
 
 %measurements
@@ -81,9 +81,6 @@ else
 end
 
 
-% %normalize mag and accel measurements now
-u_b_acc = u_b_acc/norm(u_b_acc);
-u_b_mag = u_b_mag/norm(u_b_mag);
 
 
 % construct matrix to find sigma points
@@ -207,7 +204,7 @@ else
         
         rotMat = quat2rotmat(q_k_m_sig(:,ii));
         
-        Sigma_Y(1:3,ii) = rotMat*([0;0;1]) + bias_acc + Sigma_pts_k_m(13:15,ii); %accel
+        Sigma_Y(1:3,ii) = rotMat*([0;0;g]) + bias_acc + Sigma_pts_k_m(13:15,ii); %accel
         Sigma_Y(4:6,ii) = rotMat*(mag) + Sigma_pts_k_m(16:18,ii); %magnetometer
         
     end
