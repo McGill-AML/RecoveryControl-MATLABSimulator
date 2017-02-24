@@ -26,19 +26,30 @@ R = quat2rotmat(q);
 %% Zhang 2014 Controller
 %% Altitude Controller Parameters
 Kpz = 2;%20; %Zhang x4 value = 1
-Kiz = 0.05;%40;
+Kiz = 0.0005;%40; b4 adr was 0.05
 Kdz = 0.4;
 
 Kpvz = 1.6; %Zhang x4 value = 2.8
-Kivz = 0;%0.16;%60; %Zhang x4 value = 4
+Kivz = 0.05;%0.16;%60; %Zhang x4 value = 4 b4 adr was 0
 
 % altitudeDerivSaturation = 3; %Zhang x4 value = 0.6
 
 %% Horizontal Position Controller Parameters
+% % pre adrian tuning values
+% Kps = 1;%0.6; %Zhang x4 value = 0.6
+% Kis = 0.1;
+% Kpvx = 1.5; %Zhang x4 value = 2
+% Kpvy = 1.5; %Zhang x4 value = 2
+% 
+% Kpyaw = 1.2;%Zhang x4 value = 0.7
+% Kiyaw = 0;%1;
+% Kdyaw = 0.2;
+
+
 Kps = 1;%0.6; %Zhang x4 value = 0.6
-Kis = 0.1;
-Kpvx = 2; %Zhang x4 value = 2
-Kpvy = 2; %Zhang x4 value = 2
+Kis = 0.01;
+Kpvx = 1.5; %Zhang x4 value = 2
+Kpvy = 1.5; %Zhang x4 value = 2
 
 Kpyaw = 1.2;%Zhang x4 value = 0.7
 Kiyaw = 0;%1;
@@ -67,10 +78,20 @@ yawDerivSaturation = pi/4; %Zhang x4 value = 0.3
 % Kpvyaw = 1.8;
 % Kivyaw = 0.2;
 % Kdvyaw = 0;
+%
+% % pre adrian tuning parameters
+% Kprp = 60;
+% Kirp = 0;
+% Kdrp = 12;
+% 
+% Kpvyaw = 1.8;
+% Kivyaw = 0.2;
+% Kdvyaw = 0;
 
-Kprp = 60;
-Kirp = 0;
-Kdrp = 12;
+
+Kprp = 50;
+Kirp = 1;
+Kdrp = 20;
 
 Kpvyaw = 1.8;
 Kivyaw = 0.2;

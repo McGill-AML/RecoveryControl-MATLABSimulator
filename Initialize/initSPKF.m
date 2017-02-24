@@ -1,6 +1,6 @@
 function [SPKF] = initSPKF(Est_ICs, loop_no)
 %estimator constants
-SPKF.kappa = 3; % SPKF scaling factor
+SPKF.kappa = -3; % SPKF scaling factor
 
 %initial states ang_vel, quat, gyro bias
 SPKF.X_hat.q_hat = Est_ICs.q;

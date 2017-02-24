@@ -1,6 +1,6 @@
-% loop to test variables
-clear;
-
+% % % loop to test variables
+% clear;
+% 
 timer = zeros(11,1);
 
 angle_head = 1;
@@ -15,7 +15,7 @@ for loop_no = 1
 
 
     angle_head = pi/3; %rand*pi;
-    posn_hit =  3.25;
+    posn_hit =  4.25;
 
     
     
@@ -25,45 +25,81 @@ for loop_no = 1
     
     % Setpt 1
     Setpoint.head = angle_head;
-    Setpoint.time = 0.5;
-    Setpoint.posn = [-0.15;0;5];
+    Setpoint.time = 5;
+    Setpoint.posn = [-0.15;0;0.5];
     Trajectory = Setpoint;
     
-    % Setpt 1
+        % Setpt 1
     Setpoint.head = angle_head;
-    Setpoint.time = 60;
+    Setpoint.time = Setpoint.time + 5;
     Setpoint.posn = [-0.15;0;5];
     Trajectory = [Trajectory;Setpoint];
+    
+%     % Setpt 1
+%     Setpoint.head = angle_head;
+%     Setpoint.time = 60;
+%     Setpoint.posn = [-0.15;0;5];
+%     Trajectory = [Trajectory;Setpoint];
+%     
+% %     Setpt 2 - crash
+%     Setpoint.head = angle_head;
+%     Setpoint.time = Setpoint.time + 10;
+%     Setpoint.posn = [posn_hit;0;5];
+%     Trajectory = [Trajectory;Setpoint];
+%     
+%     Setpt 2 - square
+    Setpoint.head = angle_head;
+    Setpoint.time = Setpoint.time + 10;
+    Setpoint.posn = [-5.15;0;5];
+    Trajectory = [Trajectory;Setpoint];
+    
+%     Setpt 3 - square
+    Setpoint.head = angle_head;
+    Setpoint.time = Setpoint.time + 10;
+    Setpoint.posn = [-5.15;-5;5];
+    Trajectory = [Trajectory;Setpoint];
+    
+%     Setpt 4 - square
+    Setpoint.head = angle_head;
+    Setpoint.time = Setpoint.time + 6;
+    Setpoint.posn = [-1.5;-5; 5];
+    Trajectory = [Trajectory;Setpoint];
+    
+%     Setpt 5 - square
+    Setpoint.head = angle_head;
+    Setpoint.time = Setpoint.time + 2;
+    Setpoint.posn = [-1.5;-5; 5];
+    Trajectory = [Trajectory;Setpoint];
+    
+%     Setpt 5 - square
+    Setpoint.head = angle_head;
+    Setpoint.time = Setpoint.time + 2;
+    Setpoint.posn = [-0.4;-5;5];
+    Trajectory = [Trajectory;Setpoint];
+    
+%     Setpt 5 - square
+    Setpoint.head = angle_head;
+    Setpoint.time = Setpoint.time + 10;
+    Setpoint.posn = [-0.4;0;5];
+    Trajectory = [Trajectory;Setpoint];
+    
+% %     Setpt 5 - square
+%     Setpoint.head = angle_head;
+%     Setpoint.time = Setpoint.time + 5;
+%     Setpoint.posn = [-0.6;0;1.5];
+%     Trajectory = [Trajectory;Setpoint];
+%     
+% %     Setpt 5 - square
+%     Setpoint.head = angle_head;
+%     Setpoint.time = Setpoint.time + 5;
+%     Setpoint.posn = [-0.6;0;0.6];
+%     Trajectory = [Trajectory;Setpoint];
     
 %     Setpt 2 - crash
     Setpoint.head = angle_head;
     Setpoint.time = Setpoint.time + 10;
     Setpoint.posn = [posn_hit;0;5];
     Trajectory = [Trajectory;Setpoint];
-    
-% %     Setpt 2 - square
-%     Setpoint.head = angle_head;
-%     Setpoint.time = Setpoint.time + 5;
-%     Setpoint.posn = [-1.6;0;5];
-%     Trajectory = [Trajectory;Setpoint];
-%     
-% %     Setpt 3 - square
-%     Setpoint.head = angle_head;
-%     Setpoint.time = Setpoint.time + 5;
-%     Setpoint.posn = [-1.6;-1;5];
-%     Trajectory = [Trajectory;Setpoint];
-%     
-% %     Setpt 4 - square
-%     Setpoint.head = angle_head;
-%     Setpoint.time = Setpoint.time + 5;
-%     Setpoint.posn = [-0.6;-1;5];
-%     Trajectory = [Trajectory;Setpoint];
-%     
-% %     Setpt 5 - square
-%     Setpoint.head = angle_head;
-%     Setpoint.time = Setpoint.time + 5;
-%     Setpoint.posn = [-0.6;0;5];
-%     Trajectory = [Trajectory;Setpoint];
 %     
     startsim_trajectory;
     
@@ -79,15 +115,15 @@ for loop_no = 1
     rmseEUL = rmse_att_euler(Plot, sensParams, time_of_recovery/tStep, rmseEUL, loop_no);
     
 
-%     save('crash_l_ICs_HINF','rmse','rmseEUL');
+%     save('upd_crsh_low','rmse','rmseEUL');
     
 
 
 
     
 end
-
-% save('crash_l_ICs_HINF_all');
+% 
+% save('upd_crsh_low_all');
 
 PlotRMSE = RMSE_to_plot(rmse);
 

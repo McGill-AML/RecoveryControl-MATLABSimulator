@@ -1,17 +1,17 @@
 % Plot scripts
 
 plot_SPKF = 1;
-plot_ASPKF =0;
+plot_ASPKF =1;
 plot_EKF = 0;
 plot_AEKF = 0;
-plot_COMP = 0;
-plot_HINF =1;
+plot_COMP = 1;
+plot_HINF =0;
 plot_SPKF_full = 0;
 plot_EKF_att = 1;
 plot_SRSPKF = 0;
 plot_SRSPKF_full = 0;
 plot_ASPKF_opt = 0;
-plot_AHINF = 1;
+plot_AHINF = 0;
 plot_SPKF_norm = 0;
 
 plot_pos = 0;

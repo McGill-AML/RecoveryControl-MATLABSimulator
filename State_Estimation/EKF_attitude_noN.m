@@ -191,7 +191,11 @@ r_k_D_2 = r_k'/D_2;
 
 r_k_tilde = r_k_D_2*r_k;
 
-x_k_tilde = K_k1_p1*r_k + q_k_m;
+q_upd_m = K_k1_p1*r_k;
+q_upd_m = [1; 0.5*q_upd_m(2:4)];
+
+x_k_tilde = q_upd_m;
+% x_k_tilde = quatmultiply(q_upd_m,q_k_m);
 
 K_k1 = K_k1_p1 + (1/norm(x_k_tilde,2) - 1)*x_k_tilde*r_k_D_2/r_k_tilde;
 

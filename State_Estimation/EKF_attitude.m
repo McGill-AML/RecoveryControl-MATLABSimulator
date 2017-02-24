@@ -179,43 +179,24 @@ end
 
 % find kalman gain for the quaternion:
 
-D_1 = EKF_att.P_hat(1:4,:)*C_k';
-
-D_2 = C_k*EKF_att.P_hat*C_k' + R_k;
-
-K_k1_p1 = D_1/D_2;
-
 r_k = y_k - y_k_hat;
 
-r_k_D_2 = r_k'/D_2;
+K_k = EKF_att.P_hat*C_k'/(R_k + C_k*EKF_att.P_hat*C_k')';
 
-r_k_tilde = r_k_D_2*r_k;
-
-x_k_tilde = K_k1_p1*r_k + q_k_m;
-
-K_k1 = K_k1_p1 + (1/norm(x_k_tilde,2) - 1)*x_k_tilde*r_k_D_2/r_k_tilde;
-
-
-%find kalman gain for the bias term - since G_k = 0 for bias just use basic
-%kalman equations
-
-K_k2 = EKF_att.P_hat(5:7,:)*C_k'/(R_k + C_k*EKF_att.P_hat*C_k')';
-
-K_k = [K_k1; K_k2];
 
 
 %update covariance
 EKF_att.P_hat = (eye(7) - K_k*C_k)*EKF_att.P_hat*(eye(7) - K_k*C_k)' + K_k*R_k*K_k';
 
 %update states
-q_upd =  K_k1*r_k;
+q_upd =  K_k(1:4,:)*r_k;
 q_upd = [1; 0.5*q_upd(2:4)];
 
 EKF_att.X_hat.q_hat = quatmultiply(q_upd, q_k_m);
 
 EKF_att.X_hat.q_hat = EKF_att.X_hat.q_hat/norm(EKF_att.X_hat.q_hat,2); % renormalize
 
-EKF_att.X_hat.bias_gyr = bias_gyr_k_m + K_k2*r_k;
+EKF_att.X_hat.bias_gyr = bias_gyr_k_m + K_k(5:7,:)*r_k;
 
 EKF_att.X_hat.omega_hat = u_b_gyr - EKF_att.X_hat.bias_gyr;
 
