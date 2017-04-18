@@ -15,6 +15,8 @@ global u2RpmMat BUMP_NORMS BUMP_TANGS BUMP_POSNS
 
 global IMU_POSN
 
+global poleRadius
+
 g = 9.81;
 
 %% Mass Properties
@@ -63,7 +65,7 @@ BETA = 0;
 
 %% Bumper Parameters
 BUMP_RADII = [0.125; 0.125; 0.125; 0.125];
-BUMP_ANGLE = deg2rad(5); %angle bumpers are tilted towards body center
+BUMP_ANGLE = deg2rad(5); % alpha - angle bumpers are tilted towards body center
 
 BUMP_NORMS(:,1) = invar2rotmat('Z',deg2rad(45))'*invar2rotmat('Y',BUMP_ANGLE + deg2rad(90))'* [1;0;0];
 BUMP_NORMS(:,2) = invar2rotmat('Z',deg2rad(135))'*invar2rotmat('Y',BUMP_ANGLE + deg2rad(90))'* [1;0;0];
@@ -75,23 +77,19 @@ BUMP_TANGS(:,2) = invar2rotmat('Z',deg2rad(135))'*invar2rotmat('Y',BUMP_ANGLE)'*
 BUMP_TANGS(:,3) = invar2rotmat('Z',deg2rad(-135))'*invar2rotmat('Y',BUMP_ANGLE)'*[1;0;0];
 BUMP_TANGS(:,4) = invar2rotmat('Z',deg2rad(-45))'*invar2rotmat('Y',BUMP_ANGLE)'*[1;0;0];
 
-load('bumperlocations_navi'); %bumper center locations
+load('bumperlocations_navi'); % bumper center locations
 
 BUMP_POSNS = [b1, b2, b3, b4] - repmat(CoM,1,4); %bumper center locations relative to CoM
-
-% BUMP_RADII(3) = 0.04; %change one of bumpers to top of Navi's head
-% BUMP_NORMS(:,3) = [0;0;1];
-% BUMP_TANGS(:,3) = [1;0;0];
-% BUMP_POSNS(:,3) = [0;0;-0.061];
 
 % Bumper stiffness params
 ImpactParams.compliantModel.e = 0.9;
 ImpactParams.compliantModel.k = 372;
-% ImpactParams.compliantModel.k = 372*2;
 ImpactParams.compliantModel.n = 0.66;
 
 %% IMU Parameters
-IMU_POSN = [19.205; 8.1034; -47.55] * 10^-3; %IMU posn relative to CM
+IMU_POSN = [19.205; 8.1034; -47.55] * 10^-3; % IMU posn relative to CM
+
+poleRadius = 0.5; % meters
 
 end
 

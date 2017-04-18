@@ -13,6 +13,8 @@ function [ wallPts, wallLines ] = getwallpts(wallLoc,wallPlane,wallBottom,wallMi
 wallPts = zeros(3,4);
 wallLines = zeros(3,4);
 
+polePoints = zeros(3,4);
+
 wallPts(3,1) = wallBottom + wallHeight;
 wallPts(3,2) = wallBottom + wallHeight;
 wallPts(3,3) = wallBottom;
@@ -68,6 +70,5 @@ elseif (sum(wallPlane == 'YZ')==2 || sum(wallPlane == 'ZY')==2)
 else
     error('Invalid vertical wall_plane');
 end
-
 end
 

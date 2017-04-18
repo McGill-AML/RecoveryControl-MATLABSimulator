@@ -1,39 +1,32 @@
+% How to change elasticity of impact to be less?
 
 
-% function [ImpactIdentification,FuzzyInfo,Plot,timeImpact] = startsim(VxImpact, rollImpact, pitchImpact, yawImpact,iBatch)
-% clearvars -except VxImpact rollImpact pitchImpact yawImpact iBatch
-
-%% Prescribe Initial Conditions
-% (comment section if prescribing from outside function like
-% sim_MonteCarlo.m or sim_Batch.m)
-
-VxImpact = 2;
+VxImpact = 3;
+VzImpact = -0.0;
 inclinationImpact = 25; %degrees
-yawImpact = 45; %degrees
+yawImpact = 20; %degrees
 
 angle = (inclinationImpact - 0.0042477)/1.3836686;
 rollImpact = -angle; %degrees
 pitchImpact = -angle; %degrees
 
-%% Declare Globals
 global g
 global timeImpact
 global globalFlag
 
-%% Initialize Fuzzy Logic Process
+% Initialize Fuzzy Logic Process
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
 
-%% Initialize Simulation Parameters
+% Initialize Simulation Parameters
 ImpactParams = initparams_navi;
-% ImpactParams = initparams_spiri;
 
 SimParams.recordContTime = 0;
-SimParams.useFaesslerRecovery = 0;%Use Faessler recovery
-SimParams.useRecovery = 0;
-SimParams.timeFinal = 3;
-tStep = 1/200;%1/200;
+SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
+SimParams.useRecovery = 1;
+SimParams.timeFinal = 2;
+tStep = 1/200;
 
-ImpactParams.wallLoc = 1.5;%1.5;
+ImpactParams.wallLoc = 0.0;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5; %Desired time of impact. Does nothing
 ImpactParams.frictionModel.muSliding = 0.3;%0.3;
@@ -41,33 +34,29 @@ ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
 timeStabilized = 10000;
 
-%% Initialize Structures
+% Initialize Structures
 IC = initIC;
 Control = initcontrol;
 PropState = initpropstate;
 Setpoint = initsetpoint;
-
 [Contact, ImpactInfo] = initcontactstructs;
 localFlag = initflags;
-
 ImpactIdentification = initimpactidentification;
 
-%% Set initial Conditions
-
 %%%%%%%%%%%% ***** SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%%%%
-Control.twist.posnDeriv(1) = VxImpact; %World X Velocity at impact      %%%
+Control.twist.posnDeriv(1) = VxImpact; %World X Velocity at impact  
+Control.twist.posnDeriv(3) = VzImpact; %World Z Velocity at impact      %%%
 IC.attEuler = [deg2rad(rollImpact);...                                  %%%
                deg2rad(pitchImpact);...                                 %%%
                deg2rad(yawImpact)];                                     %%%
-IC.posn = [ImpactParams.wallLoc-0.32;0;2];                              %%%
+IC.posn = [-0.8;-0.5;2];                              %%%
 Setpoint.posn(3) = IC.posn(3);                                          %%%
 xAcc = 0;                                                               %%%
 %%%%%%%%%%% ***** END SET INITIAL CONDITIONS HERE ***** %%%%%%%%%%%%%%%%%%%
 
 rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
 
-% [IC.posn(1), VxImpact, SimParams.timeInit, xAcc ] = getinitworldx( ImpactParams, Control.twist.posnDeriv(1),IC, xAcc);
-SimParams.timeInit = 0; %% comment out if using getinitworldx()
+SimParams.timeInit = 0; % comment out if using getinitworldx()
 
 Setpoint.head = IC.attEuler(3);
 Setpoint.time = SimParams.timeInit;
@@ -86,14 +75,12 @@ globalFlag.experiment.rpmChkptIsPassed = zeros(1,4);
 
 PropState.rpm = IC.rpm;
 
-%% Initialize state and kinematics structs from ICs
+% Initialize state and kinematics structs from ICs
 [state, stateDeriv] = initstate(IC, xAcc);
 [Pose, Twist] = updatekinematics(state, stateDeriv);
 
-%% Initialize sensors
+% Initialize sensors
 Sensor = initsensor(state, stateDeriv);
-
-%% Initialize History Arrays
 
 % Initialize history 
 Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
@@ -104,12 +91,12 @@ if SimParams.recordContTime == 1
                             PropState, Contact, globalFlag, Sensor);
 end
 
-%% Simulation Loop
+% Simulation Loop
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
+ %1/200;
 %     display(iSim)   
     
-    
-    %% Impact Detection    
+    % Impact Detection    
     [ImpactInfo, ImpactIdentification] = detectimpact(iSim, tStep, ImpactInfo, ImpactIdentification,...
                                                       Hist.sensors,Hist.poses,PREIMPACT_ATT_CALCSTEPFWD, stateDeriv,state);
     [FuzzyInfo] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
@@ -118,10 +105,12 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     % Calculate accelref in world frame based on FuzzyInfo.output, estWallNormal
     if sum(FuzzyInfo.InputsCalculated) == 4 && Control.accelRefCalculated == 0;
             Control.accelRef = calculaterefacceleration(FuzzyInfo.output, ImpactIdentification.wallNormalWorld);
+            
+            Control.accelRef = 4.8*ImpactIdentification.wallNormalWorld;
             Control.accelRefCalculated = 1;
     end
     
-    %% Control
+    % Control
     if Control.accelRefCalculated*SimParams.useRecovery == 1 %recovery control       
         if SimParams.useFaesslerRecovery == 1  
             
@@ -136,7 +125,6 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
             disp('Setpoint recovery');
             Control.pose.posn = [0;0;2];
             Control = controllerposn(state,iSim,SimParams.timeInit,tStep,Trajectory(end).head,Control);
-            
             Control.type = 'posn';
             
 %             Control = controlleratt(state,iSim,SimParams.timeInit,tStep,2,[0;deg2rad(20);0],Control,timeImpact, manualCmds)
@@ -149,8 +137,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         Control.type = 'att';
     end
     
-    
-    %% Propagate Dynamics
+    % Propagate Dynamics
     options = getOdeOptions();
     [tODE,stateODE] = ode45(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
                                                             tStep,Control.rpm,ImpactParams,PropState.rpm, ...
@@ -159,8 +146,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     % Reset contact flags for continuous time recording        
     globalFlag.contact = localFlag.contact;
     
-       
-    %% Record History
+    % Record History
     if SimParams.recordContTime == 0
         
         [stateDeriv, Contact, PropState] = dynamicsystem(tODE(end),stateODE(end,:), ...
@@ -199,13 +185,12 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     [Pose, Twist] = updatekinematics(state, stateDeriv);
     
     %% Update Sensors
-    Sensor = updatesensor( state, stateDeriv );
+    Sensor = updatesensor(state, stateDeriv);
 
-    %Discrete Time recording @ 200 Hz
+    % Discrete Time recording @ 200 Hz
     Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 
-    %% End loop conditions
-%     Navi has crashed:
+    % Navi has crashed:
     if state(9) <= 0
         display('Navi has hit the floor :(');
         ImpactInfo.isStable = 0;
@@ -219,19 +204,11 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         break;
     end
     
-%     if Control.recoveryStage == 3
-%         display('Navi has recovered to hover orientation');
-%         ImpactInfo.isStable = 1;
-%         break;
-%     end
 
 end
 
 
-%% Generate plottable arrays
 Plot = hist2plot(Hist);
-
-%% Toggle startsim as Script/Function
-% uncomment "end" if using startsim.m as function
-
-% end
+%%
+close all
+animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',199);

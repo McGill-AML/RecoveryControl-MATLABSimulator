@@ -1,10 +1,10 @@
-function [ ] =animate( recordAnimation,frameStep,Hist,sideview,ImpactParams,timeImpact,videoFileName,endFrame )
+function [ ] =animate( recordAnimation,frameStep,Hist,sideview,ImpactParams,timeImpact,videoFileName,endFrame)
 %animate.m Animation of simulation using recorded quadrotor states 
 %   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
 %   Last Updated: December 12, 2016
 %   Description: 
 %-------------------------------------------------------------------------%
-global BUMP_RADII BUMP_ANGLE BUMP_POSNS
+global BUMP_RADII BUMP_ANGLE BUMP_POSNS poleRadius
 
 %% Define recording parameters
 if recordAnimation == 1
@@ -59,8 +59,13 @@ impactYPosn = stateHist(vlookup(t,timeImpact),8);
 impactZPosn = stateHist(vlookup(t,timeImpact),9);
 [wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,roundn(impactZPosn,-1)-(axisMax-axisMin)/2,roundn(impactYPosn,-1)+0.5,(axisMax-axisMin),2);
                                                   %bottom,center, height, width  
-% [wallPts, wallLines] = getwallpts(ImpactParams.wallLoc,ImpactParams.wallPlane,-0.5,roundn(impactYPosn,-1)+0.5,(axisMax-axisMin),2);
                                                   
+height = 3.0;
+
+n = 100;
+[X,Y,Z] = cylinder(poleRadius,n);
+Z = [zeros(1,n+1); height*ones(1,n+1)];
+polePoints = [X;Y;Z];
 
 %% Animate!
 for iFrame = 1:frameStep:endFrame %size(t,1) %set step to 1 for recording
@@ -120,23 +125,9 @@ for iFrame = 1:frameStep:endFrame %size(t,1) %set step to 1 for recording
        plot3(pointContactWorld(1),pointContactWorld(2),pointContactWorld(3),'mX','MarkerSize',10);
     end
 
-    %% Plot wall
-    fill3(wallPts(1,:)',wallPts(2,:)',wallPts(3,:)','r','FaceAlpha',0.4);
-       plot3(wallLines(1,1:2)',wallLines(2,1:2)',wallLines(3,1:2)','r-','LineWidth',3);
-       plot3(wallLines(1,3:4)',wallLines(2,3:4)',wallLines(3,3:4)','r-','LineWidth',3);
+    % Plot pole
+    surf(X,Y,Z);
     
-    
-%     %% Color Overlay for Recovery Stage
-%     recoverystage = Hist.controls(iFrame).recoveryStage;    
-%     if recoverystage == 1 %Stabilize Attitude to "away" orientation with zero yaw rate
-%         fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'r','FaceAlpha',0.4);
-%     elseif recoverystage == 2 %Stabilize Attitude to "hover" orientation
-%         fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'y','FaceAlpha',0.4);
-%     elseif recoverystage == 3 %Stabilize Height
-%         fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'b','FaceAlpha',0.4);
-%     elseif recoverystage == 4 %stabilize position
-%         fill3([axisMin axisMin axisMax axisMax],[0 0 0 0],[axisMax axisMin axisMin axisMax],'g','FaceAlpha',0.4);
-%     end
 
     %% Figure settings
     axis([axisMin,axisMax,axisMin,axisMax,axisMin,axisMax]);
