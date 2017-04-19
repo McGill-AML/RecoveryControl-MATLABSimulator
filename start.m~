@@ -2,10 +2,11 @@ global g timeImpact globalFlag poleRadius
 
 VxImpact = 2.0;
 
-offset = 0.4;%2*0.56*(rand-0.5);
+inclinationImpact = 15; %degrees
 yawImpact = 0; %degrees
-pitchImpact = -15; %degrees
-rollImpact = 0.0;
+angle = (inclinationImpact - 0.0042477)/1.3836686;
+rollImpact = -angle; %degrees
+pitchImpact = -angle; %degrees
 
 poleRadius = 0.15; % meters
 
@@ -44,7 +45,7 @@ IC.attEuler = [deg2rad(rollImpact);...
                deg2rad(pitchImpact);...                                 
                deg2rad(yawImpact)];  
            
-IC.posn = [-0.45;offset;2];  
+IC.posn = [-0.5;offset;2];  
 
 Setpoint.posn(3) = IC.posn(3); 
 xAcc = 0;                                                               
@@ -202,4 +203,4 @@ end
 Plot = hist2plot(Hist);
 %%
 close all
-animate(0,3,Hist,'XY',ImpactParams,timeImpact,'NA',200);
+animate(0,5,Hist,'XY',ImpactParams,timeImpact,'NA',200);

@@ -15,8 +15,6 @@ global u2RpmMat BUMP_NORMS BUMP_TANGS BUMP_POSNS
 
 global IMU_POSN
 
-global poleRadius
-
 g = 9.81;
 
 %% Mass Properties
@@ -88,8 +86,6 @@ ImpactParams.compliantModel.n = 0.66;
 
 %% IMU Parameters
 IMU_POSN = [19.205; 8.1034; -47.55] * 10^-3; % IMU posn relative to CM
-
-poleRadius = 0.5; % meters
 
 end
 

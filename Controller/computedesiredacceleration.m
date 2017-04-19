@@ -15,13 +15,6 @@ function [Control] = computedesiredacceleration(Control, Twist)
         case 2 %Stabilize Attitude to "hover" orientation
             Control.accelRef = [0; 0; 0];
             dZ = 0;
-            %dZ = 5;
-        case 3 %Stabilize Height
-            dZ = 5;
-            Control.accelRef = [0; 0; 0];
-        case 4 %Stabilize Horizontal Position
-            dZ = 5;
-            Control.accelRef = [0; 0; 0];
         otherwise 
             error('Invalid recovery stage!');    
     end

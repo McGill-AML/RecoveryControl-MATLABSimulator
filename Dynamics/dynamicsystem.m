@@ -21,7 +21,7 @@ function [stateDeriv, Contact, PropState] = dynamicsystem(t,state,tStep,rpmContr
     %         - PropState: actual propeller rpm (different from controller input rpm)
     %-------------------------------------------------------------------------%
 
-    global g m I Kt Dt Jr PROP_POSNS %Inertial and Geometric Parameters
+    global g m I Kt Dt Jr PROP_POSNS BUMP_POSNS %Inertial and Geometric Parameters
     global AERO_AREA AERO_DENS Cd Tv Kp Kq Kr %Aerodynamic Parameters
     global timeImpact globalFlag poleRadius %Simulation global variables
 
@@ -78,7 +78,10 @@ function [stateDeriv, Contact, PropState] = dynamicsystem(t,state,tStep,rpmContr
                 lambdaContact = 6*(1-eContact)*kContact/(((2*eContact-1)^2+3)*globalFlag.contact.initialNormalVel(iBumper));    
                 Contact.normalForceMag(iBumper) = kContact*Contact.defl(iBumper)^nContact + lambdaContact*Contact.defl(iBumper)^nContact*Contact.deflDeriv(iBumper);
 
-                normalForceWorld(:,iBumper) = [-Contact.normalForceMag(iBumper);0;0];
+                bumperCenterWorld = rotMat'*BUMP_POSNS(:,iBumper) + state(7:9);
+                poleNormal = [bumperCenterWorld(1:2)/norm(bumperCenterWorld(1:2));0];
+                
+                normalForceWorld(:,iBumper) = Contact.normalForceMag(iBumper)*poleNormal;
                 normalForceBody(:,iBumper) = rotMat*normalForceWorld(:,iBumper);
 
                 % Calculate tangential force on bumper from friction

@@ -6,10 +6,8 @@ function [ Contact ] = findcontact(rotMat,state)
     %   Last Updated: April 17th, 2017
     %   Description: Pole contact geometry, revised from Fiona Chui's
     %   thesis
-    %-------------------------------------------------------------------------%
 
     global BUMP_RADII BUMP_POSNS BUMP_NORMS BUMP_TANGS poleRadius
-
     Contact = initcontact(0);
 
     for iBumper = 1:4
@@ -59,19 +57,6 @@ function [ Contact ] = findcontact(rotMat,state)
             Contact.slidingDirectionWorld(:,iBumper) = Contact.slidingVelocityWorld(:,iBumper)...
                                                         /norm(Contact.slidingVelocityWorld(:,iBumper));
         end
-
-        % ERROR CHECKING
-%         if Contact.defl(iBumper) <= 0     
-%             disp('Warning: Deflection calc error');
-%             disp(Contact.defl(iBumper));
-%             Contact.defl(iBumper) = 0;
-%             Contact.point.contactBody(:,iBumper) = [0;0;0];
-%             Contact.point.contactWorld(:,iBumper) = [100;100;0];
-%             Contact.deflDeriv(iBumper) = 0;
-% 
-%         end
-
     end
-
 end
 
