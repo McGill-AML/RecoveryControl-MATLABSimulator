@@ -2,7 +2,7 @@ global g timeImpact globalFlag poleRadius
 
 VxImpact = 2.0;
 
-offset = 0.4;%2*0.56*(rand-0.5);
+offset = 0.34;%2*0.56*(rand-0.5);
 yawImpact = 0; %degrees
 pitchImpact = -15; %degrees
 rollImpact = 0.0;
@@ -57,7 +57,7 @@ Setpoint.time = SimParams.timeInit;
 Setpoint.posn(1) = IC.posn(1);
 Trajectory = Setpoint;
 
-IC.linVel =  rotMat*[VxImpact;VyImpact;VzImpact];
+IC.linVel =  rotMat*[VxImpact;0;0];
 
 Experiment.propCmds = [];
 Experiment.manualCmds = [];
@@ -202,4 +202,4 @@ end
 Plot = hist2plot(Hist);
 %%
 close all
-animate(0,3,Hist,'XY',ImpactParams,timeImpact,'NA',200);
+animate(1,1,Hist,'ZX',ImpactParams,timeImpact,'NA',200);
