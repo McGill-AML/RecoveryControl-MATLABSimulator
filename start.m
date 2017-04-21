@@ -24,7 +24,7 @@ tStep = 1/200;
 ImpactParams.wallLoc = 0.0;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5; %Desired time of impact. Does nothing
-ImpactParams.frictionModel.muSliding = 0.3;%0.3;
+ImpactParams.frictionModel.muSliding = 0.1;%0.3;
 ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
 timeStabilized = 10000;
@@ -202,14 +202,18 @@ end
 Plot = hist2plot(Hist);
 %%
 close all
-% animate(1,1,Hist,'XY',ImpactParams,timeImpact,'NA',150);
-plot(Plot.times,Plot.defls(:,4),'--')
-hold on
-plot(Plot.times,Plot.defls(:,4),'*')
-legend('bumper 1','bumper 4')
-grid on
+% animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',50);
+% plot(Plot.times,Plot.defls(:,4),'--')
+% hold on
+% plot(Plot.times,Plot.defls(:,4),'*')
+% legend('bumper 1','bumper 4')
+% grid on
 
 %%
 close all
-plot(Plot.times,Plot.eulerAngleRates(2,:))
+% plot(Plot.times,Plot.eulerAngleRates(2,:))
+% plot(Plot.times,Plot.defls)
+hold on
+plot(Plot.times,Plot.contactPtVelocityWorlds_bump1)
+legend('x','y','z')
 grid on

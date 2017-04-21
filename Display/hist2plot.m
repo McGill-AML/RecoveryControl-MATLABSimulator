@@ -92,6 +92,7 @@ Plot.CMaccelerometers = [temp{3,:}];
 Plot.worldAcc = zeros(3,numel(Hist.times));
 Plot.worldAcc2 = zeros(3,numel(Hist.times));
 
+
 for iSim = 1:numel(Hist.times)
     rotMat = quat2rotmat(Plot.quaternions(:,iSim));
     bodyAcc = Hist.stateDerivs(1:3,iSim);
