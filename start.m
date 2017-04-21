@@ -2,9 +2,9 @@ global g timeImpact globalFlag poleRadius
 
 VxImpact = 2.0;
 
-offset = 0.34;%2*0.56*(rand-0.5);
+offset = 0.0;%2*0.56*(rand-0.5);
 yawImpact = 0; %degrees
-pitchImpact = -15; %degrees
+pitchImpact =0; %degrees
 rollImpact = 0.0;
 
 poleRadius = 0.15; % meters
@@ -202,4 +202,5 @@ end
 Plot = hist2plot(Hist);
 %%
 close all
-animate(1,1,Hist,'ZX',ImpactParams,timeImpact,'NA',200);
+% animate(1,1,Hist,'YX',ImpactParams,timeImpact,'NA',100);
+plot(Plot.times,Plot.eulerAngleRates(3,:))

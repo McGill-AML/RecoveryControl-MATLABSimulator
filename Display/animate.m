@@ -8,7 +8,7 @@ global BUMP_RADII BUMP_ANGLE BUMP_POSNS poleRadius
 
 %% Define recording parameters
 if recordAnimation == 1
-    recordRate = 200; %Hz %set to same as tStep from startsim.m
+    recordRate = 50; %Hz %set to same as tStep from startsim.m
     writerObj = VideoWriter(videoFileName);
     writerObj.FrameRate = recordRate;
     open(writerObj);

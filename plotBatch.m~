@@ -1,0 +1,8 @@
+global numTrials
+for i = 1:numTrials
+    scatter(Batch(i).offset,Batch(i)
+    plot(Batch(i).Plot.times,Batch(i).Plot.eulerAngleRates(3,:));
+    plot(Batch(i).Plot.times,Batch(i).timeImpact);
+    grid on
+    hold on
+end
