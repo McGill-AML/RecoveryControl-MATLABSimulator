@@ -203,13 +203,6 @@ Plot = hist2plot(Hist);
 %%
 close all
 % animate(1,1,Hist,'XY',ImpactParams,timeImpact,'NA',150);
-plot(Plot.times,Plot.defls(:,4),'--')
+plot(Plot.times,Plot.defls(1,:),'--')
 hold on
-plot(Plot.times,Plot.defls(:,4),'*')
-legend('bumper 1','bumper 4')
-grid on
-
-%%
-close all
-plot(Plot.times,Plot.eulerAngleRates(2,:))
-grid on
+plot(Plot.times,Plot.defls(4,:),'*')
