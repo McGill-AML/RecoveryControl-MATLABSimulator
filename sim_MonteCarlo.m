@@ -52,6 +52,7 @@ for iBatch = 1:numTrials
     CrashData.heightLoss = heightLoss;
     CrashData.xVelRecovered = xVelRecovered;
     CrashData.recoverySuccessful = recoverySuccessful;
+    CrashData.contact = 
     Batch = [Batch;CrashData];
 end
 

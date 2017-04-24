@@ -7,7 +7,7 @@ rollImpact = 0.0;
 poleRadius = 0.15; 
 SimParams.useRecovery = 0;
 Batch = [];
-numTrials = 1000;
+numTrials = 5;
 tic
 for iBatch = 1:numTrials 
     
@@ -44,7 +44,7 @@ for iBatch = 1:numTrials
     Setpoint.time = SimParams.timeInit;
     Setpoint.posn(1) = IC.posn(1);
     Trajectory = Setpoint;
-    IC.linVel =  rotMat*[VxImpact;VyImpact;VzImpact];
+    IC.linVel =  rotMat*[VxImpact;0;0];
     Experiment.propCmds = [];
     Experiment.manualCmds = [];
     globalFlag.experiment.rpmChkpt = zeros(4,1);
@@ -156,11 +156,11 @@ for iBatch = 1:numTrials
     CrashData.Plot = Plot;
     CrashData.ImpactInfo = ImpactInfo;
     %CrashData.ImpactIdentification = ImpactIdentification;
-    CrashData.Hist = Hist;
-    CrashData.ImpactParams = ImpactParams;
-    CrashData.timeImpact = timeImpact;
-    CrashData.offset = offset;
-    
+%     CrashData.Hist = Hist;
+%     CrashData.ImpactParams = ImpactParams;
+%     CrashData.timeImpact = timeImpact;
+%     CrashData.offset = offset;
+%     CrashData.contact = contact;
     Batch = [Batch; CrashData];
     
 end
