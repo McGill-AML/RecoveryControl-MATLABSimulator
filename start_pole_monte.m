@@ -7,7 +7,8 @@ rollImpact = 0.0;
 poleRadius = 0.15; 
 SimParams.useRecovery = 0;
 Batch = [];
-numTrials = 5;
+PREIMPACT_ATT_CALCSTEPFWD = 
+numTrials = 10;
 tic
 for iBatch = 1:numTrials 
     
@@ -22,7 +23,7 @@ for iBatch = 1:numTrials
     ImpactParams.wallLoc = 0.0;
     ImpactParams.wallPlane = 'YZ';
     ImpactParams.timeDes = 0.5; 
-    ImpactParams.frictionModel.muSliding = 0.3;%0.3;
+    ImpactParams.frictionModel.muSliding = 0.0;%0.3;
     ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
     timeImpact = 10000;
     timeStabilized = 10000;

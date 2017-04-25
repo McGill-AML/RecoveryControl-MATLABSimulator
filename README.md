@@ -1,3 +1,4 @@
+
 # Matlab-Simulator
 Contact **Fiona Chui** for questions on quadrotor dynamics (including contact), non-recovery controllers, collision detection, and collision characterization using Fuzzy Logic. Contact **Gareth Dicker** for questions on recovery controller.
 
