@@ -1,4 +1,4 @@
-function [ASPKF_opt] = ASPKF_opt_attitude(Sensor, ASPKF_opt, AEKF, sensParams, tStep)
+function [ASPKF_opt] = ASPKF_opt_attitude(Sensor, ASPKF_opt, AEKF, sensParams, tStep, useExpData)
 % ASPKF_opt - kinematic prediction for orientation
 % this estimator uses an MRP formulation of the quaternion in a sigma point
 % kalman filter to propagate the state estimate. Only estimates gryo bias
@@ -8,6 +8,11 @@ function [ASPKF_opt] = ASPKF_opt_attitude(Sensor, ASPKF_opt, AEKF, sensParams, t
 %notation - _k_1 is previous timestep, _k_m is predicted, _k is corrected
 %estimate
 global g mag
+if useExpData
+    g_acc = g;
+else
+    g_acc = -g;
+end
 
 %unpackage
 %states
@@ -104,11 +109,16 @@ q_k_1_sig(:,1) = q_k_1;
 
 %break down loops to take advantage of lower triang properties of chol
 % sigma point gen
+lambda = ASPKF_opt.alpha^2*(L+ASPKF_opt.kappa)-L;
+
+a = 1;
+f = 2*(a+1);
+
 for ii = 1:6
     
     %make sigma points
-    Sigma_pts_k_1(1:6,ii+1) = Sigma_pts_k_1(1:6,1) + sqrt(L+ASPKF_opt.kappa)*S(1:6,ii);
-    Sigma_pts_k_1(1:6,L+ii+1) = Sigma_pts_k_1(1:6,1) - sqrt(L+ASPKF_opt.kappa)*S(1:6,ii);
+    Sigma_pts_k_1(1:6,ii+1) = Sigma_pts_k_1(1:6,1) + sqrt(L+lambda)*S(1:6,ii);
+    Sigma_pts_k_1(1:6,L+ii+1) = Sigma_pts_k_1(1:6,1) - sqrt(L+lambda)*S(1:6,ii);
     
     Sigma_pts_k_1(7:end,ii+1) = Sigma_pts_k_1(7:end,1);
     Sigma_pts_k_1(7:end,L+ii+1) = Sigma_pts_k_1(7:end,1);
@@ -123,21 +133,28 @@ for ii = 7:L
 end
 
 for ii = 7:L
-    Sigma_pts_k_1(ii,ii+1) = Sigma_pts_k_1(ii,ii+1) + sqrt(L+ASPKF_opt.kappa)*S(ii,ii);
-    Sigma_pts_k_1(ii,L+ii+1) = Sigma_pts_k_1(ii,L+ii+1) - sqrt(L+ASPKF_opt.kappa)*S(ii,ii);
+    Sigma_pts_k_1(ii,ii+1) = Sigma_pts_k_1(ii,ii+1) + sqrt(L+lambda)*S(ii,ii);
+    Sigma_pts_k_1(ii,L+ii+1) = Sigma_pts_k_1(ii,L+ii+1) - sqrt(L+lambda)*S(ii,ii);
 end
 
 % quat sigma point gen
 for ii = 1:7    
     %convert MRP sigma points into quaternions by crassidis' chose a = f = 1
-    eta_k_d_pos = (1-Sigma_pts_k_1(1:3,ii+1)'*Sigma_pts_k_1(1:3,ii+1))/(1+Sigma_pts_k_1(1:3,ii+1)'*Sigma_pts_k_1(1:3,ii+1));
-    eta_k_d_neg = (1-Sigma_pts_k_1(1:3,L+ii+1)'*Sigma_pts_k_1(1:3,L+ii+1))/(1+Sigma_pts_k_1(1:3,L+ii+1)'*Sigma_pts_k_1(1:3,L+ii+1));
+%     eta_k_d_pos = (1-Sigma_pts_k_1(1:3,ii+1)'*Sigma_pts_k_1(1:3,ii+1))/(1+Sigma_pts_k_1(1:3,ii+1)'*Sigma_pts_k_1(1:3,ii+1));
+%     eta_k_d_neg = (1-Sigma_pts_k_1(1:3,L+ii+1)'*Sigma_pts_k_1(1:3,L+ii+1))/(1+Sigma_pts_k_1(1:3,L+ii+1)'*Sigma_pts_k_1(1:3,L+ii+1));
+%     
+%     q_k_1_err(:,ii+1) = [eta_k_d_pos; (1+eta_k_d_pos)*Sigma_pts_k_1(1:3,ii+1)]; %positive error quaternion
+%     q_k_1_err(:,L+ii+1) = [eta_k_d_neg; (1+eta_k_d_neg)*Sigma_pts_k_1(1:3,L+ii+1)]; %neg error quaternion
+    sigNorm_pos= norm(Sigma_pts_k_1(1:3,ii+1),2);
+    sigNorm_neg = norm(Sigma_pts_k_1(1:3,L+ii+1),2);
+    eta_k_d_pos = (-a*sigNorm_pos^2 + f*sqrt(f^2 + (1-a^2)*sigNorm_pos^2))/(f^2+sigNorm_pos^2);
+    eta_k_d_neg = (-a*sigNorm_neg^2 + f*sqrt(f^2 + (1-a^2)*sigNorm_neg^2))/(f^2+sigNorm_neg^2);
     
-    q_k_1_err(:,ii+1) = [eta_k_d_pos; (1+eta_k_d_pos)*Sigma_pts_k_1(1:3,ii+1)]; %positive error quaternion
-    q_k_1_err(:,L+ii+1) = [eta_k_d_neg; (1+eta_k_d_neg)*Sigma_pts_k_1(1:3,L+ii+1)]; %neg error quaternion
-    
-    q_k_1_sig(:,ii+1) = quatmultiply(q_k_1_err(:,ii+1),q_k_1_sig(:,1)); %compute quaternion sigma pts
-    q_k_1_sig(:,L+ii+1) = quatmultiply(q_k_1_err(:,L+ii+1),q_k_1_sig(:,1));
+    q_k_1_err(:,ii+1) = [eta_k_d_pos; (a+eta_k_d_pos)/f*Sigma_pts_k_1(1:3,ii+1)]; %positive error quaternion
+    q_k_1_err(:,L+ii+1) = [eta_k_d_neg; (a+eta_k_d_neg)/f*Sigma_pts_k_1(1:3,L+ii+1)]; %neg error quaternion
+       
+    q_k_1_sig(:,ii+1) = quatmultiply(q_k_1_sig(:,1),q_k_1_err(:,ii+1)); %compute quaternion sigma pts
+    q_k_1_sig(:,L+ii+1) = quatmultiply(q_k_1_sig(:,1),q_k_1_err(:,L+ii+1));
     
 %     q_k_1_sig(:,ii+1) = q_k_1_sig(:,ii+1)/norm(q_k_1_sig(:,ii+1)); %renorm just incase
 %     q_k_1_sig(:,L+ii+1) = q_k_1_sig(:,L+ii+1)/norm(q_k_1_sig(:,L+ii+1));
@@ -164,25 +181,26 @@ for ii = [1:10, (17+ASPKF_opt.use_acc(1)*3):(25+ASPKF_opt.use_acc(1)*3)]
     omega_sig(:,ii) = u_b_gyr - Sigma_pts_k_1(4:6,ii) - Sigma_pts_k_1(7:9,ii); %angular velocity
 
 %     %estimate orientation using estimated ang vel
-%     psi_norm = norm(omega_sig(:,ii),2);
-%     psi_k_p = sin(0.5*psi_norm*tStep)*omega_sig(:,ii)/psi_norm;
-%     
-%     Omega_k_p = [cos(0.5*psi_norm*tStep), -psi_k_p';
-%                   psi_k_p, cos(0.5*psi_norm*tStep)*eye(3)-cross_mat(psi_k_p)];
-              
-    %estimate orientation using estimated ang vel
     psi_norm = norm(omega_sig(:,ii),2);
-    psi_k_p = sin(-0.5*psi_norm*tStep)*omega_sig(:,ii)/psi_norm;
+    psi_k_p = sin(0.5*psi_norm*tStep)*omega_sig(:,ii)/psi_norm;
     
-    Omega_k_p = [cos(-0.5*psi_norm*tStep), -psi_k_p';
-                  psi_k_p, cos(-0.5*psi_norm*tStep)*eye(3)+cross_mat(psi_k_p)]; % this is fionas way
+    Omega_k_p = [cos(0.5*psi_norm*tStep), -psi_k_p';
+                  psi_k_p, cos(0.5*psi_norm*tStep)*eye(3)-cross_mat(psi_k_p)];
+              
+%     %estimate orientation using estimated ang vel
+%     psi_norm = norm(omega_sig(:,ii),2);
+%     psi_k_p = sin(-0.5*psi_norm*tStep)*omega_sig(:,ii)/psi_norm;
+%     
+%     Omega_k_p = [cos(-0.5*psi_norm*tStep), -psi_k_p';
+%                   psi_k_p, cos(-0.5*psi_norm*tStep)*eye(3)+cross_mat(psi_k_p)]; % this is fionas way
     
     q_k_m_sig(:,ii) = Omega_k_p*q_k_1_sig(:,ii); %predicted quaternion sigma points
 %     q_k_m_sig(:,ii) = q_k_m_sig(:,ii)/norm(q_k_m_sig(:,ii)); %renorm just incase
     
-    q_k_err(:,ii) = quatmultiply(q_k_m_sig(:,ii),[q_k_m_sig(1,1);-q_k_m_sig(2:4,1)]); %convert back to error
+    q_k_err(:,ii) = quatmultiply([q_k_m_sig(1,1);-q_k_m_sig(2:4,1)],q_k_m_sig(:,ii)); %convert back to error
     %orientation propagated values
-    Sigma_pts_k_m(1:3,ii) = q_k_err(2:4,ii)/(1+q_k_err(1,ii)); %convert quat error to MRP
+%     Sigma_pts_k_m(1:3,ii) = q_k_err(2:4,ii)/(1+q_k_err(1,ii)); %convert quat error to MRP
+    Sigma_pts_k_m(1:3,ii) = f*q_k_err(2:4,ii)/(a+q_k_err(1,ii)); %convert quat error to MRP
     
     
     Sigma_pts_k_m(4:6,ii) = Sigma_pts_k_1(4:6,ii); %no noise terms to add.
@@ -205,11 +223,11 @@ end
 
 
 %find state and covariance predictions
-X_k_m = 1/(L+ASPKF_opt.kappa)*(ASPKF_opt.kappa*Sigma_pts_k_m(1:6,1)+0.5*sum(Sigma_pts_k_m(1:6,2:2*L+1),2));
+X_k_m =  1/(L+lambda)*(lambda*Sigma_pts_k_m(1:6,1)+0.5*sum(Sigma_pts_k_m(1:6,2:2*L+1),2));
 
-P_k_m = (ASPKF_opt.kappa/(L+ASPKF_opt.kappa))*((Sigma_pts_k_m(1:6,1)-X_k_m(1:6))*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6))');
+P_k_m = (lambda/(L+lambda)+(1-ASPKF_opt.alpha^2+ASPKF_opt.beta))*((Sigma_pts_k_m(1:6,1)-X_k_m(1:6))*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6))');
 for ii = 2:2*L+1
-    P_k_m = P_k_m+1/(L+ASPKF_opt.kappa)*(0.5*(Sigma_pts_k_m(1:6,ii)-X_k_m(1:6))*(Sigma_pts_k_m(1:6,ii)-X_k_m(1:6))');
+    P_k_m = P_k_m+1/(L+lambda)*(0.5*(Sigma_pts_k_m(1:6,ii)-X_k_m(1:6))*(Sigma_pts_k_m(1:6,ii)-X_k_m(1:6))');
 end 
 
 %%
@@ -223,7 +241,7 @@ if ASPKF_opt.use_acc(1) == 0
     Sigma_Y = zeros(3,2*L+1);
     %do sig 1 first and then reuse where possible
     rotMat = quat2rotmat(q_k_m_sig(:,1));
-    Sigma_Y(1:3,1) = rotMat*(mag); %magnetometer
+    Sigma_Y(1:3,1) = rotMat'*(mag); %magnetometer
     %exact same
     for ii = [1, 11:13, 26:28]
         Sigma_Y(1:3,ii) = Sigma_Y(1:3,1); 
@@ -235,7 +253,7 @@ if ASPKF_opt.use_acc(1) == 0
     %diff rotation and noise
     for ii = [2:10, 17:25]
         rotMat = quat2rotmat(q_k_m_sig(:,ii));       
-        Sigma_Y(1:3,ii) = rotMat*(mag) + Sigma_pts_k_m(13:15,ii); %magnetometer        
+        Sigma_Y(1:3,ii) = rotMat'*(mag) + Sigma_pts_k_m(13:15,ii); %magnetometer        
     end
     
     y_k = u_b_mag;
@@ -247,8 +265,8 @@ else
 
     %do sig 1 first and then reuse where possible
     rotMat = quat2rotmat(q_k_m_sig(:,1));
-    Sigma_Y(1:3,1) = rotMat*(mag); %magnetometer
-    Sigma_Y(4:6,1) = rotMat*([0;0;g]); %accel
+    Sigma_Y(1:3,1) = rotMat'*(mag); %magnetometer
+    Sigma_Y(4:6,1) = rotMat'*([0;0;-g_acc]); %accel
     %exact same
     for ii = [1, 11:13, 29:31]
         Sigma_Y(1:3,ii) = Sigma_Y(1:3,1);
@@ -267,27 +285,27 @@ else
     %diff rotation
     for ii = [2:10, 20:28]
         rotMat = quat2rotmat(q_k_m_sig(:,ii));       
-        Sigma_Y(1:3,ii) = rotMat*(mag); %+ Sigma_pts_k_m(13:15,ii); %magnetometer    
-        Sigma_Y(4:6,ii) = rotMat*([0;0;g]);% + bias_acc + Sigma_pts_k_m(16:18,ii);
+        Sigma_Y(1:3,ii) = rotMat'*(mag); %+ Sigma_pts_k_m(13:15,ii); %magnetometer    
+        Sigma_Y(4:6,ii) = rotMat'*([0;0;-g_acc]);% + bias_acc + Sigma_pts_k_m(16:18,ii);
     end
     y_k = [u_b_mag; u_b_acc];
     
 end
 
-y_k_hat = 1/(L+ASPKF_opt.kappa)*(ASPKF_opt.kappa*Sigma_Y(:,1)+0.5*sum(Sigma_Y(:,2:2*L+1),2));
+y_k_hat = 1/(L+lambda)*(lambda*Sigma_Y(:,1)+0.5*sum(Sigma_Y(:,2:2*L+1),2));
 
 %now find matrices needed for kalman gain
 
-V_k = (ASPKF_opt.kappa/(L+ASPKF_opt.kappa))*(Sigma_Y(:,1)-y_k_hat)*(Sigma_Y(:,1)-y_k_hat)';
+V_k = (lambda/(L+lambda)+(1-ASPKF_opt.alpha^2+ASPKF_opt.beta))*(Sigma_Y(:,1)-y_k_hat)*(Sigma_Y(:,1)-y_k_hat)';
 for ii = 2:2*L+1
-    V_k = V_k+.5/(L+ASPKF_opt.kappa)*(Sigma_Y(:,ii)-y_k_hat)*(Sigma_Y(:,ii)-y_k_hat)';
+    V_k = V_k+.5/(L+lambda)*(Sigma_Y(:,ii)-y_k_hat)*(Sigma_Y(:,ii)-y_k_hat)';
 end
 % V_k = V_k + R_k;
 
-U_k = (ASPKF_opt.kappa/(L+ASPKF_opt.kappa))*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6))*(Sigma_Y(:,1)-y_k_hat)';
+U_k = (lambda/(L+lambda)+(1-ASPKF_opt.alpha^2+ASPKF_opt.beta))*(Sigma_pts_k_m(1:6,1)-X_k_m(1:6))*(Sigma_Y(:,1)-y_k_hat)';
 
 for ii =2:2*L+1
-    U_k = U_k + .5/(L+ASPKF_opt.kappa)*(Sigma_pts_k_m(1:6,ii)-X_k_m(1:6))*(Sigma_Y(:,ii)-y_k_hat)';
+    U_k = U_k + .5/(L+lambda)*(Sigma_pts_k_m(1:6,ii)-X_k_m(1:6))*(Sigma_Y(:,ii)-y_k_hat)';
 end
 
 %kalman gain and update
@@ -394,12 +412,17 @@ ASPKF_opt.X_hat.omega_hat = u_b_gyr - ASPKF_opt.X_hat.bias_gyr; %ang vel is just
 
 %need to convert MRP to quaternions
 
-q_k_upd(1) = (1-DX_k(1:3)'*DX_k(1:3))/(1+DX_k(1:3)'*DX_k(1:3));
+% q_k_upd(1) = (1-DX_k(1:3)'*DX_k(1:3))/(1+DX_k(1:3)'*DX_k(1:3));
+% 
+% q_k_upd(2:4,1) = (1+q_k_upd(1))*DX_k(1:3);
+pNorm = norm(DX_k(1:3),2);
+q_k_upd(1) = (-a*pNorm^2 + f*sqrt(f^2+(1-a^2)*pNorm^2))/(f^2+pNorm^2);
 
-q_k_upd(2:4,1) = (1+q_k_upd(1))*DX_k(1:3);
+q_k_upd(2:4,1) = (a+q_k_upd(1))/f*DX_k(1:3);
 
-ASPKF_opt.X_hat.q_hat = quatmultiply(q_k_upd,q_k_m_sig(:,1));
+ASPKF_opt.X_hat.q_hat = quatmultiply(q_k_m_sig(:,1),q_k_upd);
 
+ASPKF_opt.X_hat.q_hat = ASPKF_opt.X_hat.q_hat/norm(ASPKF_opt.X_hat.q_hat);
 
 % % attempt 2 to update Q - following hajiyev's exactly using linearized
 % matrices about updated states

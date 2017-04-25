@@ -90,7 +90,7 @@ q_k_1_sig(:,1) = q_k_1;
 % this loop generates sigma points for estimated MRP and bias and generates
 % the associated quaternion SPs as well
 a = 1;
-f = 4 ; %2*(a+1);
+f = 2*(a+1);
 for ii = 1:L
     
     %make sigma points
@@ -136,7 +136,7 @@ for ii = 1:2*L+1
     
     q_k_err(:,ii) = quatmultiply(q_k_m_sig(:,ii),[q_k_m_sig(1,1);-q_k_m_sig(2:4,1)]); %convert back to error
     %orientation propagated values
-    Sigma_pts_k_m(1:3,ii) = q_k_err(2:4,ii)/(1+q_k_err(1,ii)); %convert quat error to MRP
+    Sigma_pts_k_m(1:3,ii) = f*q_k_err(2:4,ii)/(a+q_k_err(1,ii)); %convert quat error to MRP
     
     
     Sigma_pts_k_m(4:6,ii) = Sigma_pts_k_1(4:6,ii) + tStep*Sigma_pts_k_1(10:12,ii) ;

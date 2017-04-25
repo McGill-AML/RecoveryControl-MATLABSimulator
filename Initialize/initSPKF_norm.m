@@ -1,4 +1,4 @@
-function [SPKF_norm] = initSPKF_norm(Est_ICs, loop_no)
+function [SPKF_norm] = initSPKF_norm(Est_ICs, useExpData)
 %estimator constants
 SPKF_norm.kappa = 3; % SPKF_norm scaling factor
 

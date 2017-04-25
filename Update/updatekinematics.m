@@ -8,8 +8,8 @@ function [Pose, Twist] = updatekinematics(state, stateDeriv)
     Pose.attQuat = state(10:13);
     
     % Attitude in Euler angles
-    [roll, pitch, yaw] = quat2angle(Pose.attQuat, 'xyz');
-    Pose.attEuler = [roll; pitch; yaw];    
+    [yaw, pitch, roll] = quat2angle(Pose.attQuat, 'zyx');
+    Pose.attEuler = [yaw; pitch; roll];    
     
     % Linear velocity in body frame
     Twist.linVel = state(1:3);

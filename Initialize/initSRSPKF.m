@@ -1,4 +1,4 @@
-function [SRSPKF] = initSRSPKF(Est_ICs)
+function [SRSPKF] = initSRSPKF(Est_ICs, useExpData)
 %estimator constants
 SRSPKF.kappa = -3; % SRSPKF scaling factor
 

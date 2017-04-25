@@ -1,4 +1,4 @@
-function [SPKF] = SPKF_attitude_slow(Sensor, SPKF, EKF, sensParams, tStep)
+function [SPKF] = SPKF_attitude_slow(Sensor, SPKF, EKF, sensParams, tStep, useExpData)
 % SPKF - kinematic prediction for orientation
 % this estimator uses an MRP formulation of the quaternion in a sigma point
 % kalman filter to propagate the state estimate. Only estimates gryo bias
@@ -8,6 +8,11 @@ function [SPKF] = SPKF_attitude_slow(Sensor, SPKF, EKF, sensParams, tStep)
 %estimate
 
 global g mag
+if useExpData
+    g_acc = g;
+else
+    g_acc = -g;
+end
 %unpackage
 %states
 pos_k_1 = EKF.X_hat.pos_hat;
@@ -117,19 +122,19 @@ for ii = 1:2*L+1
     omega_sig(:,ii) = u_b_gyr - Sigma_pts_k_1(4:6,ii) - Sigma_pts_k_1(7:9,ii); %angular velocity
 
 %     %estimate orientation using estimated ang vel
-%     psi_norm = norm(omega_sig(:,ii),2);
-%     psi_k_p = sin(0.5*psi_norm*tStep)*omega_sig(:,ii)/psi_norm;
-%     
-%     Omega_k_p = [cos(0.5*psi_norm*tStep), -psi_k_p';
-%                   psi_k_p, cos(0.5*psi_norm*tStep)*eye(3)-cross_mat(psi_k_p)];
+    psi_norm = norm(omega_sig(:,ii),2);
+    psi_k_p = sin(0.5*psi_norm*tStep)*omega_sig(:,ii)/psi_norm;
+    
+    Omega_k_p = [cos(0.5*psi_norm*tStep), -psi_k_p';
+                  psi_k_p, cos(0.5*psi_norm*tStep)*eye(3)-cross_mat(psi_k_p)];
               
     %estimate orientation using estimated ang vel
-    psi_norm = norm(omega_sig(:,ii),2);
-    psi_k_p = sin(-0.5*psi_norm*tStep)*omega_sig(:,ii)/psi_norm;
-    
-    Omega_k_p = [cos(-0.5*psi_norm*tStep), -psi_k_p';
-                  psi_k_p, cos(-0.5*psi_norm*tStep)*eye(3)+cross_mat(psi_k_p)]; % this is fionas way
-    
+%     psi_norm = norm(omega_sig(:,ii),2);
+%     psi_k_p = sin(-0.5*psi_norm*tStep)*omega_sig(:,ii)/psi_norm;
+%     
+%     Omega_k_p = [cos(-0.5*psi_norm*tStep), -psi_k_p';
+%                   psi_k_p, cos(-0.5*psi_norm*tStep)*eye(3)+cross_mat(psi_k_p)]; % this is fionas way
+%     
     q_k_m_sig(:,ii) = Omega_k_p*q_k_1_sig(:,ii); %predicted quaternion sigma points
 %     q_k_m_sig(:,ii) = q_k_m_sig(:,ii)/norm(q_k_m_sig(:,ii)); %renorm just incase
     
@@ -160,7 +165,7 @@ if ~SPKF.use_acc
     
     for ii = 1:2*L+1
         rotMat = quat2rotmat(q_k_m_sig(:,ii));       
-        Sigma_Y(1:3,ii) = rotMat*(mag) + Sigma_pts_k_m(13:15,ii); %magnetometer        
+        Sigma_Y(1:3,ii) = rotMat'*(mag) + Sigma_pts_k_m(13:15,ii); %magnetometer        
     end
     
 else
@@ -172,8 +177,8 @@ else
         
         rotMat = quat2rotmat(q_k_m_sig(:,ii));
         
-        Sigma_Y(1:3,ii) = rotMat*(mag) + Sigma_pts_k_m(13:15,ii); %magnetometer
-        Sigma_Y(4:6,ii) = rotMat*([0;0;g]) + bias_acc + Sigma_pts_k_m(16:18,ii); %accel
+        Sigma_Y(1:3,ii) = rotMat'*(mag) + Sigma_pts_k_m(13:15,ii); %magnetometer
+        Sigma_Y(4:6,ii) = rotMat'*([0;0;-g_acc]) + bias_acc + Sigma_pts_k_m(16:18,ii); %accel
         
     end
     
@@ -199,14 +204,16 @@ end
 %kalman gain
 K_k = U_k/V_k;
 
+% YOOOOOO I CHANGED THIS NEXT PART DONT FORGET::
+
 if SPKF.use_acc
-    DX_k = K_k*([u_b_mag; u_b_acc] - y_k_hat);
+    DX_k = X_k_m + K_k*([u_b_mag; u_b_acc] - y_k_hat);
 else   
-    DX_k = K_k*(u_b_mag - y_k_hat);
+    DX_k = X_k_m + K_k*(u_b_mag - y_k_hat);
 end
 
 
-SPKF.X_hat.bias_gyr = X_k_m(4:6) + DX_k(4:6);
+SPKF.X_hat.bias_gyr = DX_k(4:6); % X_k_m(4:6) + DX_k(4:6);
 
 SPKF.X_hat.omega_hat = u_b_gyr - SPKF.X_hat.bias_gyr; %ang vel is just gyro minus bias
 

@@ -127,11 +127,20 @@ temp2 = struct2cell([temp{2,:}]);
 Plot.SPKF_quat = [temp2{1,:}];
 Plot.SPKF_omega = [temp2{2,:}];
 Plot.SPKF_gyr_bias = [temp2{3,:}];
+Plot.SPKF_X_k_m = [temp2{4,:}];
+Plot.SPKF_DX_k = [temp2{5,:}];
+
 tempP = [temp{3,:}];
 for ii = 1:6
     Plot.SPKF_P_hat(ii,:) = tempP(ii,ii:6:end);
 end
+tempP = [temp{9,:}];
+for ii = 1:6
+    Plot.SPKF_inno_cov(ii,:) = tempP(ii,ii:6:end);
+end
+Plot.SPKF_innov = [temp{8,:}];
 
+Plot.SPKF_K_k = reshape([temp{10,:}],[6, 6, length([temp{10,:}])/6]);
 
 
 temp = struct2cell(Hist.ASPKF);
@@ -185,6 +194,7 @@ tempP = [temp{2,:}];
 for ii = 1:7
     Plot.EKF_att_P_hat(ii,:) = tempP(ii,ii:7:end);
 end
+Plot.EKF_att_innov = [temp{4,:}];
 
 
 
@@ -238,9 +248,9 @@ Plot.SPKF_norm_quat = [temp2{1,:}];
 Plot.SPKF_norm_omega = [temp2{2,:}];
 Plot.SPKF_norm_gyr_bias = [temp2{3,:}];
 tempP = [temp{2,:}];
-for ii = 1:7
-    Plot.SPKF_norm_P_hat(ii,:) = tempP(ii,ii:7:end);
-end
+% for ii = 1:7
+%     Plot.SPKF_norm_P_hat(ii,:) = tempP(ii,ii:7:end);
+% end
 
 
 

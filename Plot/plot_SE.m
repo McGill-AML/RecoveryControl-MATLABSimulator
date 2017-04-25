@@ -1,10 +1,10 @@
 % Plot scripts
 
-plot_SPKF = 1;
-plot_ASPKF =1;
+plot_SPKF =1;
+plot_ASPKF =0;
 plot_EKF = 0;
 plot_AEKF = 0;
-plot_COMP = 1;
+plot_COMP = 0;
 plot_HINF =0;
 plot_SPKF_full = 0;
 plot_EKF_att = 1;
@@ -12,15 +12,15 @@ plot_SRSPKF = 0;
 plot_SRSPKF_full = 0;
 plot_ASPKF_opt = 0;
 plot_AHINF = 0;
-plot_SPKF_norm = 0;
+plot_SPKF_norm = 1;
 
 plot_pos = 0;
 plot_cov = 0;
 plot_vel = 0;
-plot_quat =1;
-plot_ASPKF_stuff = 0;
+plot_quat =0;
+plot_ASPKF_stuff = 1;
 plot_angvel = 0;
-plot_eul_ang = 0;
+plot_eul_ang =0;
 plot_acceleroms = 0;
 plot_gyros = 0;
 plot_mag = 0;
@@ -32,6 +32,47 @@ plot_baro = 0;
 plot_animate = 0;
 plot_AHINF_stuff = 0;
 
+if 0 
+    
+   hdt = datacursormode;
+set(hdt,'UpdateFcn',@datatipWithSubscript);
+end
+
+%%
+legendNames = ['Truth'];
+if plot_SPKF == 1
+    legendNames = [legendNames, 'SPKF'];
+end
+if plot_ASPKF == 1
+    legendNames = [legendNames, 'ASPKF'];
+end
+if plot_COMP == 1
+    legendNames = [legendNames, 'COMP'];
+end
+if plot_HINF == 1
+    legendNames = [legendNames, 'HINF'];
+end
+if plot_SPKF_full == 1
+    legendNames = [legendNames, 'SPKF full'];
+end
+if plot_EKF_att == 1
+    legendNames = [legendNames, 'EKF'];
+end
+if plot_SRSPKF == 1
+    legendNames = [legendNames, 'SRSPKF'];
+end
+if plot_SRSPKF_full == 1
+    legendNames = [legendNames, 'SRSPKF full'];
+end
+if plot_ASPKF_opt == 1
+    legendNames = [legendNames, 'ASPKF opt'];
+end
+if plot_AHINF == 1
+    legendNames = [legendNames, 'AHINF'];
+end
+if plot_SPKF_norm == 1
+    legendNames = [legendNames, 'SPKF norm'];
+end
 
 
 
@@ -192,7 +233,7 @@ if plot_quat == 1
         plot(Plot.times,Plot.AHINF_quat(1,:),'g--', 'Linewidth',line_width);
     end
     if plot_SPKF_norm == 1
-        plot(Plot.times,Plot.SPKF_norm_quat(1,:), 'r:','Linewidth',line_width);
+        plot(Plot.times,Plot.SPKF_norm_quat(1,:), 'y','Linewidth',line_width);
     end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$q_0$ (m)','fontsize',font_size,'Interpreter','latex');
@@ -232,7 +273,7 @@ if plot_quat == 1
         plot(Plot.times,Plot.AHINF_quat(2,:),'g--', 'Linewidth',line_width);
     end
     if plot_SPKF_norm == 1
-        plot(Plot.times,Plot.SPKF_norm_quat(2,:), 'r:','Linewidth',line_width);
+        plot(Plot.times,Plot.SPKF_norm_quat(2,:), 'y','Linewidth',line_width);
     end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$q_x$ (m)','fontsize',font_size,'Interpreter','latex');
@@ -272,7 +313,7 @@ if plot_quat == 1
         plot(Plot.times,Plot.AHINF_quat(3,:),'g--', 'Linewidth',line_width);
     end
     if plot_SPKF_norm == 1
-        plot(Plot.times,Plot.SPKF_norm_quat(3,:), 'r:','Linewidth',line_width);
+        plot(Plot.times,Plot.SPKF_norm_quat(3,:), 'y','Linewidth',line_width);
     end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$q_y$ (m)','fontsize',font_size,'Interpreter','latex');
@@ -312,13 +353,13 @@ if plot_quat == 1
         plot(Plot.times,Plot.AHINF_quat(4,:),'g--', 'Linewidth',line_width);
     end
     if plot_SPKF_norm == 1
-        plot(Plot.times,Plot.SPKF_norm_quat(4,:), 'r:','Linewidth',line_width);
+        plot(Plot.times,Plot.SPKF_norm_quat(4,:), 'y','Linewidth',line_width);
     end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$q_z$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
     grid on
-    
+    legend(legendNames);
 end
 
 %%  plot ASPKF gain
@@ -401,10 +442,47 @@ end
 %% Euler angles
 
 if plot_eul_ang == 1
-    figure;
-    plot(Plot.times, Plot.eulerAngles);grid on;
-    title(['Euler angles, run no', num2str(loop_no)]);
-    legend('theta','phi','psi');
+    if plot_SPKF == 1
+        for ii = 1:length(Plot.SPKF_quat)
+            [Plot.SPKF_eul.yaw(ii), Plot.SPKF_eul.pitch(ii), Plot.SPKF_eul.roll(ii)] = quat2angle(Plot.SPKF_quat(:,ii));
+        end
+    end
+    figure
+    title(['Quat estimate, run no', num2str(loop_no)]);
+    subplot(3,1,1)
+    plot(Plot.times,Plot.eulerAngles(1,:),'Linewidth',line_width);
+    hold on
+    if plot_SPKF == 1
+        plot(Plot.times,Plot.SPKF_eul.yaw(1,:),'Linewidth',line_width, 'Color', 'r');
+    end
+    xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
+    ylabel('$yaw$ (m)','fontsize',font_size,'Interpreter','latex');
+    set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
+    grid on
+    subplot(3,1,2)
+    plot(Plot.times,Plot.eulerAngles(2,:),'Linewidth',line_width);
+    hold on
+    if plot_SPKF == 1
+        plot(Plot.times,Plot.SPKF_eul.pitch(1,:),'Linewidth',line_width, 'Color', 'r');
+    end
+    xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
+    ylabel('$pitch$ (m)','fontsize',font_size,'Interpreter','latex');
+    set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
+    grid on
+    subplot(3,1,3)
+    plot(Plot.times,Plot.eulerAngles(3,:),'Linewidth',line_width);
+    hold on
+    if plot_SPKF == 1
+        plot(Plot.times,Plot.SPKF_eul.roll(1,:),'Linewidth',line_width, 'Color', 'r');
+    end
+    xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
+    ylabel('$roll$ (m)','fontsize',font_size,'Interpreter','latex');
+    set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
+    grid on
+%     figure;
+%     plot(Plot.times, Plot.eulerAngles);grid on;
+%     title(['Euler angles, run no', num2str(loop_no)]);
+%     legend('theta','phi','psi');
 end
 
 %% Sensors
@@ -456,6 +534,7 @@ if plot_gyros == 1
     end
     hold on
     plot(Plot.times,Plot.gyros(1,:),'Linewidth',line_width, 'Color', 'r');
+    plot(Plot.tims, gyrfilt(1,:),'Linewidth',line_width);
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$\omega_{1}$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
@@ -466,6 +545,7 @@ if plot_gyros == 1
     end
     hold on
     plot(Plot.times,Plot.gyros(2,:),'Linewidth',line_width, 'Color', 'r');
+    plot(Plot.tims, gyrfilt(2,:),'Linewidth',line_width);
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$\omega_{2}$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
@@ -476,6 +556,7 @@ if plot_gyros == 1
     end
     hold on
     plot(Plot.times,Plot.gyros(3,:),'Linewidth',line_width, 'Color', 'r');
+    plot(Plot.tims, gyrfilt(3,:),'Linewidth',line_width);
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$\omega_{3}$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
@@ -491,6 +572,10 @@ if plot_mag == 1
     title(['Magnetometer measurements, run no', num2str(loop_no)]);
     
     plot(Plot.times,Plot.mag(1,:),'Linewidth',line_width, 'Color', 'r');
+    hold on;
+    if useExpData == 1
+        plot(Plot.times,IMU_MagX,'Linewidth',line_width, 'Color', 'b');
+    end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$X$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
@@ -498,6 +583,10 @@ if plot_mag == 1
     subplot(3,1,2)
     
     plot(Plot.times,Plot.mag(2,:),'Linewidth',line_width, 'Color', 'r');
+    hold on;
+    if useExpData == 1
+        plot(Plot.times,IMU_MagY,'Linewidth',line_width, 'Color', 'b');
+    end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$Y$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
@@ -505,6 +594,10 @@ if plot_mag == 1
     subplot(3,1,3)
     
     plot(Plot.times,Plot.mag(3,:),'Linewidth',line_width, 'Color', 'r');
+    hold on;
+    if useExpData == 1
+        plot(Plot.times,IMU_MagZ,'Linewidth',line_width, 'Color', 'b');
+    end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$Z$ (m)','fontsize',font_size,'Interpreter','latex');
     set(gca,'XMinorGrid','off','GridLineStyle','-','FontSize',line_size)
@@ -560,7 +653,7 @@ if plot_gyro_bias ==1
         plot(Plot.times,Plot.AHINF_gyr_bias(1,:),'g--', 'Linewidth',line_width);
     end
     if plot_SPKF_norm == 1
-        plot(Plot.times,Plot.SPKF_norm_gyr_bias(1,:), 'r:','Linewidth',line_width);
+        plot(Plot.times,Plot.SPKF_norm_gyr_bias(1,:), 'y','Linewidth',line_width);
     end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$\omega_{1}$ (m)','fontsize',font_size,'Interpreter','latex');
@@ -600,7 +693,7 @@ if plot_gyro_bias ==1
         plot(Plot.times,Plot.AHINF_gyr_bias(2,:),'g--', 'Linewidth',line_width);
     end
     if plot_SPKF_norm == 1
-        plot(Plot.times,Plot.SPKF_norm_gyr_bias(2,:), 'r:','Linewidth',line_width);
+        plot(Plot.times,Plot.SPKF_norm_gyr_bias(2,:), 'y','Linewidth',line_width);
     end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$\omega_{2}$ (m)','fontsize',font_size,'Interpreter','latex');
@@ -640,7 +733,7 @@ if plot_gyro_bias ==1
         plot(Plot.times,Plot.AHINF_gyr_bias(3,:),'g--', 'Linewidth',line_width);
     end
     if plot_SPKF_norm == 1
-        plot(Plot.times,Plot.SPKF_norm_gyr_bias(3,:), 'r:','Linewidth',line_width);
+        plot(Plot.times,Plot.SPKF_norm_gyr_bias(3,:), 'y','Linewidth',line_width);
     end
     xlabel('Time (s)','fontsize',font_size,'Interpreter','latex');
     ylabel('$\omega_{3}$ (m)','fontsize',font_size,'Interpreter','latex');

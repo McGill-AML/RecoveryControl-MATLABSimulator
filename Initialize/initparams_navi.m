@@ -13,6 +13,7 @@ global u2RpmMat BUMP_NORMS BUMP_TANGS BUMP_POSNS
 
 g = 9.81;
 
+
 %% Mass Properties
 m = 1.095; %kg
 

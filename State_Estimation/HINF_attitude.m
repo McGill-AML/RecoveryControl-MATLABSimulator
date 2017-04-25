@@ -1,4 +1,4 @@
-function [HINF] = HINF_attitude(Sensor, HINF, EKF, sensParams, tStep)
+function [HINF] = HINF_attitude(Sensor, HINF, EKF, sensParams, tStep, useExpData)
 % HINF - kinematic prediction for orientation
 % unit norm constrained H infinity (min max) filter
 % using the predict correct structure
@@ -7,6 +7,12 @@ function [HINF] = HINF_attitude(Sensor, HINF, EKF, sensParams, tStep)
 %estimate
 
 global g mag
+if useExpData
+    g_acc = g;
+else
+    g_acc = -g;
+end
+
 %unpackage
 %states
 pos_k_1 = EKF.X_hat.pos_hat;
@@ -47,11 +53,19 @@ u_b_baro = Sensor.baro;
 omega_hat_m = u_b_gyr - bias_gyr; %ang vel estimate
 
 psi_norm = norm(omega_hat_m,2);
-psi_k_p = sin(-0.5*psi_norm*tStep)*omega_hat_m/psi_norm;
+% propagate using hamilton convention
+psi_k_p = sin(0.5*psi_norm*tStep)*omega_hat_m/psi_norm;
 
 %ang vel matrix used in discretization
-Omega_k_m = [cos(-0.5*psi_norm*tStep), -psi_k_p';
-            psi_k_p, cos(-0.5*psi_norm*tStep)*eye(3)+cross_mat(psi_k_p)];
+Omega_k_m = [cos(0.5*psi_norm*tStep), -psi_k_p';
+            psi_k_p, cos(0.5*psi_norm*tStep)*eye(3)-cross_mat(psi_k_p)];
+        
+% % this method is fionna's quaternion convention
+% psi_k_p = sin(-0.5*psi_norm*tStep)*omega_hat_m/psi_norm;
+% 
+% %ang vel matrix used in discretization
+% Omega_k_m = [cos(-0.5*psi_norm*tStep), -psi_k_p';
+%             psi_k_p, cos(-0.5*psi_norm*tStep)*eye(3)+cross_mat(psi_k_p)];
 
 q_k_m = Omega_k_m*q_k_1;
 
@@ -61,48 +75,29 @@ q_k_m = q_k_m/norm(q_k_m,2);
 bias_gyr_k_m = bias_gyr;
 
 %discretized (euler discretization) then linearized state transition matrix
-% A_k_1_1 = eye(4)+[0, -omega_hat_m'; omega_hat_m, cross_mat(omega_hat_m)];
+% this is the old one, fiona style kinematics
+% A_k_1_1 = eye(4)+tStep*[zeros(1,4); zeros(3,1), -cross_mat(omega_hat_m)];
 % 
-% A_k_1_2 = [q_k_m(2), q_k_m(3), q_k_m(4);
-%            -q_k_m(1), -q_k_m(4), q_k_m(3);
-%            q_k_m(4), -q_k_m(1), -q_k_m(2);
-%            -q_k_m(3), q_k_m(2), -q_k_m(1)];
+% A_k_1_2 = 0.5*tStep*[zeros(1,3); eye(3)];
 %        
-% A_k_1 = [ -0.5*tStep*[A_k_1_1, A_k_1_2];
+% A_k_1 = [ A_k_1_1, A_k_1_2;
 %           zeros(3,4), eye(3)];
-
+      
 A_k_1_1 = eye(4)+tStep*[zeros(1,4); zeros(3,1), -cross_mat(omega_hat_m)];
 
-A_k_1_2 = 0.5*tStep*[zeros(1,3); eye(3)];
+A_k_1_2 = -0.5*tStep*[zeros(1,3); eye(3)];
        
 A_k_1 = [ A_k_1_1, A_k_1_2;
-          zeros(3,4), eye(3)];
+          zeros(3,4), eye(3)];      
 
 % process noise weighting matrix, could change if we know gyro noise is more?
 % B_k_1 = tStep*blkdiag(eye(4), eye(3)*0.1); 
-B_k_1 = tStep*diag([sensParams.var_gyr; sensParams.var_gyr(1); sensParams.var_bias_gyr*.001]); 
+Q_k = tStep*diag([sensParams.var_gyr; sensParams.var_gyr(1); sensParams.var_bias_gyr*.001]); 
 
 %predict covariance matrix
-HINF.P_hat = A_k_1*HINF.P_hat_eps*A_k_1' + B_k_1; %used to be B_k_1*B_k_1';
+HINF.P_hat = A_k_1*HINF.P_hat_eps*A_k_1' + Q_k; %used to be B_k_1*B_k_1';
 
 %% update 
-% 
-% dR_dq_0 = [q_k_m(1), -q_k_m(4), q_k_m(3);
-%              q_k_m(4), q_k_m(1), -q_k_m(2);
-%              -q_k_m(3), q_k_m(2), q_k_m(1)];
-% 
-% dR_dq_1 = [q_k_m(2), q_k_m(3), q_k_m(4);
-%              q_k_m(3), -q_k_m(2), -q_k_m(1);
-%              q_k_m(4), q_k_m(1), -q_k_m(2)];
-%          
-% dR_dq_2 = [-q_k_m(3), q_k_m(2), q_k_m(1);
-%              q_k_m(2), q_k_m(3), q_k_m(4);
-%              -q_k_m(1), q_k_m(4), -q_k_m(3)];
-%          
-%          
-% dR_dq_3 = [-q_k_m(4), -q_k_m(1), q_k_m(2);
-%              q_k_m(1), -q_k_m(4), q_k_m(3);
-%              q_k_m(2), q_k_m(3), q_k_m(4)];
          
 rotMat = quat2rotmat( q_k_m );
 
@@ -113,12 +108,11 @@ if norm(u_b_acc,2) > norm(g,2) + HINF.accel_bound || norm(u_b_acc,2) < norm(g,2)
     %magnetometer only
 %     C_k = [dR_dq_0*mag, dR_dq_1*mag, dR_dq_2*mag, dR_dq_3*mag, zeros(3)];
 
-    C_k = [zeros(3,1), -cross_mat(rotMat*mag), zeros(3,3)];
+    C_k = [zeros(3,1), cross_mat(rotMat'*mag), zeros(3,3)];
     
     y_k = u_b_mag;
     
-%     y_k_hat = C_k*[q_k_m; bias_gyr_k_m];
-    y_k_hat = rotMat*mag;
+    y_k_hat = rotMat'*mag;
     
     R_k = diag(sensParams.var_mag);
     
@@ -131,13 +125,13 @@ else
 %     C_k = [dR_dq_0*[0;0;g], dR_dq_1*[0;0;g], dR_dq_2*[0;0;g], dR_dq_3*[0;0;g], zeros(3);
 %            dR_dq_0*mag, dR_dq_1*mag, dR_dq_2*mag, dR_dq_3*mag, zeros(3)];
 
-    C_k = [zeros(3,1), -cross_mat(rotMat*[0; 0; g]), zeros(3,3);
-            zeros(3,1), -cross_mat(rotMat*mag), zeros(3,3)];
+    C_k = [zeros(3,1), cross_mat(rotMat'*[0; 0; -g_acc]), zeros(3,3);
+            zeros(3,1), cross_mat(rotMat'*mag), zeros(3,3)];
     
     y_k = [u_b_acc; u_b_mag];
     
-%     y_k_hat = C_k*[q_k_m; bias_gyr_k_m];
-    y_k_hat = [rotMat*[0; 0; g]; rotMat*mag];
+    
+    y_k_hat = [rotMat'*[0; 0; -g_acc]; rotMat'*mag];
     
     R_k = diag([sensParams.var_acc; sensParams.var_mag]);
     
@@ -159,16 +153,18 @@ K_k1_p1 = D_1/D_2;
 
 r_k = y_k - y_k_hat;
 
-r_k_D_2 = r_k'/D_2;
-
-r_k_tilde = r_k_D_2*r_k;
-
-q_upd_m = K_k1_p1*r_k;
-q_upd_m = [1; 0.5*q_upd_m(2:4)];
-
-x_k_tilde = q_upd_m;
-
-K_k1 = K_k1_p1 + (1/norm(x_k_tilde,2) - 1)*x_k_tilde*r_k_D_2/r_k_tilde;
+K_k1 = K_k1_p1;
+% This applies the norm constraint. just use K_k1 instead of K_k1_p1 
+% r_k_D_2 = r_k'/D_2;
+% 
+% r_k_tilde = r_k_D_2*r_k;
+% 
+% q_upd_m = K_k1_p1*r_k;
+% q_upd_m = [1; 0.5*q_upd_m(2:4)];
+% 
+% x_k_tilde = q_upd_m;
+% 
+% K_k1 = K_k1_p1 + (1/norm(x_k_tilde,2) - 1)*x_k_tilde*r_k_D_2/r_k_tilde;
 
 
 %find kalman gain for the bias term - since G_k = 0 for bias just use basic
@@ -187,7 +183,7 @@ HINF.P_hat_eps = (eye(7) - K_k*C_k + L_k*HINF.G_k)*HINF.P_hat*(eye(7) - K_k*C_k 
 q_upd =  K_k1*r_k;
 q_upd = [1; 0.5*q_upd(2:4)];
 
-HINF.X_hat.q_hat = quatmultiply(q_upd, q_k_m);
+HINF.X_hat.q_hat = quatmultiply( q_k_m, q_upd);
 
 HINF.X_hat.q_hat = HINF.X_hat.q_hat/norm(HINF.X_hat.q_hat,2); % renormalize
 

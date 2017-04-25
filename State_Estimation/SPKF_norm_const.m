@@ -83,8 +83,8 @@ for ii = 1:L
     Sigma_pts_k_1(:,ii+1) = Sigma_pts_k_1(:,1) + sqrt(L+SPKF_norm.kappa)*S(:,ii);
     Sigma_pts_k_1(:,L+ii+1) = Sigma_pts_k_1(:,1) - sqrt(L+SPKF_norm.kappa)*S(:,ii);
     
-    Sigma_pts_k_1(1:4,ii+1) = Sigma_pts_k_1(1:4,ii+1)/norm(Sigma_pts_k_1(1:4,ii+1));
-    Sigma_pts_k_1(1:4,L+ii+1) = Sigma_pts_k_1(1:4,L+ii+1)/norm(Sigma_pts_k_1(1:4,L+ii+1));
+%     Sigma_pts_k_1(1:4,ii+1) = Sigma_pts_k_1(1:4,ii+1)/norm(Sigma_pts_k_1(1:4,ii+1));
+%     Sigma_pts_k_1(1:4,L+ii+1) = Sigma_pts_k_1(1:4,L+ii+1)/norm(Sigma_pts_k_1(1:4,L+ii+1));
     
 end 
 

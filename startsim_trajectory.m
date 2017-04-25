@@ -16,7 +16,7 @@ ImpactParams = initparams_navi;
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
 SimParams.useRecovery = 1; 
-SimParams.timeFinal = 75;
+SimParams.timeFinal =60;
 tStep = 1/100;%1/200;
 
 ImpactParams.wallLoc = 0.5;%1.5;
@@ -43,7 +43,7 @@ localFlag = initflags;
 ImpactIdentification = initimpactidentification;
 
 %% Set initial Conditions
-IC.posn = [ImpactParams.wallLoc-0.65;0;0.5]; 
+IC.posn = [ImpactParams.wallLoc-0.65;0;0.15]; 
 
 Trajectory(1).posn = IC.posn;
 
@@ -101,12 +101,12 @@ iTrajectory = 1;
 [Pose, Twist] = updatekinematics(state, stateDeriv);
 
 %% Initialize sensors
-sensParams = initsensor_params(useExpData); % initialize sensor parameters for use in measurement model
+sensParams = initsensor_params(useExpData,loop_no); % initialize sensor parameters for use in measurement model
 
 Sensor = initsensor(state, stateDeriv, sensParams); % init sensor values
 sensParams = initgps_baro(Sensor, sensParams); %init initial GPS and baro in order to initialize cartesian coord at starting spot
 
-Est_sensParams = initEst_sensPars(sensParams); %initialize sensor parameters for use in estimators (to add error, etc.)
+Est_sensParams = initEst_sensPars(sensParams,useExpData); %initialize sensor parameters for use in estimators (to add error, etc.)
 
 %% Initialize state estimators
 Est_ICs = initSE_ICs(IC, sensParams, loop_no, useExpData); % set initial condition estimate in order to add errors
@@ -114,35 +114,95 @@ Est_ICs = initSE_ICs(IC, sensParams, loop_no, useExpData); % set initial conditi
 EKF = initEKF(Est_ICs);
 AEKF = initAEKF(Est_ICs);
 
-SPKF = initSPKF(Est_ICs, loop_no);
-ASPKF = initASPKF(Est_ICs);
-ASPKF_opt = initASPKF_opt(Est_ICs);
+SPKF = initSPKF(Est_ICs, useExpData);
+ASPKF = initASPKF(Est_ICs,useExpData);
+ASPKF_opt = initASPKF_opt(Est_ICs, useExpData);
 
 
 SRSPKF = initSRSPKF(Est_ICs);
 % SRSPKF = initSPKF(Est_ICs, loop_no);
 % SRSPKF.kappa = 3;
 
-COMP = initCOMP(Est_ICs);
+COMP = initCOMP(Est_ICs, useExpData);
 
-EKF_att = initEKF_att(Est_ICs, loop_no);
-HINF = initHINF(Est_ICs);
-AHINF = initAHINF(Est_ICs);
+EKF_att = initEKF_att(Est_ICs, useExpData);
+HINF = initHINF(Est_ICs, useExpData);
+AHINF = initAHINF(Est_ICs, useExpData);
 
 SRSPKF_full = initSRSPKF_full(Est_ICs);
 
 SPKF_full = initSPKF_full(Est_ICs, loop_no);
-SPKF_norm = initEKF_att(Est_ICs, loop_no);
+% SPKF_norm = initEKF_att(Est_ICs, useExpData);
+SPKF_norm = initCOMP_PX4(Est_ICs, useExpData);
+
+% SPKF_norm.gyr_bias_k_i =.05;
+% SPKF_norm.acc_k_i =0.25;
+% SPKF_norm.mag_k_i0.15;
+
+%init lp filter for COMP filter
+[COMP] = initlpfilt(Sensor, COMP);
 
 
 
 time_to_break = 0; %var so sim doesn't stop once it's stabilized
+
+if exist('running_a_loop','var')
+%     create 3 mod loops for run_loop
+%     
+%     comp_vary = 0.05:0.05:0.25;
+%     
+% %     COMP.mag_k_i = comp_vary(change_one);
+% %     COMP.acc_k_i = comp_vary(change_two);
+% %     SPKF_norm.mag_k_i = comp_vary(change_one);
+% %     SPKF_norm.acc_k_i = comp_vary(change_two);
+%     SPKF_norm.gyr_bias_k_i = comp_vary(change_two);
+%     COMP.gyr_bias_k_i = comp_vary(change_two);
+%     COMP.accel_bound = change_two*2 -1;
+% %     ekf_mag_acc_vary = [0.1,0.5, 1, 10, 50];
+% %     
+% %     Est_sensParams.var_acc = Est_sensParams.var_acc*ekf_mag_acc_vary(change_two);
+% %     Est_sensParams.var_mag = Est_sensParams.var_mag*ekf_mag_acc_vary(change_two);
+%         hinf_val = [0.1, 0.2, 0.3, 0.7, 2];
+% 
+% HINF.G_k = hinf_val(change_two)*[eye(4), zeros(4,3)];
+% 
+% ahinf_val = [0.2, 0.4, 0.7, 1, 3];
+% 
+% AHINF.delta_max = ahinf_val(change_two);
+% AHINF.delta_rate = ahinf_val(change_two)/10;
+% 
+%     if change_two == 2
+%         SPKF.accel_bound = 3;
+%         EKF_att.accel_bound = 3;
+% %         
+% % Est_sensParams.var_mag = Est_sensParams.var_mag *10;
+%     elseif change_two == 3 
+%         SPKF.accel_bound = 1;
+%         EKF_att.accel_bound = 1;
+%         
+% %         Est_sensParams.var_acc = Est_sensParams.var_acc*10;
+%     elseif change_two == 4
+%         SPKF.accel_bound = 1;
+%         EKF_att.accel_bound = 1;
+%         
+%         Est_sensParams.var_acc = Est_sensParams.var_acc/10;
+% %         Est_sensParams.var_bias_gyr = Est_sensParams.var_bias_gyr*.01;
+%     elseif change_two == 5
+%         SPKF.accel_bound = 1;
+%         EKF_att.accel_bound = 1;
+%         
+%         Est_sensParams.var_acc = Est_sensParams.var_acc*10;
+% %         Est_sensParams.var_bias_gyr = Est_sensParams.var_bias_gyr*.0001;
+%     end
+%            
+    
+end
 %% Initialize History Arrays
 
 % Initialize history 
-Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
+Hist = inithist(SimParams, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
                 sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full,EKF_att,SRSPKF, SRSPKF_full, ASPKF_opt, AHINF, ...
-                SPKF_norm, useExpData);
+                SPKF_norm, useExpData, tStep, 0);
             
 % Initialize Continuous History
 if SimParams.recordContTime == 1 
@@ -154,6 +214,7 @@ end
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 %     display(iSim)    
     %% Loop through waypoints
+
     if iSim > Trajectory(iTrajectory).time
         if iTrajectory + 1 <= numel(Trajectory)
             iTrajectory = iTrajectory + 1;            
@@ -221,64 +282,73 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
      %% Update Sensors
     [Sensor,sensParams] = measurement_model(state, stateDeriv, sensParams, tStep);
     
+    
+   [Sensor_filt,COMP] = applylpfilt(Sensor, COMP);
+
 %     [Sensor.acc, move_avg_acc] = moving_avg_filt(Sensor.acc, move_avg_acc);
     %% State Estimation
-    tic;
-    SPKF = SPKF_attitude(Sensor, SPKF, EKF, Est_sensParams, tStep);
-    timer(1) = timer(1) + toc;
+%     tic;
+    SPKF = SPKF_attitude(Sensor, SPKF, EKF, Est_sensParams, tStep, useExpData);
+%     timer(1) = timer(1) + toc;
     
 
 % % %     
-    tic;
-    ASPKF = ASPKF_attitude(Sensor, ASPKF, EKF, Est_sensParams, tStep);
-    timer(2) = timer(2) + toc;
+%     tic;
+    ASPKF = ASPKF_attitude(Sensor, ASPKF, EKF, Est_sensParams, tStep, useExpData, 0);
+%     timer(2) = timer(2) + toc;
 %     
-    tic;
-    EKF_att = EKF_attitude_noN(Sensor, EKF_att, EKF, Est_sensParams, tStep);
-    timer(3) = timer(3) + toc;
+%     tic;
+    EKF_att = EKF_attitude(Sensor, EKF_att, EKF, Est_sensParams.EKF, tStep, useExpData);
+%     timer(3) = timer(3) + toc;
 %     
 % %     tic;
 %     SPKF_full = SPKF_full_state(Sensor, SPKF_full, Est_sensParams, tStep, iSim);
 %     timer(4) = timer(4) + toc;
 
 % % % % %     
-    tic;
-    COMP = CompFilt_attitude(Sensor, COMP, EKF, Est_sensParams, tStep);
-    timer(5) = timer(5) + toc;
+%     tic;
+    COMP = CompFilt_attitude(Sensor_filt, COMP, EKF, Est_sensParams, tStep, useExpData);
+%     timer(5) = timer(5) + toc;
 % % %     
  
-     tic;
-    HINF = HINF_attitude(Sensor, HINF, EKF, Est_sensParams, tStep);
-    timer(6) = timer(6) + toc;
+%      tic;
+    HINF = HINF_attitude(Sensor, HINF, EKF, Est_sensParams.EKF, tStep, useExpData);
+%     timer(6) = timer(6) + toc;
 %     
 %     tic;
-%     SRSPKF = SPKF_attitude_crs(Sensor, SRSPKF, EKF, Est_sensParams, tStep);
+%     SRSPKF = SPKF_attitude_crs(Sensor, SRSPKF, EKF, Est_sensParams, tStep, useExpData);
 %     timer(7) = timer(7) + toc;
 %     
-    tic;
-    SRSPKF = SRSPKF_attitude(Sensor, SRSPKF, EKF, Est_sensParams, tStep);
-    timer(7) = timer(7) + toc;
+%     tic;
+%     SRSPKF = SRSPKF_attitude(Sensor, SRSPKF, EKF, Est_sensParams, tStep, useExpData);
+%     timer(7) = timer(7) + toc;
 %     
 %     tic;
 %     SRSPKF_full = SRSPKF_full_state(Sensor, SRSPKF_full, Est_sensParams, tStep, iSim);
 %     timer(8) = timer(8) + toc;
 %     
-    tic;
-    ASPKF_opt = ASPKF_opt_attitude(Sensor, ASPKF_opt, EKF, Est_sensParams, tStep);
-    timer(9) = timer(9) + toc;
+%     tic;
+    ASPKF_opt = ASPKF_opt_attitude(Sensor, ASPKF_opt, EKF, Est_sensParams, tStep, useExpData);
+%     timer(9) = timer(9) + toc;
+    
+%     tic;
+%     ASPKF_opt = SPKF_attitude_slow(Sensor, ASPKF_opt, EKF, Est_sensParams, tStep, useExpData);
+%     timer(9) = timer(9) + toc;
 % %     
-    tic;
-    AHINF = AHINF_attitude(Sensor, AHINF, EKF, Est_sensParams, tStep);
-    timer(10) = timer(10) + toc;
+%     tic;
+    AHINF = AHINF_attitude(Sensor, AHINF, EKF, Est_sensParams.EKF, tStep, useExpData);
+%     timer(10) = timer(10) + toc;
 
 %     tic;
-%     SPKF_norm = EKF_attitude(Sensor, SPKF_norm, EKF, Est_sensParams, tStep);
+    SPKF_norm = CompFilt_PX4(Sensor_filt, SPKF_norm, EKF, Est_sensParams, tStep, useExpData);
 %     timer(11) = timer(11) + toc;
     
 %     tic;
 %     SPKF_norm = SPKF_norm_const(Sensor, SPKF_norm, EKF, Est_sensParams, tStep);
 %     timer(11) = timer(11) + toc;
     
+
+
 % %     
 % 
 %     EKF = EKF_position(Sensor, EKF, SPKF, Hist.SPKF(end).X_hat.q_hat, Est_sensParams, tStep, iSim);
@@ -286,7 +356,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 %     AEKF = AEKF_position(Sensor, AEKF, ASPKF, Hist.ASPKF(end).X_hat.q_hat, Est_sensParams, tStep, iSim);
     
 
-    
+ 
     
     
     %% Record History
@@ -333,16 +403,21 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
         ContHist.states = [ContHist.states,stateODE'];    
     end
     
+
     localFlag.contact = globalFlag.contact;     
     state = stateODE(end,:)';
     t = tODE(end);
     [Pose, Twist] = updatekinematics(state, stateDeriv);
+    
+
+    
 
     %Discrete Time recording @ 200 Hz
     Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor, ...
                         sensParams, EKF, AEKF, SPKF, ASPKF, COMP, HINF, SPKF_full,EKF_att, SRSPKF, SRSPKF_full, ASPKF_opt, ...
-                        AHINF,SPKF_norm, useExpData);
-                    
+                        AHINF,SPKF_norm, useExpData, iSim, tStep);
+    
+
     %% End loop conditions
     % Navi has crashed:
     if state(9) <= 0

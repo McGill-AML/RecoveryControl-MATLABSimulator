@@ -7,8 +7,15 @@ if loop_no <= 0 || useExpData == 1
     IC.attEuler = IC.attEuler;% + randn(3,1).*[2; 2; 5]*pi/180;
 else
     phi = randn(1);
+%     phi = [-1.3118, -.0515, -.4289, .4676, 2.2786]; % set of randomized init conditions that are constant
+%     phi = phi(mod(loop_no-1,5)+1);
     a_tmp = -1 + 2*rand(3,1);
     a_tmp = a_tmp/norm(a_tmp);
+%     a_tmp = [-0.7946    0.2722   -0.6521   -0.4342    0.0362;
+%              0.6004    0.7482    0.7337    0.8628    0.8265;
+%              0.0902    0.6051   -0.1908    0.2588    0.5617]; % set of randomized init conditions that are constant
+%     a_tmp = a_tmp(:,mod(loop_no-1,5)+1);
+    
     quat_tmp = [cos(phi*pi/180/2); a_tmp*sin(phi*pi/180/2)];
     [r1, r2, r3] = quat2angle(quat_tmp);
     IC.attEuler = IC.attEuler + [r1; r2; r3];
@@ -17,7 +24,7 @@ end
 
 if useExpData
     Est_ICs.q = angle2quat((IC.attEuler(1)),IC.attEuler(2),IC.attEuler(3),'xyz')';
-    Est_ICs.q = [-0.6786;   -0.0116;    0.0243;   -0.7340];
+%     [Est_ICs.q, rotMat]  = initOrientExpData([IMU_AccX'; IMU_AccY'; IMU_AccZ'], [IMU_GyroX'; IMU_GyroY';IMU_GyroZ']);
 else
     Est_ICs.q = angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')';
 end

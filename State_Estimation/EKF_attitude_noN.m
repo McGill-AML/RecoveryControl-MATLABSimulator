@@ -93,6 +93,13 @@ A_k_1_2 = 0.5*tStep*[zeros(1,3); eye(3)];
        
 A_k_1 = [ A_k_1_1, A_k_1_2;
           zeros(3,4), eye(3)];
+      
+% A_k_1_1 = eye(4)+tStep*[zeros(1,4); zeros(3,1), -cross_mat(omega_hat_m)];
+% 
+% A_k_1_2 = -0.5*tStep*[zeros(1,3); eye(3)];
+%        
+% A_k_1 = [ A_k_1_1, A_k_1_2;
+%           zeros(3,4), eye(3)];
 
 
 % process noise 
@@ -136,6 +143,7 @@ if norm(u_b_acc,2) > norm(g,2) + EKF_att.accel_bound || norm(u_b_acc,2) < norm(g
 %     C_k = [dR_dq_0*mag, dR_dq_1*mag, dR_dq_2*mag, dR_dq_3*mag, zeros(3)];
 
     C_k = [zeros(3,1), -cross_mat(rotMat*mag), zeros(3,3)];
+%     C_k = [zeros(3,1), cross_mat(rotMat'*mag), zeros(3,3)];
     
     R_k = diag(sensParams.var_mag);
     
