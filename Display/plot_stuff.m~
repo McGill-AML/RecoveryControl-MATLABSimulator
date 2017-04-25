@@ -1,0 +1,7 @@
+close all
+Plot.stateDeriv = Hist.stateDerivs(1:13,:)';
+for i = 1:13
+    Plot.stateDeriv(:,i) = norm(Plot.stateDeriv(:,i));
+end
+plot(Plot.times, Plot.stat)
+grid on

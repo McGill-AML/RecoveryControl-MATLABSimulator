@@ -1,0 +1,16 @@
+
+close all
+for trial = 1:5
+    numBumpersImpacted = 0;
+    for bumper = 1:4
+        if(sum(Plot.defls(:,bumper))~=0)
+            numBumpersImpacted = numBumpersImpacted + 1;
+        end
+    end
+    
+    if sum(Batch(trial).contact.defl
+        scatter(Batch(trial).offset,max(abs(Batch(trial).Plot.eulerAngleRates(3,:))));
+    end
+    grid on
+    hold on
+end

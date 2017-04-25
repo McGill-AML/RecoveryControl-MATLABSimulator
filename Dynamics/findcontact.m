@@ -53,9 +53,17 @@ function [ Contact ] = findcontact(rotMat,state)
             
             % Project velocity onto pole tangent plane
             Contact.slidingVelocityWorld(:,iBumper) = contactPointVelocityWorld - Contact.deflDeriv(iBumper)*poleNormal;
+            
             % Normalize to find vector of sliding direction
-            Contact.slidingDirectionWorld(:,iBumper) = Contact.slidingVelocityWorld(:,iBumper)...
-                                                        /norm(Contact.slidingVelocityWorld(:,iBumper));
+            tol = 0.1;
+            
+            if(norm(Contact.slidingVelocityWorld(:,iBumper))) > tol
+                Contact.slidingDirectionWorld(:,iBumper) = Contact.slidingVelocityWorld(:,iBumper)...
+                                                            /norm(Contact.slidingVelocityWorld(:,iBumper));
+            else
+                Contact.slidingDirectionWorld(:,iBumper) = zeros(size(Contact.slidingVelocityWorld(:,iBumper)));
+            end
+            
         end
     end
 end

@@ -33,6 +33,14 @@ Plot.angAccs = Hist.stateDerivs(4:6,:);
 temp = struct2cell(Hist.contacts);
 Plot.normalForces = reshape([temp{6,:}],[4,size(temp,2)]);
 temp2 = [temp{8,:}];
+
+tempN = [temp{7,:}];
+
+Plot.slidingVelocityWorlds_bump1 = tempN(:,1:4:end)';
+Plot.slidingVelocityWorlds_bump2 = tempN(:,2:4:end)';
+Plot.slidingVelocityWorlds_bump3 = tempN(:,3:4:end)';
+Plot.slidingVelocityWorlds_bump4 = tempN(:,4:4:end)';
+
 Plot.slidingDirectionWorlds_bump1 =  temp2(:,1:4:end)';
 Plot.slidingDirectionWorlds_bump2 =  temp2(:,2:4:end)';
 Plot.slidingDirectionWorlds_bump3 =  temp2(:,3:4:end)';
@@ -64,6 +72,8 @@ Plot.contactPointBodys_bump3 = temp4(:,3:4:end)';
 Plot.contactPointBodys_bump4 = temp4(:,4:4:end)';
 
 Plot.defls = reshape([temp{4,:}],[4,size(temp,2)])';
+
+Plot.deflDerivs = reshape([temp{5,:}],[4,size(temp,2)])';
 
 Plot.muSlidings = [temp{11,:}];
 

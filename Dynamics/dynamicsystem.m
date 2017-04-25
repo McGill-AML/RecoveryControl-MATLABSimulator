@@ -96,8 +96,9 @@ function [stateDeriv, Contact, PropState] = dynamicsystem(t,state,tStep,rpmContr
 
                 % Coulomb friction                
                 Contact.tangentialForceWorld(:,iBumper) = -Contact.muSliding*Contact.normalForceMag(iBumper)*Contact.slidingDirectionWorld(:,iBumper);
+                
                 tangentialForceBody(:,iBumper) = rotMat*Contact.tangentialForceWorld(:,iBumper);
-
+                
                 % Total contact moment 
                 contactMomentBody(:,iBumper) = cross(Contact.point.contactBody(:,iBumper),normalForceBody(:,iBumper)+tangentialForceBody(:,iBumper));
 

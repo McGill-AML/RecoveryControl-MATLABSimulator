@@ -5,25 +5,26 @@ yawImpact = 0.0;
 pitchImpact = -15; 
 rollImpact = 0.0;
 poleRadius = 0.15; 
-SimParams.useRecovery = 0;
+SimParams.useRecovery = 1;
 Batch = [];
-PREIMPACT_ATT_CALCSTEPFWD = 
-numTrials = 10;
+record = [];
+[FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
+numTrials = 1;
 tic
 for iBatch = 1:numTrials 
     
     disp(iBatch)
-    
-    offset = 0.8*(rand-0.5); % Randomize only position on y axis.
+    offset = 0.3;
+%     offset = -0.005+(iBatch-1)*0.0025;%0.8*(rand-0.5); % Randomize only position on y axis.
 
     ImpactParams = initparams_navi;
     SimParams.recordContTime = 0;
-    SimParams.timeFinal = 1.5;
+    SimParams.timeFinal = 0.5;
     tStep = 1/200;
     ImpactParams.wallLoc = 0.0;
     ImpactParams.wallPlane = 'YZ';
     ImpactParams.timeDes = 0.5; 
-    ImpactParams.frictionModel.muSliding = 0.0;%0.3;
+    ImpactParams.frictionModel.muSliding = 0.5;%0.3;
     ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
     timeImpact = 10000;
     timeStabilized = 10000;
@@ -56,8 +57,11 @@ for iBatch = 1:numTrials
     [Pose, Twist] = updatekinematics(state, stateDeriv);
     Sensor = initsensor(state, stateDeriv);
     Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
-
+    iDelay = 1;
+    tDelay = zeros(1,101);
+    
     for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep   
+        tic
         [ImpactInfo, ImpactIdentification] = detectimpact(iSim, tStep, ImpactInfo, ImpactIdentification,...
                                                           Hist.sensors,Hist.poses,PREIMPACT_ATT_CALCSTEPFWD, stateDeriv,state);
         [FuzzyInfo] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
@@ -81,14 +85,18 @@ for iBatch = 1:numTrials
             Control = controlleratt(state,iSim,SimParams.timeInit,tStep,Control,[]);
             Control.type = 'att';
         end
-
+        
         % Propagate Dynamics
         options = getOdeOptions();
-        [tODE,stateODE] = ode45(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
+        [tODE,stateODE] = ode23(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
                                                                 tStep,Control.rpm,ImpactParams,PropState.rpm, ...
                                                                 Experiment.propCmds),[iSim iSim+tStep],state,options);
-
-        % Reset contact flags for continuous time recording        
+%         tDelay(iDelay) = toc;
+%         iDelay = iDelay + 1;
+       
+%         record = [record; sum(stateDeriv)]
+        % Reset contact flags for continuous time recording  
+        
         globalFlag.coninitpropstatetact = localFlag.contact;
 
         % Record History
@@ -149,21 +157,24 @@ for iBatch = 1:numTrials
             break;
         end
 
-
+    toc
     end
 
     Plot = hist2plot(Hist);
     
     CrashData.Plot = Plot;
     CrashData.ImpactInfo = ImpactInfo;
-    %CrashData.ImpactIdentification = ImpactIdentification;
-%     CrashData.Hist = Hist;
-%     CrashData.ImpactParams = ImpactParams;
-%     CrashData.timeImpact = timeImpact;
-%     CrashData.offset = offset;
-%     CrashData.contact = contact;
+    CrashData.ImpactIdentification = ImpactIdentification;
+    CrashData.Hist = Hist;
+    CrashData.ImpactParams = ImpactParams;
+    CrashData.timeImpact = timeImpact;
+    CrashData.offset = offset;
+    CrashData.contact = Contact;
     Batch = [Batch; CrashData];
     
 end
-toc
- 
+
+% save('monteCarloResults.mat','Batch');
+
+%%
+ animate(0,3,Hist,'XY',ImpactParams,timeImpact,'NA',200);

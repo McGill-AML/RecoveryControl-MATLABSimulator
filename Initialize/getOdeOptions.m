@@ -1,5 +1,8 @@
 function options = getOdeOptions()
-
-    options = odeset('RelTol',1e-3,'AbsTol',[1e-5 1e-5 1e-5 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3 1e-3]); %Default: RelTol 1e-3, AbsTol 1e-6
+    tight = 1e-5;
+    loose = 1e-3;
+    options = odeset('RelTol',loose,'AbsTol',...
+        [tight tight tight loose loose loose loose loose loose loose loose loose loose],...
+        'Stats','off'); %Default: RelTol 1e-3, AbsTol 1e-6
 
 end
