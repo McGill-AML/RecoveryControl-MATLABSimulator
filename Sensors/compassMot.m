@@ -86,5 +86,7 @@ end
 
 % figure;plot(TIME,mag_filt);grid on
 figure;plot(TIME, mag_corrected);grid on
+title('Corrected Magnetometer Data'); 
+xlabel('Time'); ylabel('Mag Field [Gauss]');
 
 % figure;plot(TIME, bsxfun(@minus,[IMU_MagX, IMU_MagY, IMU_MagZ],mag_field_0'));grid on

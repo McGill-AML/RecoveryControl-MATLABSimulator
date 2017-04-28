@@ -16,7 +16,7 @@ ImpactParams = initparams_navi;
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
 SimParams.useRecovery = 1; 
-SimParams.timeFinal =60;
+SimParams.timeFinal = 60;
 tStep = 1/100;%1/200;
 
 ImpactParams.wallLoc = 0.5;%1.5;
@@ -157,7 +157,7 @@ if exist('running_a_loop','var')
 % %     SPKF_norm.acc_k_i = comp_vary(change_two);
 %     SPKF_norm.gyr_bias_k_i = comp_vary(change_two);
 %     COMP.gyr_bias_k_i = comp_vary(change_two);
-%     COMP.accel_bound = change_two*2 -1;
+%     COMP.accel_bound = change_two*5-4;
 % %     ekf_mag_acc_vary = [0.1,0.5, 1, 10, 50];
 % %     
 % %     Est_sensParams.var_acc = Est_sensParams.var_acc*ekf_mag_acc_vary(change_two);
@@ -172,26 +172,31 @@ if exist('running_a_loop','var')
 % AHINF.delta_rate = ahinf_val(change_two)/10;
 % 
 %     if change_two == 2
-%         SPKF.accel_bound = 3;
-%         EKF_att.accel_bound = 3;
-% %         
+% %         SPKF.accel_bound = 3;
+% %         EKF_att.accel_bound = 3;
+%          COMP.accel_bound = 4;
 % % Est_sensParams.var_mag = Est_sensParams.var_mag *10;
 %     elseif change_two == 3 
-%         SPKF.accel_bound = 1;
-%         EKF_att.accel_bound = 1;
-%         
+% %         SPKF.accel_bound = 1;
+% %         EKF_att.accel_bound = 1;
+%          COMP.accel_bound = 0.5;
+%          COMP.acc_k_i = 0.25;
 % %         Est_sensParams.var_acc = Est_sensParams.var_acc*10;
 %     elseif change_two == 4
-%         SPKF.accel_bound = 1;
-%         EKF_att.accel_bound = 1;
-%         
-%         Est_sensParams.var_acc = Est_sensParams.var_acc/10;
+% %         SPKF.accel_bound = 1;
+% %         EKF_att.accel_bound = 1;
+%          COMP.accel_bound = 0.5;
+%          COMP.acc_k_i = 0.05;
+% %         Est_sensParams.var_acc = Est_sensParams.var_acc/10;
 % %         Est_sensParams.var_bias_gyr = Est_sensParams.var_bias_gyr*.01;
 %     elseif change_two == 5
-%         SPKF.accel_bound = 1;
-%         EKF_att.accel_bound = 1;
-%         
-%         Est_sensParams.var_acc = Est_sensParams.var_acc*10;
+% %         SPKF.accel_bound = 1;
+% %         EKF_att.accel_bound = 1;
+% %         
+%          COMP.accel_bound = 0.5;
+%          COMP.acc_k_i = 0.25;
+%          COMP.mag_k_i = 0.15;
+% %         Est_sensParams.var_acc = Est_sensParams.var_acc*10;
 % %         Est_sensParams.var_bias_gyr = Est_sensParams.var_bias_gyr*.0001;
 %     end
 %            

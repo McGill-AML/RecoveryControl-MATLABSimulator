@@ -1,17 +1,17 @@
 % % % % % loop to test variables
-clear;
-
-timer = zeros(11,1);
-
-angle_head = 1;
-posn_hit = 0;
-
-rmseEUL = [];
-rmse =[];
-loop_no = 1;
-% for change_one = 1:1
-%     for change_two = 1:1
-        for ICset = 1:100
+% clear;
+% 
+% timer = zeros(11,1);
+% 
+% angle_head = 1;
+% posn_hit = 0;
+% 
+% rmseEUL = [];
+% rmse =[];
+% loop_no = 1;
+% for change_one = 1:2
+%     for change_two = 1:5
+        for ICset =79:200
             tic;
             loop_no
             clearvars -except loop_no timer rmse angle_head posn_hit rmse_position rmseEUL change_one change_two ICset
@@ -125,7 +125,7 @@ loop_no = 1;
 
         end
 %     end
-%     
+    
 % end
 % 
 % save('upd_crsh_low_all');

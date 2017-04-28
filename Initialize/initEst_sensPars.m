@@ -38,7 +38,7 @@ Est_sensParams.EKF.var_bias_gyr =  sensParams.var_bias_gyr*.1;
 
 Est_sensParams.EKF.var_bias_mag =  sensParams.var_bias_mag;
 else
-     Est_sensParams.var_acc = [1; 1; 1]*1; %abs(sensParams.var_acc)*1;% + randn(3,1)*0.1); This was *100
+     Est_sensParams.var_acc = [1; 1; 1]*10; %abs(sensParams.var_acc)*1;% + randn(3,1)*0.1); This was *100
 
  Est_sensParams.var_gyr =  abs(sensParams.var_gyr)*1;% + randn(3,1)*0.0003);
 

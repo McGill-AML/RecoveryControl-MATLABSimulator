@@ -40,7 +40,7 @@ end
 
 
 if useExpData == 0
-    COMP.accel_bound = 1; % +/- how much larger thna gravity before not used in update
+    COMP.accel_bound = 0.5; % +/- how much larger thna gravity before not used in update
 else
     COMP.accel_bound = 5; % +/- how much larger thna gravity before not used in update
 end

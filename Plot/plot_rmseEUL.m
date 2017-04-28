@@ -1,15 +1,15 @@
 %% plot script for plotting RMSE
 
-plot_SPKF =1;
-plot_ASPKF =1;
+plot_SPKF =0;
+plot_ASPKF =0;
 plot_EKF = 0;
 plot_AEKF = 0;
 plot_COMP =1;
-plot_HINF = 1;
+plot_HINF = 0;
 plot_SPKF_full =0;
-plot_EKF_att =1;
-plot_ASPKF_opt = 1;
-plot_AHINF = 1;
+plot_EKF_att =0;
+plot_ASPKF_opt = 0;
+plot_AHINF = 0;
 plot_SPKF_norm =1;
 plot_SRSPKF =0;
 

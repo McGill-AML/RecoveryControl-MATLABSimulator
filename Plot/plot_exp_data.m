@@ -4,6 +4,7 @@ titlemod = fileNo;
 % sensors
 figure;plot(TIME, [IMU_MagX, IMU_MagY, IMU_MagZ]); grid on;
 title(['Magnetometer ']); legend('X', 'Y', 'Z');
+xlabel('Time'); ylabel('Mag Field [Gauss]');
 
 
 figure;plot(TIME, [IMU_GyroX, IMU_GyroY, IMU_GyroZ]); grid on;
@@ -16,7 +17,7 @@ set(hdt,'UpdateFcn',@datatipWithSubscript);
 
 
 figure;plot(TIME, BATT_Curr); grid on;
-title(['Battery Current ']); 
+title(['Battery Current ']); xlabel('Time'); ylabel('Current [Amps]');
 
 
 %% plot vicon
