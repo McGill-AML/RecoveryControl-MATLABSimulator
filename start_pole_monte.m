@@ -10,7 +10,7 @@ Batch = [];
 record = [];
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
 numTrials = 1;
-tic
+
 for iBatch = 1:numTrials 
     
     disp(iBatch)
@@ -24,7 +24,7 @@ for iBatch = 1:numTrials
     ImpactParams.wallLoc = 0.0;
     ImpactParams.wallPlane = 'YZ';
     ImpactParams.timeDes = 0.5; 
-    ImpactParams.frictionModel.muSliding = 0.5;%0.3;
+    ImpactParams.frictionModel.muSliding = 0.3;%0.3;
     ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
     timeImpact = 10000;
     timeStabilized = 10000;
@@ -157,7 +157,7 @@ for iBatch = 1:numTrials
             break;
         end
 
-    toc
+    
     end
 
     Plot = hist2plot(Hist);
@@ -177,4 +177,4 @@ end
 % save('monteCarloResults.mat','Batch');
 
 %%
- animate(0,3,Hist,'XY',ImpactParams,timeImpact,'NA',200);
+%  animate(0,3,Hist,'XY',ImpactParams,timeImpact,'NA',100);
