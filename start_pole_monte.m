@@ -4,22 +4,21 @@ VxImpact = 2.0;
 yawImpact = 0.0;
 pitchImpact = -15; 
 rollImpact = 0.0;
-poleRadius = 0.15; 
-SimParams.useRecovery = 1;
+poleRadius = 0.1; 
+SimParams.useRecovery = 0;
 Batch = [];
 record = [];
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
-numTrials = 1;
-
+numTrials = 1000;
+elapsedTime = 0;
 for iBatch = 1:numTrials 
-    
+    tic
     disp(iBatch)
-    offset = 0.3;
-%     offset = -0.005+(iBatch-1)*0.0025;%0.8*(rand-0.5); % Randomize only position on y axis.
-
+    offset = -1+2*((iBatch-1)/numTrials);
+    offset_meters = 0.35*offset;
     ImpactParams = initparams_navi;
     SimParams.recordContTime = 0;
-    SimParams.timeFinal = 0.5;
+    SimParams.timeFinal = 1.0;
     tStep = 1/200;
     ImpactParams.wallLoc = 0.0;
     ImpactParams.wallPlane = 'YZ';
@@ -37,7 +36,7 @@ for iBatch = 1:numTrials
     ImpactIdentification = initimpactidentification;
     Control.twist.posnDeriv(1) = VxImpact; 
     IC.attEuler = [deg2rad(rollImpact);deg2rad(pitchImpact);deg2rad(yawImpact)];  
-    IC.posn = [-0.45;offset;2];  
+    IC.posn = [-0.45;offset_meters;2];  
     Setpoint.posn(3) = IC.posn(3); 
     xAcc = 0;                                                               
     rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
@@ -57,11 +56,9 @@ for iBatch = 1:numTrials
     [Pose, Twist] = updatekinematics(state, stateDeriv);
     Sensor = initsensor(state, stateDeriv);
     Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
-    iDelay = 1;
-    tDelay = zeros(1,101);
     
     for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep   
-        tic
+       
         [ImpactInfo, ImpactIdentification] = detectimpact(iSim, tStep, ImpactInfo, ImpactIdentification,...
                                                           Hist.sensors,Hist.poses,PREIMPACT_ATT_CALCSTEPFWD, stateDeriv,state);
         [FuzzyInfo] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
@@ -86,22 +83,14 @@ for iBatch = 1:numTrials
             Control.type = 'att';
         end
         
-        % Propagate Dynamics
         options = getOdeOptions();
         [tODE,stateODE] = ode23(@(tODE, stateODE) dynamicsystem(tODE,stateODE, ...
                                                                 tStep,Control.rpm,ImpactParams,PropState.rpm, ...
                                                                 Experiment.propCmds),[iSim iSim+tStep],state,options);
-%         tDelay(iDelay) = toc;
-%         iDelay = iDelay + 1;
-       
-%         record = [record; sum(stateDeriv)]
-        % Reset contact flags for continuous time recording  
-        
+
         globalFlag.coninitpropstatetact = localFlag.contact;
 
-        % Record History
         if SimParams.recordContTime == 0
-
             [stateDeriv, Contact, PropState] = dynamicsystem(tODE(end),stateODE(end,:), ...
                                                              tStep,Control.rpm,ImpactParams, PropState.rpm, ...
                                                              Experiment.propCmds);        
@@ -111,9 +100,7 @@ for iBatch = 1:numTrials
                     ImpactInfo.firstImpactOccured = 1;
                 end
             end
-
         else      
-            % Continuous time recording
             for j = 1:size(stateODE,1)
                 [stateDeriv, Contact, PropState] = dynamicsystem(tODE(j),stateODE(j,:), ...
                                                                  tStep,Control.rpm,ImpactParams, PropState.rpm, ...
@@ -124,10 +111,8 @@ for iBatch = 1:numTrials
                         ImpactInfo.firstImpactOccured = 1;
                     end
                 end     
-
                 ContHist = updateconthist(ContHist,stateDeriv, Pose, Twist, Control, PropState, Contact, globalFlag, Sensor); 
             end
-
             ContHist.times = [ContHist.times;tODE];
             ContHist.states = [ContHist.states,stateODE'];    
         end
@@ -136,14 +121,10 @@ for iBatch = 1:numTrials
         state = stateODE(end,:)';
         t = tODE(end);
         [Pose, Twist] = updatekinematics(state, stateDeriv);
-
-        %% Update Sensors
         Sensor = updatesensor(state, stateDeriv);
-
-        % Discrete Time recording @ 200 Hz
         Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 
-        % Navi has crashed:
+        % Navi has crashed
         if state(9) <= 0
             display('Navi has hit the floor :(');
             ImpactInfo.isStable = 0;
@@ -161,20 +142,19 @@ for iBatch = 1:numTrials
     end
 
     Plot = hist2plot(Hist);
-    
     CrashData.Plot = Plot;
-    CrashData.ImpactInfo = ImpactInfo;
+%     CrashData.ImpactInfo = ImpactInfo;
     CrashData.ImpactIdentification = ImpactIdentification;
-    CrashData.Hist = Hist;
+%     CrashData.Hist = Hist;
     CrashData.ImpactParams = ImpactParams;
     CrashData.timeImpact = timeImpact;
     CrashData.offset = offset;
-    CrashData.contact = Contact;
+%     CrashData.contact = Contact;
     Batch = [Batch; CrashData];
-    
+    elapsedTime = toc + elapsedTime
 end
 
-% save('monteCarloResults.mat','Batch');
+save('1000_trials_may_20.mat','Batch');
 
 %%
 %  animate(0,3,Hist,'XY',ImpactParams,timeImpact,'NA',100);
