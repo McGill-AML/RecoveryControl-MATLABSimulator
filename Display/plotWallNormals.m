@@ -1,0 +1,19 @@
+close all
+for trial = 1:1000
+    disp(trial)
+    scatter(Batch(trial).ImpactIdentification.wallNormalWorld(1), ...
+            Batch(trial).ImpactIdentification.wallNormalWorld(2),...
+            'MarkerFaceColor',[(Batch(trial).offset+1)/2 0 0],...
+            'MarkerEdgeColor','w');
+%         scatter(Batch(trial).offset, ...
+%             Batch(trial).ImpactIdentification.wallNormalWorld(1),...
+%             'MarkerFaceColor',[(Batch(trial).offset+1)/2 0 0],...
+%             'MarkerEdgeColor','w');
+
+    title('Wall Normals');
+    
+    xlabel('X Component (m)');
+    ylabel('Y Component (m)');
+    grid on
+    hold on
+end

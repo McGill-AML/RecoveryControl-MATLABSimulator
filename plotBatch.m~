@@ -1,16 +1,21 @@
 
 close all
-for trial = 1:5
+for trial = 1:1000
     numBumpersImpacted = 0;
-    for bumper = 1:4
-        if(sum(Plot.defls(:,bumper))~=0)
+    for bumper = 1:4   % check how many bumpers impacted
+        if(sum(Batch(trial).Plot.defls(:,bumper))~=0)
             numBumpersImpacted = numBumpersImpacted + 1;
         end
     end
-    
-    if sum(Batch(trial).contact.defl
-        scatter(Batch(trial).offset,max(abs(Batch(trial).Plot.eulerAngleRates(3,:))));
+    if numBumpersImpacted == 0
+        scatter(Batch(trial).offset,max(abs(Batch(trial).Plot.eulerAngleRates(3,:))),'g');
+    elseif numBumpersImpacted == 1
+        h1 = scatter(Batch(trial).offset,max(abs(Batch(trial).Plot.eulerAngleRates(3,:))),'b');
+    elseif numBumpersImpacted >= 2
+        scatter(Batch(trial).offset,max(abs(Batch(trial).Plot.eulerAngleRates(3,:))),'r');
+        legend('multiple impacts');
     end
+    axis([-1 1 0 14])
     grid on
     hold on
 end

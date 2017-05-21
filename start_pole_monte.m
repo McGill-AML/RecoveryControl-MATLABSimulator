@@ -154,7 +154,7 @@ for iBatch = 1:numTrials
     elapsedTime = toc + elapsedTime
 end
 
-save('1000_trials_may_20.mat','Batch');
+save('nighty_night.mat','Batch');
 
 %%
 %  animate(0,3,Hist,'XY',ImpactParams,timeImpact,'NA',100);
