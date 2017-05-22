@@ -4,10 +4,10 @@ VxImpact = 2.5;
 
 offset = 0.0;%2*0.56*(rand-0.5);
 yawImpact = 0; %degrees
-pitchImpact = 30; %degrees
+pitchImpact = -15; %degrees
 rollImpact = 0.0;
 
-poleRadius = 0.15; % meters
+poleRadius = 0.1; % meters
 
 % Initialize Fuzzy Logic Process
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
@@ -16,15 +16,15 @@ poleRadius = 0.15; % meters
 ImpactParams = initparams_navi;
 
 SimParams.recordContTime = 0;
-SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
-SimParams.useRecovery = 1;
+SimParams.useFaesslerRecovery = 0;%Use Faessler recovery
+SimParams.useRecovery = 0;
 SimParams.timeFinal = 2.0;
 tStep = 1/200;
 
 ImpactParams.wallLoc = 0.0;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5; %Desired time of impact. Does nothing
-ImpactParams.frictionModel.muSliding = 0.1;%0.3;
+ImpactParams.frictionModel.muSliding = 0.3;%0.3;
 ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
 timeStabilized = 10000;
