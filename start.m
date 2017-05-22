@@ -1,10 +1,10 @@
 global g timeImpact globalFlag poleRadius
 
-VxImpact = 2.0;
+VxImpact = 2.5;
 
 offset = 0.0;%2*0.56*(rand-0.5);
 yawImpact = 0; %degrees
-pitchImpact =-15; %degrees
+pitchImpact = 30; %degrees
 rollImpact = 0.0;
 
 poleRadius = 0.15; % meters
@@ -18,7 +18,7 @@ ImpactParams = initparams_navi;
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
 SimParams.useRecovery = 1;
-SimParams.timeFinal = 0.75;
+SimParams.timeFinal = 2.0;
 tStep = 1/200;
 
 ImpactParams.wallLoc = 0.0;
@@ -201,19 +201,20 @@ end
 
 Plot = hist2plot(Hist);
 %%
-close all
-% animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',50);
-% plot(Plot.times,Plot.defls(:,4),'--')
+% close all
+% % animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',50);
+% % plot(Plot.times,Plot.defls(:,4),'--')
+% % hold on
+% % plot(Plot.times,Plot.defls(:,4),'*')
+% % legend('bumper 1','bumper 4')
+% % grid on
+% 
+% %%
+% close all
+% % plot(Plot.times,Plot.eulerAngleRates(2,:))
+% % plot(Plot.times,Plot.defls)
 % hold on
-% plot(Plot.times,Plot.defls(:,4),'*')
-% legend('bumper 1','bumper 4')
+% plot(Plot.times,Plot.contactPtVelocityWorlds_bump1)
+% legend('x','y','z')
 % grid on
-
-%%
-close all
-% plot(Plot.times,Plot.eulerAngleRates(2,:))
-% plot(Plot.times,Plot.defls)
-hold on
-plot(Plot.times,Plot.contactPtVelocityWorlds_bump1)
-legend('x','y','z')
-grid on
+animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'na',400);
