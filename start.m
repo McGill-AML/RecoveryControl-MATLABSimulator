@@ -4,7 +4,7 @@ VxImpact = 2.5;
 
 offset = 0.0;%2*0.56*(rand-0.5);
 yawImpact = 0; %degrees
-pitchImpact = -15; %degrees
+pitchImpact = -25; %degrees
 rollImpact = 0.0;
 
 poleRadius = 0.1; % meters
@@ -86,8 +86,7 @@ end
 
 % Simulation Loop
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
- %1/200;
-%     display(iSim)   
+ 
     
     % Impact Detection    
     [ImpactInfo, ImpactIdentification] = detectimpact(iSim, tStep, ImpactInfo, ImpactIdentification,...
@@ -217,4 +216,4 @@ Plot = hist2plot(Hist);
 % plot(Plot.times,Plot.contactPtVelocityWorlds_bump1)
 % legend('x','y','z')
 % grid on
-animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'na',400);
+animate(0,3,Hist,'XY',ImpactParams,timeImpact,'crash',400);
