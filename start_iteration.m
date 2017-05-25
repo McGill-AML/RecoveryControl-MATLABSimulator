@@ -11,16 +11,17 @@ record = [];
 numOffset = 71;
 numPitch = 46;
 elapsedTime = 0;
-for iPitch = 45%1:numPitch 
+for iPitch = 1:numPitch 
     pitchImpact = 1 - iPitch; 
     tic
-    disp(iPitch)
-    for iOffset=10%1:numOffset
-        offset = 0.3;%-1+2*((iOffset-1)/numOffset);
+    for iOffset=1:numOffset
+        recoverySuccessful = 0;
+        disp(numOffset*(iPitch-1)+iOffset);
+        offset = -1+2*((iOffset-1)/(numOffset-1));
         offset_meters = 0.35*offset;
         ImpactParams = initparams_navi;
         SimParams.recordContTime = 0;
-        SimParams.timeFinal = 2.0;
+        SimParams.timeFinal = 3.0;
         tStep = 1/200;
         ImpactParams.wallLoc = 0.0;
         ImpactParams.wallPlane = 'YZ';
@@ -35,10 +36,10 @@ for iPitch = 45%1:numPitch
         Setpoint = initsetpoint;
         [Contact, ImpactInfo] = initcontactstructs;
         localFlag = initflags;
-        ImpactIdentification = initimpactidentification;
+        ImpactIdentification = inviitimpactidentification;
         Control.twist.posnDeriv(1) = VxImpact; 
         IC.attEuler = [deg2rad(rollImpact);deg2rad(pitchImpact);deg2rad(yawImpact)];  
-        IC.posn = [-0.4;offset_meters;2];  
+        IC.posn = [-0.4;offset_meters;0];  
         Setpoint.posn(3) = IC.posn(3); 
         xAcc = 0;                                                               
         rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
@@ -72,7 +73,7 @@ for iPitch = 45%1:numPitch
             end
 
             if Control.accelRefCalculated*SimParams.useRecovery == 1       
-                    Control = checkrecoverystage(Pose, Twist, Control, ImpactInfo);
+                    [Control, recoverySuccessful] = checkrecoverystage(Pose, Twist, Control, ImpactInfo, recoverySuccessful);
                     [Control] = computedesiredacceleration(Control, Twist);
                     [Control] = controllerrecovery(tStep, Pose, Twist, Control);       
                     Control.type = 'recovery';
@@ -124,39 +125,19 @@ for iPitch = 45%1:numPitch
             [Pose, Twist] = updatekinematics(state, stateDeriv);
             Sensor = updatesensor(state, stateDeriv);
             Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
-
-            % Navi has crashed
-            if state(9) <= 0
-                display('Navi has hit the floor :(');
-                ImpactInfo.isStable = 0;
-                break;
-            end  
-
-            % Navi has drifted very far away from wall:
-            if state(7) <= -10
-                display('Navi has left the building');
-                ImpactInfo.isStable = 1;
-                break;
-            end
-
-
         end
 
         Plot = hist2plot(Hist);
-        CrashData.Plot = Plot;
-    %     CrashData.ImpactInfo = ImpactInfo;
-        CrashData.ImpactIdentification = ImpactIdentification;
-    %     CrashData.Hist = Hist;
-        CrashData.ImpactParams = ImpactParams;
-        CrashData.timeImpact = timeImpact;
-        CrashData.offset = offset;
-    %     CrashData.contact = Contact;
-        Batch = [Batch; CrashData];
+        Trial = {offset, pitchImpact, Plot.times', Plot.posns', Plot.recoveryStage'...
+            recoverySuccessful, ImpactIdentification.wallNormalWorld,timeImpact}; 
+        Batch = [Batch;Trial];
         elapsedTime = toc + elapsedTime
     end
 end
 
-% save('iteration_with_recovery.mat','Batch');
+
+save('vertVel_no_recovery.mat','Batch');
 %%
-close all
- animate(0,1,Hist,'na',ImpactParams,timeImpact,'NA',400);
+% close all
+%  animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',400);
+% plot(Plot.times,abs(Plot.propRpms))

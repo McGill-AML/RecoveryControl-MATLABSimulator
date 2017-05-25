@@ -1,10 +1,10 @@
-function [Control] = checkrecoverystage(Pose, Twist, Control, ImpactInfo)
+function [Control, recoverySuccessful] = checkrecoverystage(Pose, Twist, Control, ImpactInfo, recoverySuccessful)
 %checkrecoverystage.m  Checks recovery stage for Recovery Controller
 
     bodyRatesThresh = 2.0; %rad/s
     errorQuaternionThresh = 0.15; % non-dimensioned
     rollPitchThresh = 0.2; % rad
-    verticalVelocityThresh = 0.5; % m/s
+    verticalVelocityThresh = 0.2; % m/s
     
     SWITCH_1 = abs(Control.errQuat(2)) < errorQuaternionThresh && abs(Control.errQuat(3)) < errorQuaternionThresh ... % error quaternion elements 2 and 3
         && abs(Twist.attEulerRate(1)) < bodyRatesThresh  && abs(Twist.attEulerRate(2)) < bodyRatesThresh;    % roll/pitch rates   
@@ -25,6 +25,7 @@ function [Control] = checkrecoverystage(Pose, Twist, Control, ImpactInfo)
         case 2
             if SWITCH_2
                 Control.recoveryStage = 0;
+                recoverySuccessful = 1;
             end
         otherwise 
             error('Invalid recovery stage!');
