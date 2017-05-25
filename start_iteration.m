@@ -4,19 +4,19 @@ VxImpact = 2.0;
 yawImpact = 0.0;
 rollImpact = 0.0;
 poleRadius = 0.1; 
-SimParams.useRecovery = 0;
+SimParams.useRecovery = 1;
 Batch = [];
 record = [];
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
 numOffset = 71;
 numPitch = 46;
 elapsedTime = 0;
-for iPitch = 1:numPitch 
+for iPitch = 45%1:numPitch 
     pitchImpact = 1 - iPitch; 
     tic
     disp(iPitch)
-    for iOffset=1:numOffset
-        offset = -1+2*((iOffset-1)/numOffset);
+    for iOffset=10%1:numOffset
+        offset = 0.3;%-1+2*((iOffset-1)/numOffset);
         offset_meters = 0.35*offset;
         ImpactParams = initparams_navi;
         SimParams.recordContTime = 0;
@@ -156,6 +156,7 @@ for iPitch = 1:numPitch
     end
 end
 
-save('iteration_no_recovery.mat','Batch');
+% save('iteration_with_recovery.mat','Batch');
 %%
- animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',400);
+close all
+ animate(0,1,Hist,'na',ImpactParams,timeImpact,'NA',400);
