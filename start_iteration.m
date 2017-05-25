@@ -16,7 +16,7 @@ for iPitch = 1:numPitch
     tic
     disp(iPitch)
     for iOffset=1:numOffset
-        offset = -1+2*((iOffset-1)/numOffset);
+        offset = -1+2*((iOffset-1)/(numOffset-1));
         offset_meters = 0.35*offset;
         ImpactParams = initparams_navi;
         SimParams.recordContTime = 0;
@@ -158,4 +158,4 @@ end
 
 save('iteration_no_recovery.mat','Batch');
 %%
- animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',400);
+%  animate(0,3,Hist,'XY',ImpactParams,timeImpact,'NA',400);
