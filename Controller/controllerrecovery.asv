@@ -27,7 +27,7 @@ function [Control] = controllerrecovery(tStep, Pose, Twist, Control, Hist)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-global m g Ixx Iyy Izz u2RpmMat vertVelPrevious;
+global m Ixx Iyy Izz u2RpmMat;
 
 if sum(abs(Control.acc)) == 0
     error('Desired acceleration must be non-zero');
@@ -48,14 +48,9 @@ bodyFrameZAxis = quatrotate(Pose.attQuat', [0 0 -1]);
 %     % can't give thrust in positive z-axis
 %     Control.u(1) = 0;
 % end
-P_vertVel = 7.0;
+P_vertVel = 1.0;
 D_vertVel = 0.0;
-
-sp_vertVel = 0.0;
-vertVelError =  sp_vertVel - Twist.linVel(3);
-Control.u(1) = -m*g + P_vertVel*(vertVelError) + D_vertVel*(vertVelPrevious - Twist.linVel(3))/tStep;
-vertVelPrevious = Twist.linVel(3);
-
+Control.u(1) = P_vertVel*(sp_vertVel - 
 % ----------> Saturate thrust here <-----------
 
 %% 2. Compute roll/pitch error

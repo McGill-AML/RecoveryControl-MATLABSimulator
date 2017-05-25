@@ -4,7 +4,10 @@ function [Pose, Twist] = initposetwist
 %   Last Updated: December 12, 2016
 %   Description:
 %-------------------------------------------------------------------------%   
-
+    global vertVelPrevious
+    
+    vertVelPrevious = 0.0;
+    
     % Position in world frame
     Pose.posn = zeros(3,1);
 
@@ -28,5 +31,7 @@ function [Pose, Twist] = initposetwist
 
     % Euler angle rates
     Twist.attEulerRate = zeros(3,1);
+    
+    
 
 end
