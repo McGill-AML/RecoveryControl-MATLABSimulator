@@ -4,24 +4,24 @@ VxImpact = 2.0;
 yawImpact = 0.0;
 rollImpact = 0.0;
 poleRadius = 0.1; 
-SimParams.useRecovery = 0;
+SimParams.useRecovery = 1;
 Batch = [];
 record = [];
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
 numOffset = 71;
 numPitch = 46;
 elapsedTime = 0;
-for iPitch = 21%:numPitch 
-    pitchImpact = 1 - iPitch; 
+for iPitch = 20%:numPitch 
+    pitchImpact = -45;%1 - iPitch; 
     tic
     for iOffset=1%:numOffset
         recoverySuccessful = 0;
         disp(numOffset*(iPitch-1)+iOffset);
-        offset = 0.2%-1+2*((iOffset-1)/(numOffset-1));
+        offset = 0.2;%-1+2*((iOffset-1)/(numOffset-1));
         offset_meters = 0.35*offset;
         ImpactParams = initparams_navi;
         SimParams.recordContTime = 0;
-        SimParams.timeFinal = 1.15;
+        SimParams.timeFinal = 3;
         tStep = 1/200;
         ImpactParams.wallLoc = 0.0;
         ImpactParams.wallPlane = 'YZ';
@@ -131,6 +131,7 @@ for iPitch = 21%:numPitch
         Trial = {offset, pitchImpact, Plot.times', Plot.posns', Plot.recoveryStage'...
             recoverySuccessful, ImpactIdentification.wallNormalWorld,timeImpact}; 
         Batch = [Batch;Trial];
+        
         elapsedTime = toc + elapsedTime
     end
 end
@@ -138,5 +139,5 @@ end
 save('vertVel_no_recovery.mat','Batch');
 %%
 close all
-animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',300);
+animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',600);
 % plot(Plot.times,abs(Plot.propRpms))
