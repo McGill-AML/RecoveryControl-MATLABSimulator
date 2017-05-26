@@ -27,7 +27,10 @@ function [ Contact ] = findcontact(rotMat,state)
         
         % find point on bumper closest to origin along pole normal by
         % projecting pole normal onto bumper plane and scaling by bumper radius
-        centerToContact = BUMP_RADII(iBumper)*(dot(poleNormal,bumperNormalWorld)*bumperNormalWorld - poleNormal);
+        % normalize to make a unit vector from bumper center to contact
+        unitCenterToContact=(dot(poleNormal,bumperNormalWorld)*bumperNormalWorld - poleNormal)/...
+                        norm(dot(poleNormal,bumperNormalWorld)*bumperNormalWorld - poleNormal);
+        centerToContact = BUMP_RADII(iBumper)*(unitCenterToContact);
         % project this point onto pole normal
         centerToProjection = dot(poleNormal,centerToContact)*poleNormal;
 
@@ -63,7 +66,6 @@ function [ Contact ] = findcontact(rotMat,state)
             else
                 Contact.slidingDirectionWorld(:,iBumper) = zeros(size(Contact.slidingVelocityWorld(:,iBumper)));
             end
-            
         end
     end
 end

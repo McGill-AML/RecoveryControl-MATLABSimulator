@@ -4,24 +4,24 @@ VxImpact = 2.0;
 yawImpact = 0.0;
 rollImpact = 0.0;
 poleRadius = 0.1; 
-SimParams.useRecovery = 0;
+SimParams.useRecovery = 1;
 Batch = [];
 record = [];
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
 numOffset = 71;
 numPitch = 46;
 elapsedTime = 0;
-for iPitch = 1%numPitch 
+for iPitch = 21%:numPitch 
     pitchImpact = 1 - iPitch; 
     tic
-    for iOffset=1:2%numOffset
+    for iOffset=1%:numOffset
         recoverySuccessful = 0;
         disp(numOffset*(iPitch-1)+iOffset);
-        offset = -1+2*((iOffset-1)/(numOffset-1));
+        offset = 0.15%-1+2*((iOffset-1)/(numOffset-1));
         offset_meters = 0.35*offset;
         ImpactParams = initparams_navi;
         SimParams.recordContTime = 0;
-        SimParams.timeFinal = 3.0;
+        SimParams.timeFinal = 1.0;
         tStep = 1/200;
         ImpactParams.wallLoc = 0.0;
         ImpactParams.wallPlane = 'YZ';
@@ -39,7 +39,7 @@ for iPitch = 1%numPitch
         ImpactIdentification = initimpactidentification;
         Control.twist.posnDeriv(1) = VxImpact; 
         IC.attEuler = [deg2rad(rollImpact);deg2rad(pitchImpact);deg2rad(yawImpact)];  
-        IC.posn = [-0.4;offset_meters;0];  
+        IC.posn = [-0.4;offset_meters;2];  
         Setpoint.posn(3) = IC.posn(3); 
         xAcc = 0;                                                               
         rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
@@ -125,42 +125,18 @@ for iPitch = 1%numPitch
             [Pose, Twist] = updatekinematics(state, stateDeriv);
             Sensor = updatesensor(state, stateDeriv);
             Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
-
-            % Navi has crashed
-%             if state(9) <= 0
-%                 display('Navi has hit the floor :(');
-%                 ImpactInfo.isStable = 0;
-%                 break;
-%             end  
-% 
-%             % Navi has drifted very far away from wall:
-%             if state(7) <= -10
-%                 display('Navi has left the building');
-%                 ImpactInfo.isStable = 1;
-%                 break;
-%             end
         end
 
         Plot = hist2plot(Hist);
-        CrashData = Plot.posns';
-        CrashData = [CrashData Plot.recoveryStage'];
-%         CrashData.recoveryStage = Plot.recoveryStage;
-%         CrashData.times = Plot.times;
-%         CrashData = recoverySuccessful;
-%         CrashData.wallNormalWorld = ImpactIdentification.wallNormalWorld;
-%         CrashData.timeImpactDetected= ImpactIdentification.timeImpactDetected;
-%         CrashData.timeImpact = timeImpact; %actual
-%         CrashData.offset = offset;
-%         CrashData.initialPitch = pitchImpact;
-        Batch = {offset, pitchImpact, Plot.times', Plot.posns', Plot.recoveryStage'...
+        Trial = {offset, pitchImpact, Plot.times', Plot.posns', Plot.recoveryStage'...
             recoverySuccessful, ImpactIdentification.wallNormalWorld,timeImpact}; 
-        Batch(numOffset*(iPitch-1)+iOffset) = CrashData;
+        Batch = [Batch;Trial];
         elapsedTime = toc + elapsedTime
     end
 end
 
 save('vertVel_no_recovery.mat','Batch');
 %%
-% close all
-%  animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',400);
+close all
+animate(0,1,Hist,'',ImpactParams,timeImpact,'NA',199);
 % plot(Plot.times,abs(Plot.propRpms))
