@@ -1,13 +1,13 @@
 global g timeImpact globalFlag poleRadius
 
-VxImpact = 2.0;
+VxImpact = 2.5;
 
 offset = 0.0;%2*0.56*(rand-0.5);
 yawImpact = 0; %degrees
-pitchImpact =-15; %degrees
+pitchImpact = -25; %degrees
 rollImpact = 0.0;
 
-poleRadius = 0.15; % meters
+poleRadius = 0.1; % meters
 
 % Initialize Fuzzy Logic Process
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
@@ -16,15 +16,15 @@ poleRadius = 0.15; % meters
 ImpactParams = initparams_navi;
 
 SimParams.recordContTime = 0;
-SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
-SimParams.useRecovery = 1;
-SimParams.timeFinal = 0.75;
+SimParams.useFaesslerRecovery = 0;%Use Faessler recovery
+SimParams.useRecovery = 0;
+SimParams.timeFinal = 2.0;
 tStep = 1/200;
 
 ImpactParams.wallLoc = 0.0;
 ImpactParams.wallPlane = 'YZ';
 ImpactParams.timeDes = 0.5; %Desired time of impact. Does nothing
-ImpactParams.frictionModel.muSliding = 0.1;%0.3;
+ImpactParams.frictionModel.muSliding = 0.3;%0.3;
 ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
 timeImpact = 10000;
 timeStabilized = 10000;
@@ -86,8 +86,7 @@ end
 
 % Simulation Loop
 for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
- %1/200;
-%     display(iSim)   
+ 
     
     % Impact Detection    
     [ImpactInfo, ImpactIdentification] = detectimpact(iSim, tStep, ImpactInfo, ImpactIdentification,...
@@ -201,19 +200,20 @@ end
 
 Plot = hist2plot(Hist);
 %%
-close all
-% animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',50);
-% plot(Plot.times,Plot.defls(:,4),'--')
+% close all
+% % animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',50);
+% % plot(Plot.times,Plot.defls(:,4),'--')
+% % hold on
+% % plot(Plot.times,Plot.defls(:,4),'*')
+% % legend('bumper 1','bumper 4')
+% % grid on
+% 
+% %%
+% close all
+% % plot(Plot.times,Plot.eulerAngleRates(2,:))
+% % plot(Plot.times,Plot.defls)
 % hold on
-% plot(Plot.times,Plot.defls(:,4),'*')
-% legend('bumper 1','bumper 4')
+% plot(Plot.times,Plot.contactPtVelocityWorlds_bump1)
+% legend('x','y','z')
 % grid on
-
-%%
-close all
-% plot(Plot.times,Plot.eulerAngleRates(2,:))
-% plot(Plot.times,Plot.defls)
-hold on
-plot(Plot.times,Plot.contactPtVelocityWorlds_bump1)
-legend('x','y','z')
-grid on
+animate(0,3,Hist,'XY',ImpactParams,timeImpact,'crash',400);
