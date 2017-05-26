@@ -136,7 +136,7 @@ for iPitch = 1:numPitch
 end
 
 
-save('vertVel_no_recovery.mat','Batch');
+save('vertVel_with_recovery.mat','Batch');
 %%
 % close all
 %  animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',400);
