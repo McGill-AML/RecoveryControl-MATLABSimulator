@@ -11,10 +11,10 @@ record = [];
 numOffset = 71;
 numPitch = 46;
 elapsedTime = 0;
-for iPitch = 1%:numPitch 
+for iPitch = 1:numPitch 
     pitchImpact = 1 - iPitch; 
     tic
-    for iOffset=1%:numOffset
+    for iOffset=1:numOffset
         recoverySuccessful = 0;
         disp(numOffset*(iPitch-1)+iOffset);
         offset = -1+2*((iOffset-1)/(numOffset-1));
