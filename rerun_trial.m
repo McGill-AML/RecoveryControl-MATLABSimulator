@@ -12,17 +12,17 @@ numOffset = 71;
 numPitch = 46;
 elapsedTime = 0;
 for iPitch = 1%25%1:numPitch 
-    pitchImpact = 80;%1 - iPitch; 
-    rollImpact = -170;
+    pitchImpact = -40;%1 - iPitch; 
+    rollImpact = 0;
     tic
     for iOffset=1%30%:numOffset
         recoverySuccessful = 0;
         disp(numOffset*(iPitch-1)+iOffset);
-        offset = 0.6;%-0.114285714285714;%-1+2*((iOffset-1)/(numOffset-1));
+        offset = 0.0;%0.6;%-0.114285714285714;%-1+2*((iOffset-1)/(numOffset-1));
         offset_meters = 0.35*offset;
         ImpactParams = initparams_navi;
         SimParams.recordContTime = 0;
-        SimParams.timeFinal = 19/200;
+        SimParams.timeFinal = 1.0;
         tStep = 1/200;
         ImpactParams.wallLoc = 0.0;
         ImpactParams.wallPlane = 'YZ';
@@ -140,5 +140,5 @@ end
 
 %%
 close all
-animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',300);
+animate(0,1,Hist,'XZ',ImpactParams,timeImpact,'NA',200);
 % plot(Plot.times,abs(Plot.propRpms))

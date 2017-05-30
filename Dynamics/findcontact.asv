@@ -40,7 +40,6 @@ function [ Contact ] = findcontact(rotMat,state)
         if isempty(beta)
             disp('no contact')
         elseif length(beta) == 2
-            disp('is contact')
             ptsIntersection(1:3,iBumper) = BUMP_RADII(iBumper)*cos(beta(1))*bumperTangentWorld + BUMP_RADII(iBumper)*sin(beta(1))*bumperCrossProduct + bumperCenterWorld;
             ptsIntersection(4:6,iBumper) = BUMP_RADII(iBumper)*cos(beta(2))*bumperTangentWorld + BUMP_RADII(iBumper)*sin(beta(2))*bumperCrossProduct + bumperCenterWorld;
             
@@ -55,7 +54,7 @@ function [ Contact ] = findcontact(rotMat,state)
             Contact.defl(iBumper) = poleRadius - norm(Contact.point.contactWorld(1:2,iBumper));
             
             % horizontal normal from center of pole to contact point
-            poleContactNormal = [Contact.point.contactWorld(1:2,iBumper); 0]/norm(Contact.point.contactWorld(1:2,iBumper));
+            poleContactNormal = Contact.point.contactWorld(1:2,iBumper)/norm(Contact.point.contactWorld(1:2,iBumper));
            
             % Compute velocity of contact point in world frame
             contactPointVelocityWorld = rotMat'*([state(1);state(2);state(3)] ...

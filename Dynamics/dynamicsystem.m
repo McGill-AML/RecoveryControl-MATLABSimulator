@@ -79,9 +79,10 @@ function [stateDeriv, Contact, PropState] = dynamicsystem(t,state,tStep,rpmContr
                 Contact.normalForceMag(iBumper) = kContact*Contact.defl(iBumper)^nContact + lambdaContact*Contact.defl(iBumper)^nContact*Contact.deflDeriv(iBumper);
 
                 bumperCenterWorld = rotMat'*BUMP_POSNS(:,iBumper) + state(7:9);
-                poleNormal = [bumperCenterWorld(1:2)/norm(bumperCenterWorld(1:2));0];
+
+                poleContactNormal = [Contact.point.contactWorld(1:2,iBumper); 0]/norm(Contact.point.contactWorld(1:2,iBumper));
                 
-                normalForceWorld(:,iBumper) = Contact.normalForceMag(iBumper)*poleNormal;
+                normalForceWorld(:,iBumper) = Contact.normalForceMag(iBumper)*poleContactNormal;
                 normalForceBody(:,iBumper) = rotMat*normalForceWorld(:,iBumper);
 
                 % Calculate tangential force on bumper from friction
