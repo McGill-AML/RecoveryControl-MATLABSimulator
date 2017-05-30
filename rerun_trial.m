@@ -11,17 +11,18 @@ record = [];
 numOffset = 71;
 numPitch = 46;
 elapsedTime = 0;
-for iPitch = 1%:numPitch 
-    pitchImpact = 1 - iPitch; 
+for iPitch = 1%25%1:numPitch 
+    pitchImpact = 80;%1 - iPitch; 
+    rollImpact = -170;
     tic
-    for iOffset=1%:numOffset
+    for iOffset=1%30%:numOffset
         recoverySuccessful = 0;
         disp(numOffset*(iPitch-1)+iOffset);
-        offset = -1+2*((iOffset-1)/(numOffset-1));
+        offset = 0.6;%-0.114285714285714;%-1+2*((iOffset-1)/(numOffset-1));
         offset_meters = 0.35*offset;
         ImpactParams = initparams_navi;
         SimParams.recordContTime = 0;
-        SimParams.timeFinal = 3.0;
+        SimParams.timeFinal = 19/200;
         tStep = 1/200;
         ImpactParams.wallLoc = 0.0;
         ImpactParams.wallPlane = 'YZ';
@@ -131,19 +132,13 @@ for iPitch = 1%:numPitch
         Trial = {offset, pitchImpact, ...
                  recoverySuccessful, ImpactIdentification.wallNormalWorld, ...
                  Plot.times, Plot.posns, Plot.defls, ...
-                 Plot.recoveryStage, Hist.states, ...
-                 Plot.deflDerivs, Plot.eulerAngleRates, ...
-                 Plot.eulerAngles, Plot.normalForces, ...
-                 Plot.posnDerivs, Plot.propRpms, ...
-                 Plot.quaternions, Plot.angVels, timeImpact}; 
+                 Plot.recoveryStage, Hist.states, Plot.normalForces, timeImpact}; 
              
-        Batch = [Batch;Trial];
         elapsedTime = toc + elapsedTime
     end
 end
 
-save('iterate_no_recovery.mat','Batch');
-% %%
-% close all
-% animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',300);
+%%
+close all
+animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',300);
 % plot(Plot.times,abs(Plot.propRpms))
