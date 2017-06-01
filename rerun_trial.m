@@ -12,17 +12,17 @@ numOffset = 71;
 numPitch = 46;
 elapsedTime = 0;
 for iPitch = 1%25%1:numPitch 
-    pitchImpact = -20;%1 - iPitch; 
+    pitchImpact = 0;%1 - iPitch; 
     rollImpact = 0;
     tic
     for iOffset=1%30%:numOffset
         recoverySuccessful = 0;
         disp(numOffset*(iPitch-1)+iOffset);
-        offset = 0.5;%0.6;%-0.114285714285714;%-1+2*((iOffset-1)/(numOffset-1));
+        offset = 0.0;%0.6;%-0.114285714285714;%-1+2*((iOffset-1)/(numOffset-1));
         offset_meters = 0.35*offset;
         ImpactParams = initparams_navi;
         SimParams.recordContTime = 0;
-        SimParams.timeFinal = 1.5;
+        SimParams.timeFinal = 0.2;
         tStep = 1/200;
         ImpactParams.wallLoc = 0.0;
         ImpactParams.wallPlane = 'YZ';
@@ -40,7 +40,7 @@ for iPitch = 1%25%1:numPitch
         ImpactIdentification = initimpactidentification;
         Control.twist.posnDeriv(1) = VxImpact; 
         IC.attEuler = [deg2rad(rollImpact);deg2rad(pitchImpact);deg2rad(yawImpact)];  
-        IC.posn = [-0.4;offset_meters;2];  
+        IC.posn = [-0.4; offset_meters;1];%[-0.4;offset_meters;0];  
         Setpoint.posn(3) = IC.posn(3); 
         xAcc = 0;                                                               
         rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
@@ -134,11 +134,13 @@ for iPitch = 1%25%1:numPitch
                  Plot.times, Plot.posns, Plot.defls, ...
                  Plot.recoveryStage, Hist.states, Plot.normalForces, timeImpact}; 
              
-        elapsedTime = toc + elapsedTime
+        %elapsedTime = toc + elapsedTime
     end
 end
 
 %%
 close all
-animate(0,1,Hist,'na',ImpactParams,timeImpact,'NA',300);
+% for iter=1
+    animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',600);
+% end
 % plot(Plot.times,abs(Plot.propRpms))
