@@ -64,7 +64,7 @@ function [stateDeriv, Contact, PropState] = dynamicsystem(t,state,tStep,rpmContr
     %% Contact Detection and Force Calculation
 
     % if a collision is possible (0.3 is from CM to furthest bumper point)
-    if 1%abs(norm(state(7:8)) < (poleRadius + 0.3))
+    if abs(norm(state(7:8)) < (poleRadius + 0.3))
         Contact = findcontact(rotMat, state); %find contact points
 
         for iBumper = 1:4

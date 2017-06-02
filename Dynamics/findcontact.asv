@@ -7,9 +7,11 @@ function [ Contact ] = findcontact(rotMat,state)
 
     for iBumper = 1:4
         % Transform bumper definitions to world frame
-        bumperNormalWorld = rotMat'*BUMP_NORMS(:,iBumper); % normal to bumper circle
+        bumperNormalWorld = rotMat'*BUMP_NORMS(:,iBumper); % normal to bumper center
         bumperTangentWorld = rotMat'*BUMP_TANGS(:,iBumper); % in plane with bumper circle
-        bumperCrossProduct = cross(bumperNormalWorld,bumperTangentWorld); % orthogonal vector in bumper plane
+        bumperCrossProduct = [bumperNormalWorld(2)*bumperTangentWorld(3) - bumperNormalWorld(3)*bumperTangentWorld(2); ...
+                              -(bumperNormalWorld(1)*bumperTangentWorld(3) - bumperNormalWorld(3)*bumperTangentWorld(1)); ...
+                              bumperNormalWorld(1)*bumperTangentWorld(2) - bumperNormalWorld(2)*bumperTangentWorld(1)]; 
         bumperCenterWorld = rotMat'*BUMP_POSNS(:,iBumper) + state(7:9); % center of bumper
 
         poleVertical = [0; 0; 1]; % fixed to world frame
@@ -28,56 +30,63 @@ function [ Contact ] = findcontact(rotMat,state)
                   B^2*E^2 - D^2*(BUMP_RADII(iBumper))^2];
 
         allSolutions = roots(coeffs);
-        realSolutions = real(allSolutions(abs(imag(allSolutions)) < 1e-4));
-
-        if isempty(realSolutions)
-            realSolutions = allSolutions;
-        end
+        realSolutions = real(allSolutions(abs(imag(allSolutions)) < 1e-3));
         
-        distances = [];
-        for iter = 1:length(realSolutions)
-            G = poleVertical*realSolutions(iter) - bumperCenterWorld;
+        if ~isempty(realSolutions)
+            distances = [];
+            for iter = 1:length(realSolutions)
+                G = poleVertical*realSolutions(iter) - bumperCenterWorld;
+                J = bumperNormalWorld(1)*G(1) + bumperNormalWorld(2)*G(2) + bumperNormalWorld(3)*G(3);
+                K = [(bumperNormalWorld(2)*G(3)-G(2)*bumperNormalWorld(3)) -(bumperNormalWorld(1)*G(3)-bumperNormalWorld(3)*G(1)) (bumperNormalWorld(1)*G(2)-G(1)*bumperNormalWorld(2))];
+                distances(iter) = (J^2 + (sqrt(K(1)^2 + K(2)^2 + K(3)^2) - (BUMP_RADII(iBumper)))^2)/2;
+            end  
+
+            [~, minIndex] = min(distances);
+            t = realSolutions(minIndex);
+
+            G = poleVertical*t - bumperCenterWorld;
+
             J = bumperNormalWorld(1)*G(1) + bumperNormalWorld(2)*G(2) + bumperNormalWorld(3)*G(3);
-            K = [(bumperNormalWorld(2)*G(3)-G(2)*bumperNormalWorld(3)) -(bumperNormalWorld(1)*G(3)-bumperNormalWorld(3)*G(1)) (bumperNormalWorld(1)*G(2)-G(1)*bumperNormalWorld(2))];
-            distances(iter) = (J^2 + (sqrt(K(1)^2 + K(2)^2 + K(3)^2) - (BUMP_RADII(iBumper)))^2)/2;
-        end  
-        
-        [~, minIndex] = min(distances);
-        t = realSolutions(minIndex);
+            L = G - J*bumperNormalWorld;
+            Contact.point.contactWorld(:,iBumper) = bumperCenterWorld + (BUMP_RADII(iBumper))*L/sqrt(L(1)^2+L(2)^2+L(3)^2);
+            Contact.point.contactBody(:,iBumper) = rotMat*(Contact.point.contactWorld(:,iBumper) - state(7:9));
 
-        G = poleVertical*t - bumperCenterWorld;
-       
-        J = bumperNormalWorld(1)*G(1) + bumperNormalWorld(2)*G(2) + bumperNormalWorld(3)*G(3);
-        L = G - J*bumperNormalWorld;
-        Contact.point.contactWorld(:,iBumper) = bumperCenterWorld + (BUMP_RADII(iBumper))*L/norm(L);
-        Contact.point.contactBody(:,iBumper) = rotMat*(Contact.point.contactWorld(:,iBumper) - state(7:9));
+            % need to find minimum distance and the bumper frame point
 
-        % need to find minimum distance and the bumper frame point
+            if norm([Contact.point.contactWorld(1,iBumper) Contact.point.contactWorld(2,iBumper)]) < poleRadius
 
-        if norm([Contact.point.contactWorld(1,iBumper) Contact.point.contactWorld(2,iBumper)]) < poleRadius
+                Contact.defl(iBumper) = poleRadius - sqrt(Contact.point.contactWorld(1,iBumper)^2 + ...
+                                                          Contact.point.contactWorld(2,iBumper)^2);
+                % horizontal normal from center of pole to contact point
+                poleContactNormal = [Contact.point.contactWorld(1:2,iBumper); 0] ...
+                                    /sqrt(Contact.point.contactWorld(1,iBumper)^2 + ...
+                                          Contact.point.contactWorld(2,iBumper)^2);
+                % Compute velocity of contact point in world frame
+                contactPointVelocityWorld = rotMat'*([state(1);state(2);state(3)] ...
+                                            + [state(5)*Contact.point.contactBody(3,iBumper) - state(6)*Contact.point.contactBody(2,iBumper); ...
+                                               -(state(4)*Contact.point.contactBody(3,iBumper) -state(6)*Contact.point.contactBody(1,iBumper)); ...
+                                               state(4)*Contact.point.contactBody(2,iBumper) - state(5)*Contact.point.contactBody(3,iBumper)
+                                        
+                                        cross([state(4);state(5);state(6)],Contact.point.contactBody(:,iBumper)));
+                % log this value
+                Contact.pointVelocityWorld(:,iBumper) = contactPointVelocityWorld;
+                % compute deflection derivative value along pole normal
+                Contact.deflDeriv(iBumper) = dot(contactPointVelocityWorld,poleContactNormal);
+                % Project velocity onto pole tangent plane
+                Contact.slidingVelocityWorld(:,iBumper) = contactPointVelocityWorld - Contact.deflDeriv(iBumper)*poleContactNormal;
 
-            Contact.defl(iBumper) = poleRadius - norm(Contact.point.contactWorld(1:2,iBumper));
-            % horizontal normal from center of pole to contact point
-            poleContactNormal = [Contact.point.contactWorld(1:2,iBumper); 0]/norm(Contact.point.contactWorld(1:2,iBumper));
-            % Compute velocity of contact point in world frame
-            contactPointVelocityWorld = rotMat'*([state(1);state(2);state(3)] ...
-                                        + cross([state(4);state(5);state(6)],Contact.point.contactBody(:,iBumper)));
-            % log this value
-            Contact.pointVelocityWorld(:,iBumper) = contactPointVelocityWorld;
-            % compute deflection derivative value along pole normal
-            Contact.deflDeriv(iBumper) = dot(contactPointVelocityWorld,poleContactNormal);
-            % Project velocity onto pole tangent plane
-            Contact.slidingVelocityWorld(:,iBumper) = contactPointVelocityWorld - Contact.deflDeriv(iBumper)*poleContactNormal;
-
-            % Normalize to find vector of sliding direction
-            tol = 0.1;
-            if(norm(Contact.slidingVelocityWorld(:,iBumper))) > tol
-                Contact.slidingDirectionWorld(:,iBumper) = Contact.slidingVelocityWorld(:,iBumper)...
-                                                            /norm(Contact.slidingVelocityWorld(:,iBumper));
-            else
-                Contact.slidingDirectionWorld(:,iBumper) = zeros(size(Contact.slidingVelocityWorld(:,iBumper)));
-            end
-        end 
+                % Normalize to find vector of sliding direction
+                tol = 0.1;
+                if(norm(Contact.slidingVelocityWorld(:,iBumper))) > tol
+                    Contact.slidingDirectionWorld(:,iBumper) = Contact.slidingVelocityWorld(:,iBumper)...
+                                                                /norm(Contact.slidingVelocityWorld(:,iBumper));
+                else
+                    Contact.slidingDirectionWorld(:,iBumper) = zeros(size(Contact.slidingVelocityWorld(:,iBumper)));
+                end
+            end 
+        else
+            disp(iBumper);
+        end
     end
 end
 

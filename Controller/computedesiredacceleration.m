@@ -20,5 +20,5 @@ function [Control] = computedesiredacceleration(Control, Twist)
     end
     % Desired acceleration is the sum of a 1) gravity, 2) reference acceleration
     % and 3) vertical velocity control term
-    Control.acc = [0; 0; g] + Control.accelRef + [0; 0; -dZ*Twist.posnDeriv(3)]; 
+    Control.acc = [0; 0; g] + Control.accelRef;%+ [0; 0; -dZ*Twist.posnDeriv(3)]; 
 end

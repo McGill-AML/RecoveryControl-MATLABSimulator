@@ -8,7 +8,7 @@ SimParams.useRecovery = 0;
 Batch = [];
 record = [];
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
-numOffset = 71;
+numOffset = 36;
 numPitch = 46;
 elapsedTime = 0;
 for iPitch = 1:numPitch 
@@ -22,7 +22,7 @@ for iPitch = 1:numPitch
         offset_meters = 0.35*offset;
         ImpactParams = initparams_navi;
         SimParams.recordContTime = 0;
-        SimParams.timeFinal = 2.94;
+        SimParams.timeFinal = 2.0;
         tStep = 1/200;
         ImpactParams.wallLoc = 0.0;
         ImpactParams.wallPlane = 'YZ';
@@ -40,7 +40,7 @@ for iPitch = 1:numPitch
         ImpactIdentification = initimpactidentification;
         Control.twist.posnDeriv(1) = VxImpact; 
         IC.attEuler = [deg2rad(rollImpact);deg2rad(pitchImpact);deg2rad(yawImpact)];  
-        IC.posn = [-0.4; offset_meters; 2];%[-0.4;offset_meters;0];  
+        IC.posn = [-0.4; offset_meters; 2];
         Setpoint.posn(3) = IC.posn(3); 
         xAcc = 0;                                                               
         rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
@@ -62,7 +62,7 @@ for iPitch = 1:numPitch
         Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 
         for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep   
-            disp(iSim)
+%             disp(iSim)
             [ImpactInfo, ImpactIdentification] = detectimpact(iSim, tStep, ImpactInfo, ImpactIdentification,...
                                                               Hist.sensors,Hist.poses,PREIMPACT_ATT_CALCSTEPFWD, stateDeriv,state);
             [FuzzyInfo] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
@@ -139,9 +139,9 @@ for iPitch = 1:numPitch
     end
 end
 save('june_1_without_recovery.mat','Batch');
-% %%
-% close all
+%%
+close all
 % % for iter=1
-%      animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',800);
+     animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',800);
 % end
 % plot(Plot.times,abs(Plot.propRpms))
