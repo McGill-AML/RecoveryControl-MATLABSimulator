@@ -4,25 +4,26 @@ VxImpact = 2.0;
 yawImpact = 0.0;
 rollImpact = 0.0;
 poleRadius = 0.1; 
-SimParams.useRecovery = ;
+SimParams.useRecovery = 1;
 Batch = [];
 record = [];
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
-numOffset = 71;
+numOffset = 36;
 numPitch = 46;
 elapsedTime = 0;
-for iPitch = 1%25%1:numPitch 
-    pitchImpact = -20;%1 - iPitch; 
+
+for iPitch = 1:numPitch 
+    pitchImpact = 1 - iPitch; 
     rollImpact = 0;
     tic
-    for iOffset=1%30%:numOffset
+    for iOffset=1:numOffset
         recoverySuccessful = 0;
         disp(numOffset*(iPitch-1)+iOffset);
-        offset = 0.5;%0.6;%-0.114285714285714;%-1+2*((iOffset-1)/(numOffset-1));
+        offset = -1+2*((iOffset-1)/(numOffset-1));
         offset_meters = 0.35*offset;
         ImpactParams = initparams_navi;
         SimParams.recordContTime = 0;
-        SimParams.timeFinal = 1.5;
+        SimParams.timeFinal = 2.0;
         tStep = 1/200;
         ImpactParams.wallLoc = 0.0;
         ImpactParams.wallPlane = 'YZ';
@@ -40,7 +41,7 @@ for iPitch = 1%25%1:numPitch
         ImpactIdentification = initimpactidentification;
         Control.twist.posnDeriv(1) = VxImpact; 
         IC.attEuler = [deg2rad(rollImpact);deg2rad(pitchImpact);deg2rad(yawImpact)];  
-        IC.posn = [-0.4;offset_meters;2];  
+        IC.posn = [-0.4; offset_meters; 2];
         Setpoint.posn(3) = IC.posn(3); 
         xAcc = 0;                                                               
         rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
@@ -62,7 +63,7 @@ for iPitch = 1%25%1:numPitch
         Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 
         for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep   
-
+%             disp(iSim)
             [ImpactInfo, ImpactIdentification] = detectimpact(iSim, tStep, ImpactInfo, ImpactIdentification,...
                                                               Hist.sensors,Hist.poses,PREIMPACT_ATT_CALCSTEPFWD, stateDeriv,state);
             [FuzzyInfo] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
@@ -135,10 +136,13 @@ for iPitch = 1%25%1:numPitch
                  Plot.recoveryStage, Hist.states, Plot.normalForces, timeImpact}; 
              
         elapsedTime = toc + elapsedTime
+        Batch = [Batch; Trial];
     end
 end
+save('june_2_without_recovery.mat','Batch');
 
-%%
 close all
-animate(0,1,Hist,'na',ImpactParams,timeImpact,'NA',300);
+% % for iter=1
+     animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',800);
+% end
 % plot(Plot.times,abs(Plot.propRpms))

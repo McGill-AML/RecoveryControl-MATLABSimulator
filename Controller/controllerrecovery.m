@@ -53,8 +53,12 @@ D_vertVel = 0.0;
 
 sp_vertVel = 0.0;
 vertVelError =  sp_vertVel - Twist.linVel(3);
-Control.u(1) = -m*g + P_vertVel*(vertVelError) + D_vertVel*(vertVelPrevious - Twist.linVel(3))/tStep;
-vertVelPrevious = Twist.linVel(3);
+if Control.recoveryStage == 1
+    Control.u(1) = -m*g;
+else
+    Control.u(1) = -m*g + P_vertVel*(vertVelError) + D_vertVel*(vertVelPrevious - Twist.linVel(3))/tStep;
+    vertVelPrevious = Twist.linVel(3);
+end
 
 % ----------> Saturate thrust here <-----------
 
