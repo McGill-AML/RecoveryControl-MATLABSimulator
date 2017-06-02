@@ -8,7 +8,8 @@ function [ Contact ] = findcontact(rotMat,state)
     for iBumper = 1:4
         % Transform bumper definitions to world frame
         bumperCenterWorld = rotMat'*BUMP_POSNS(:,iBumper) + state(7:9); % center of bumper
-            if (sqrt(bumperCenterWorld(1)^2+bumperCenterWorld(2)^2) <= (poleRadius + BUMP_RADII(iBumper)))
+
+        if (sqrt(bumperCenterWorld(1)^2+bumperCenterWorld(2)^2) <= (poleRadius + BUMP_RADII(iBumper)))
             bumperNormalWorld = rotMat'*BUMP_NORMS(:,iBumper); % normal to bumper center
             bumperTangentWorld = rotMat'*BUMP_TANGS(:,iBumper); % in plane with bumper circle
             bumperCrossProduct = [bumperNormalWorld(2)*bumperTangentWorld(3) - bumperNormalWorld(3)*bumperTangentWorld(2); ...

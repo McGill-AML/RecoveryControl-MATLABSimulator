@@ -4,21 +4,22 @@ VxImpact = 2.0;
 yawImpact = 0.0;
 rollImpact = 0.0;
 poleRadius = 0.1; 
-SimParams.useRecovery = 0;
+SimParams.useRecovery = 1;
 Batch = [];
 record = [];
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
 numOffset = 36;
 numPitch = 46;
 elapsedTime = 0;
-for iPitch = 1:numPitch 
+
+for iPitch = 1%:numPitch 
     pitchImpact = 1 - iPitch; 
     rollImpact = 0;
     tic
-    for iOffset=1:numOffset
+    for iOffset=19%:numOffset
         recoverySuccessful = 0;
-        disp(numOffset*(iPitch-1)+iOffset);
-        offset = -1+2*((iOffset-1)/(numOffset-1));
+        disp(numOffset*(iPitch-1)+iOffset)
+        offset = -1+2*((iOffset-1)/(numOffset-1))
         offset_meters = 0.35*offset;
         ImpactParams = initparams_navi;
         SimParams.recordContTime = 0;
@@ -135,13 +136,22 @@ for iPitch = 1:numPitch
                  Plot.recoveryStage, Hist.states, Plot.normalForces, timeImpact}; 
              
         elapsedTime = toc + elapsedTime
+        
+        
+        Plot.posns
+        
+        
+        
+        
+        
         Batch = [Batch; Trial];
     end
 end
-save('june_1_without_recovery.mat','Batch');
+% save('june_2_without_recovery.mat','Batch');
 %%
+
 close all
 % % for iter=1
-     animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',800);
+     animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',200);
 % end
 % plot(Plot.times,abs(Plot.propRpms))

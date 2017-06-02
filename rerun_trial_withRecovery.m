@@ -11,11 +11,11 @@ record = [];
 numOffset = 36;
 numPitch = 46;
 elapsedTime = 0;
-for iPitch = 1:numPitch 
+for iPitch = 45%:numPitch 
     pitchImpact = 1 - iPitch; 
     rollImpact = 0;
     tic
-    for iOffset=1:numOffset
+    for iOffset=19%:numOffset
         recoverySuccessful = 0;
         disp(numOffset*(iPitch-1)+iOffset);
         offset = -1+2*((iOffset-1)/(numOffset-1));
@@ -127,21 +127,20 @@ for iPitch = 1:numPitch
             Sensor = updatesensor(state, stateDeriv);
             Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
         end
-
         Plot = hist2plot(Hist);
         Trial = {offset, pitchImpact, ...
                  recoverySuccessful, ImpactIdentification.wallNormalWorld, ...
                  Plot.times, Plot.posns, Plot.defls, ...
                  Plot.recoveryStage, Hist.states, Plot.normalForces, timeImpact}; 
-             
+        
         elapsedTime = toc + elapsedTime
         Batch = [Batch; Trial];
     end
 end
-save('june_2_with_recovery.mat','Batch');
+% save('june_2_with_recovery.mat','Batch');
 %%
-% close all
+close all
 % % % for iter=1
-%      animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',800);
+     animate(1,2,Hist,'XZ',ImpactParams,timeImpact,'pitch_30_zero_offset_with_recovery',400);
 % end
 % plot(Plot.times,abs(Plot.propRpms))
