@@ -71,6 +71,7 @@ polePoints = [X;Y;Z];
 for iFrame = 1:frameStep:endFrame %size(t,1) %set step to 1 for recording
     %% Rotate body-fixed points to world-frame points
     iFrame
+    pause(0.2);
     q = [stateHist(iFrame,10);stateHist(iFrame,11);stateHist(iFrame,12);stateHist(iFrame,13)];
     q = q/norm(q);
     rotMat = quat2rotmat(q);

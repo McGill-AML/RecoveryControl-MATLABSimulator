@@ -48,6 +48,8 @@ function [ Contact ] = findcontact(rotMat,state)
             contactAxisBody = contactAxisBody/norm(contactAxisBody);
 
             Contact.point.contactBody(:,iBumper) = BUMP_POSNS(:,iBumper) + BUMP_RADII(iBumper)*contactAxisBody;
+            
+            
             Contact.point.contactWorld(:,iBumper) = real(rotMat'*Contact.point.contactBody(:,iBumper) + state(7:9));
             
             % Find deflection
@@ -95,6 +97,7 @@ function [ Contact ] = findcontact(rotMat,state)
 
             % this averages the two contact points to generate an imaginary point
             % within the radius of the bumper but not on the perimeter
+            if norm([bumperCenterWorld(1) bumperCenterWorld(2)]) < poleRadius
             Contact.point.contactBody(:,iBumper) = BUMP_POSNS(:,iBumper) + (BUMP_RADII(iBumper)*contactAxisBody1 + BUMP_RADII(iBumper)*contactAxisBody2)/2;
             Contact.point.contactWorld(:,iBumper) = real(rotMat'*Contact.point.contactBody(:,iBumper) + state(7:9));
             
