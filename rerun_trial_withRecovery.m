@@ -11,11 +11,11 @@ record = [];
 numOffset = 36;
 numPitch = 46;
 elapsedTime = 0;
-for iPitch = 1:numPitch 
+for iPitch = 1:5:45%:numPitch 
     pitchImpact = 1 - iPitch; 
     rollImpact = 0;
     tic
-    for iOffset=1:numOffset
+    for iOffset=1:6:36%1:numOffset
         recoverySuccessful = 0;
         disp(numOffset*(iPitch-1)+iOffset);
         offset = -1+2*((iOffset-1)/(numOffset-1));
@@ -138,7 +138,7 @@ for iPitch = 1:numPitch
         Batch = [Batch; Trial];
     end
 end
-save('june_2_with_recovery.mat','Batch');
+save('small_Batch.mat','Batch');
 %%
 % close all
 % % % for iter=1
