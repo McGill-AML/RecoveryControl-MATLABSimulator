@@ -1,19 +1,10 @@
 function [ImpactInfo, ImpactIdentification, timeCalc] = detectimpact(iSim, tStep, ImpactInfo,ImpactIdentification, Histsensors ,Histposes,PREIMPACT_ATT_CALCSTEPFWD, stateDeriv, state)
 %detectimpact.m CollisionIdentification phase
-%   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
-%   Last Updated: December 12, 2016
-%   Description: This phase firstly detects an impact has occured, then
-%                estimates the wall normal. Four estimates of the wall
-%                normal are calculated (but only 1) is used on Navi
-%                experimental platform):
-%                   1) Estimate using accelerometer located at IMU_POSN
-%                   2) Estimate using accelerometer located at quadrotor CM
-%                   3) Estimate 2) corrected with true angular acceleration
-%                   4) Estimate 2) corrected with estimated angular
-%                   acceleration (consecutive two point differentiation)
-%-------------------------------------------------------------------------%
+
     timeCalc = [0;0;0;0];
-    if ImpactInfo.firstImpactDetected == 0         
+    
+    if ImpactInfo.firstImpactDetected == 0  
+        
         Sensor = Histsensors(end);
         rotMat = quat2rotmat(Histposes(end).attQuat);
         accelWorld = rotMat'*Sensor.accelerometer;

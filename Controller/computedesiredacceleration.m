@@ -3,9 +3,7 @@ function [Control] = computedesiredacceleration(Control, Twist)
 
     global g
 
-    if Control.recoveryStage == 0
-         % do nothing
-    elseif Control.recoveryStage == 1
+    if Control.recoveryStage == 1
         Control.acc = [0; 0; g] + Control.accelRef; % point 30 degrees away
     elseif Control.recoveryStage == 2
         Control.acc = [0; 0; g]; % go to hover

@@ -13,17 +13,14 @@ function [Control, recoverySuccessful] = checkrecoverystage(Pose, Twist, Control
                   abs(Twist.attEulerRate(1)) < bodyRatesThresh  && abs(Twist.attEulerRate(2)) < bodyRatesThresh ...
                   && Twist.linVel(3) < verticalVelocityThresh;
    
-    if Control.recoveryStage == 0
-        if ImpactInfo.firstImpactOccured
-            Control.recoveryStage = 1;
-        end
-    elseif Control.recoveryStage == 1
+    if Control.recoveryStage == 1
         if SWITCH_1
             Control.recoveryStage = 2;
         end
     elseif Control.recoveryStage == 2
         if SWITCH_2 %recovery is done
             Control.recoveryStage = 3;
+            recoverySuccessful = 1;
         end
     elseif Control.recoveryStage == 3
         Control.recoveryStage = 3;
