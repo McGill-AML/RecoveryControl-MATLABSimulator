@@ -71,9 +71,13 @@ polePoints = [X;Y;Z];
 for iFrame = 1:frameStep:endFrame %size(t,1) %set step to 1 for recording
     %% Rotate body-fixed points to world-frame points
 <<<<<<< HEAD
+<<<<<<< HEAD
     iFrame
     pause(0.2);
 =======
+=======
+
+>>>>>>> c650154687ad6b6645daa209b4a2ba9ba81609ff
 %     iFrame
 %     pause(0.5)
 >>>>>>> da806c2b724dd235dd907b3f3370a0e98f193eec

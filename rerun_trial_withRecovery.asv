@@ -143,10 +143,14 @@ for iPitch = 1:5:45%:numPitch
     end
 end
 
+% % % for iter=1
+     animate(1,2,Hist,'XZ',ImpactParams,timeImpact,'pitch_30_zero_offset_with_recovery',400);
+=======
 save('june_3_with_recovery_test.mat','Batch');
 %%
 close all
 % % % for iter=1
      animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',800);
+>>>>>>> c650154687ad6b6645daa209b4a2ba9ba81609ff
 % end
 % plot(Plot.times,abs(Plot.propRpms))

@@ -1,10 +1,12 @@
+clear all
+
 global g timeImpact globalFlag poleRadius numTrials
 
 VxImpact = 2.0;
 yawImpact = 0.0;
 rollImpact = 0.0;
 poleRadius = 0.1; 
-SimParams.useRecovery = 1;
+SimParams.useRecovery = 0;
 Batch = [];
 record = [];
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
@@ -12,14 +14,13 @@ numOffset = 36;
 numPitch = 46;
 elapsedTime = 0;
 
-for iPitch = 1%:numPitch 
+for iPitch = 1:5:45%:numPitch 
     pitchImpact = 1 - iPitch; 
-    rollImpact = 0;
     tic
-    for iOffset=19%:numOffset
+    for iOffset=1:3:36%1:numOffset
         recoverySuccessful = 0;
-        disp(numOffset*(iPitch-1)+iOffset)
-        offset = -1+2*((iOffset-1)/(numOffset-1))
+        disp(numOffset*(iPitch-1)+iOffset);
+        offset = -1+2*((iOffset-1)/(numOffset-1));
         offset_meters = 0.35*offset;
         ImpactParams = initparams_navi;
         SimParams.recordContTime = 0;
@@ -66,18 +67,21 @@ for iPitch = 1%:numPitch
 %             disp(iSim)
             [ImpactInfo, ImpactIdentification] = detectimpact(iSim, tStep, ImpactInfo, ImpactIdentification,...
                                                               Hist.sensors,Hist.poses,PREIMPACT_ATT_CALCSTEPFWD, stateDeriv,state);
-            [FuzzyInfo] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
-                                            Sensor, Hist.poses(end), SimParams, Control, FuzzyInfo);
+%             [FuzzyInfo] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
+%                                             Sensor, Hist.poses(end), SimParams, Control, FuzzyInfo);
 
-            if (sum(FuzzyInfo.InputsCalculated) == 4 && Control.accelRefCalculated == 0)
+            if (ImpactInfo.firstImpactDetected && Control.accelRefCalculated == 0)
                     Control.accelRef = 4.8*ImpactIdentification.wallNormalWorld;
                     Control.accelRefCalculated = 1;
             end
 
-            if Control.accelRefCalculated*SimParams.useRecovery == 1       
-                    [Control, recoverySuccessful] = checkrecoverystage(Pose, Twist, Control, ImpactInfo, recoverySuccessful);
+            if Control.accelRefCalculated*SimParams.useRecovery == 1    
+                if Control.recoveryStage == 0
+                    Control.recoveryStage = 1;
+                end
                     [Control] = computedesiredacceleration(Control, Twist);
-                    [Control] = controllerrecovery(tStep, Pose, Twist, Control);       
+                    [Control] = controllerrecovery(tStep, Pose, Twist, Control);   
+                    [Control, recoverySuccessful] = checkrecoverystage(Pose, Twist, Control, ImpactInfo, recoverySuccessful);
                     Control.type = 'recovery';
             else 
                 Control.recoveryStage = 0;
@@ -128,30 +132,21 @@ for iPitch = 1%:numPitch
             Sensor = updatesensor(state, stateDeriv);
             Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
         end
-
         Plot = hist2plot(Hist);
         Trial = {offset, pitchImpact, ...
                  recoverySuccessful, ImpactIdentification.wallNormalWorld, ...
                  Plot.times, Plot.posns, Plot.defls, ...
                  Plot.recoveryStage, Hist.states, Plot.normalForces, timeImpact}; 
-             
+        
         elapsedTime = toc + elapsedTime
-        
-        
-        Plot.posns
-        
-        
-        
-        
-        
         Batch = [Batch; Trial];
     end
 end
-% save('june_2_without_recovery.mat','Batch');
-%%
 
+save('june_3_with_recovery_test.mat','Batch');
+%%
 close all
-% % for iter=1
-     animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',200);
+% % % for iter=1
+     animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',800);
 % end
 % plot(Plot.times,abs(Plot.propRpms))

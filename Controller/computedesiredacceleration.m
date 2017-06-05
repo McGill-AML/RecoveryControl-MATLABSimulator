@@ -1,24 +1,16 @@
 function [Control] = computedesiredacceleration(Control, Twist)
-%computedesiredacceleration.m Computes the desired acceleration vector for Recovery Controller
-%   Author: Gareth Dicker (gareth.dicker@mail.mcgill.ca)
-%   Last Updated: 
-%   Description: 
-%-------------------------------------------------------------------------%
+% computedesiredacceleration.m Computes the desired acceleration vector for Recovery Controller
 
     global g
-    % Introduce vertical velocity control gain at recovery stage 3
-    switch Control.recoveryStage
-        case 0 % Normal Flight
-            dZ = 0;
-        case 1 % Stabilize Attitude to "away" orientation with zero yaw rate
-            dZ = 0;
-        case 2 %Stabilize Attitude to "hover" orientation
-            Control.accelRef = [0; 0; 0];
-            dZ = 0;
-        otherwise 
-            error('Invalid recovery stage!');    
+
+    if Control.recoveryStage == 1
+        Control.acc = [0; 0; g] + Control.accelRef; % point 30 degrees away
+    elseif Control.recoveryStage == 2
+        Control.acc = [0; 0; g]; % go to hover
+    elseif Control.recoveryStage == 3
+        Control.acc = [0; 0; g]; % stay at hover
+    else
+        error('Error computing desired acceleration');
     end
-    % Desired acceleration is the sum of a 1) gravity, 2) reference acceleration
-    % and 3) vertical velocity control term
-    Control.acc = [0; 0; g] + Control.accelRef;%+ [0; 0; -dZ*Twist.posnDeriv(3)]; 
+    
 end
