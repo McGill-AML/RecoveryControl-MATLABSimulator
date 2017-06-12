@@ -195,6 +195,11 @@ for ii = 1:7
     Plot.EKF_att_P_hat(ii,:) = tempP(ii,ii:7:end);
 end
 Plot.EKF_att_innov = [temp{4,:}];
+tempK = [temp{5,:}];
+
+for ii = 1:length(Plot.EKF_att_quat)
+Plot.EKF_K_k1 = tempK(1,(1:6)+(ii-1)*6);
+end
 
 
 

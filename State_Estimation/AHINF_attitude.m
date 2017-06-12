@@ -71,6 +71,8 @@ Omega_k_m = [cos(0.5*psi_norm*tStep), -psi_k_p';
 
 q_k_m = Omega_k_m*q_k_1;
 
+% q_k_m = q_k_1 + 0.5*quatmultiply(q_k_1, [0;omega_hat_m ])*tStep;
+
 %renormalize quaternion (just in case)
 q_k_m = q_k_m/norm(q_k_m,2);
 
@@ -97,7 +99,7 @@ A_k_1 = [ A_k_1_1, A_k_1_2;
 Q_k = tStep*diag([sensParams.var_gyr; sensParams.var_gyr(1); sensParams.var_bias_gyr*.001]); 
 
 %predict covariance matrix
-AHINF.P_hat = A_k_1*AHINF.P_hat_eps*A_k_1' + Q_k; %used to be B_k_1*B_k_1';
+AHINF.P_hat = A_k_1*AHINF.P_hat*A_k_1' + Q_k; %used to be B_k_1*B_k_1';
 
 %% update 
          
@@ -152,8 +154,11 @@ if AHINF.use_acc
    
     AHINF.innov_k(1) = norm(tStep*AHINF.gamma(1:6,1:6)*r_k); %update prev innovation norms
 else   
-
-    AHINF.innov_k(1) = norm(tStep*AHINF.gamma(1:3,1:3)*r_k); %update prev innovation norms
+    y_k = [u_b_mag; u_b_acc - bias_acc];
+    
+%     y_k_hat = C_k*[q_k_m; bias_gyr_k_m];
+    y_k_hat = [rotMat'*mag; rotMat'*[0; 0; -g_acc]];
+    AHINF.innov_k(1) = norm(tStep*AHINF.gamma(1:6,1:6)*(y_k-y_k_hat)); %update prev innovation norms
 end
 
 
@@ -179,16 +184,31 @@ end
 %Here the process is broken down based on matrix inversions - in order to
 %more easily facilitate coding in c++ later on.
 
-% find kalman gain for the quaternion:
+% % find kalman gain for the quaternion:
 D_3 = AHINF.P_hat*G_k'/(eye(4)-G_k*AHINF.P_hat*G_k')*G_k;
 
 D_1 = (D_3(1:4,1:4) + eye(4))*AHINF.P_hat(1:4,1:7)*C_k';
+
 
 D_2 = C_k*D_3*AHINF.P_hat*C_k' + C_k*AHINF.P_hat*C_k' + R_k;
 
 K_k1_p1 = D_1/D_2;
 
 K_k1 = K_k1_p1;
+
+%modded version: 
+% G_k = blkdiag(eye(4)*AHINF.delta, zeros(3));
+% D_3 = AHINF.P_hat*G_k'/(eye(7)-G_k*AHINF.P_hat*G_k')*G_k;
+% 
+% D_1 = (D_3 + eye(7))*AHINF.P_hat*C_k';
+% 
+% 
+% D_2 = C_k*D_3*AHINF.P_hat*C_k' + C_k*AHINF.P_hat*C_k' + R_k;
+% 
+% K_k = D_1/D_2;
+% K_k1 = K_k(1:4,:);
+% K_k2 = K_k(5:7,:);
+
 % This applies the norm constraint. just use K_k1 instead of K_k1_p1 
 % r_k_D_2 = r_k'/D_2;
 % 
@@ -205,15 +225,18 @@ K_k1 = K_k1_p1;
 
 %find kalman gain for the bias term - since G_k = 0 for bias just use basic
 %kalman equations
-
+% unmodded version
 K_k2 = AHINF.P_hat(5:7,:)*C_k'/(R_k + C_k*AHINF.P_hat*C_k')';
 
 K_k = [K_k1; K_k2];
 
 L_k = (eye(7) - K_k*C_k)*AHINF.P_hat*G_k'/(eye(4) - G_k*AHINF.P_hat*G_k');
 
+% modded version
+% L_k = (eye(7) - K_k*C_k)*AHINF.P_hat*G_k'/(eye(7) - G_k*AHINF.P_hat*G_k');
+
 %update covariance
-AHINF.P_hat_eps = (eye(7) - K_k*C_k + L_k*G_k)*AHINF.P_hat*(eye(7) - K_k*C_k + L_k*G_k)' + K_k*R_k*K_k' - L_k*L_k';
+AHINF.P_hat = (eye(7) - K_k*C_k + L_k*G_k)*AHINF.P_hat*(eye(7) - K_k*C_k + L_k*G_k)' + K_k*R_k*K_k' - L_k*L_k';
 
 %update states
 q_upd =  K_k1*r_k;
@@ -227,7 +250,7 @@ AHINF.X_hat.bias_gyr = bias_gyr_k_m + K_k2*r_k;
 
 AHINF.X_hat.omega_hat = u_b_gyr - AHINF.X_hat.bias_gyr;
 
-AHINF.P_hat_eps = 0.5*(AHINF.P_hat_eps + AHINF.P_hat_eps'); % make sure symetric
+AHINF.P_hat = 0.5*(AHINF.P_hat + AHINF.P_hat'); % make sure symetric
 
 
 

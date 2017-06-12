@@ -23,6 +23,8 @@ else
 end
 
 
+    SPKF.P_hat(4:6,4:6) = SPKF.P_hat(4:6,4:6)*100;
+
 if useExpData == 0 %
     SPKF.accel_bound = 0.5; % this was set to 1, +/- how much larger thna gravity before not used in update
 else

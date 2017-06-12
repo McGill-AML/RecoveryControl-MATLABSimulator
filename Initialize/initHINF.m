@@ -11,12 +11,12 @@ HINF.P_hat = Est_ICs.P_init_att;
 
 HINF.P_hat_eps = HINF.P_hat;
 
-HINF.P_hat(1:4,1:4) = HINF.P_hat(1:4,1:4)*0.1;
-HINF.P_hat_eps(1:4,1:4) = HINF.P_hat(1:4,1:4)*0.1;
 
 if useExpData == 0
-HINF.P_hat(5:7,5:7) = HINF.P_hat(5:7,5:7)*10;
-HINF.P_hat_eps(5:7,5:7) = HINF.P_hat(5:7,5:7)*10;
+    HINF.P_hat(5:7,5:7) = HINF.P_hat(5:7,5:7)*10;
+else
+    
+    HINF.P_hat(1:4,1:4) = HINF.P_hat(1:4,1:4)*0.001;
 end
 
 HINF.G_k = 0.1*[eye(4), zeros(4,3)];%0.1*[eye(4), zeros(4,3)];

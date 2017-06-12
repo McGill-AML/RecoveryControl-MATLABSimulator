@@ -3,16 +3,16 @@
 
 % timer = zeros(11,1);
 
-% clear;
-% rmseEUL = [];
-% rmse = [];
-% ind4loop = 1;
+clear;
+rmseEUL = [];
+rmse = [];
+ind4loop = 1;
 
-for change_one = 1:1
-    for change_two = 1:1
+% for change_one = 1:1
+%     for change_two = 1:1
         
              
-            for  fileNo = [2, 6, 9, 15, 16,  22,  30,  34, 45, 49, 54, 60, 73] %fileNo = [1:13,15:67, 71:78] %fileNo = [1:13,15:67, 71:78] %fileNo = [2, 6, 9, 15, 16,  22,  30,  34, 45, 49, 54, 60, 73]%fileNo = [2, 6, 9, 15, 16, 18, 21, 22, 28, 30, 31, 34, 45,47, 49, 54, 60, 73] %%% picked these dudes based on max drop length   %fileNo = [1:13,15:67, 71:78]
+            for  fileNo = [1:13,15:67, 71:78] %fileNo = [1:13,15:67, 71:78] %fileNo = [2, 6, 9, 15, 16,  22,  30,  34, 45, 49, 54, 60, 73] %fileNo = [1:13,15:67, 71:78] %fileNo = [1:13,15:67, 71:78] %fileNo = [2, 6, 9, 15, 16,  22,  30,  34, 45, 49, 54, 60, 73]%fileNo = [2, 6, 9, 15, 16, 18, 21, 22, 28, 30, 31, 34, 45,47, 49, 54, 60, 73] %%% picked these dudes based on max drop length   %fileNo = [1:13,15:67, 71:78]
                 ind4loop
                 fileNo
                 clearvars -except fileNo rmse rmseEUL change_two change_one ind4loop
@@ -35,8 +35,8 @@ for change_one = 1:1
                 ind4loop = ind4loop+1;
             end
         
-    end
-end
+%     end
+% end
     
     
     

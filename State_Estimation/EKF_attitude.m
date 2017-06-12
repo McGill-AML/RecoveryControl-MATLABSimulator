@@ -15,9 +15,9 @@ else
 end
 %unpackage
 %states
-pos_k_1 = EKF_pos.X_hat.pos_hat;
-
-vel_k_1 = EKF_pos.X_hat.vel_hat;
+% pos_k_1 = EKF_pos.X_hat.pos_hat;
+% 
+% vel_k_1 = EKF_pos.X_hat.vel_hat;
 
 q_k_1 = EKF_att.X_hat.q_hat;
 
@@ -69,7 +69,10 @@ Omega_k_m = [cos(0.5*psi_norm*tStep), -psi_k_p';
 
 q_k_m = Omega_k_m*q_k_1;
 
-%renormalize quaternion (just in case)
+
+% q_k_m = q_k_1 + 0.5*quatmultiply(q_k_1, [0;omega_hat_m ])*tStep;
+% 
+% %renormalize quaternion (just in case)
 q_k_m = q_k_m/norm(q_k_m,2);
 
 bias_gyr_k_m = bias_gyr;
@@ -99,6 +102,8 @@ Q_k = tStep*diag([sensParams.var_gyr(1); sensParams.var_gyr; sensParams.var_bias
 %         -(0.5*sensParams.var_bias_gyr(1)*tStep^2)*[zeros(3,1), eye(3)], sensParams.var_bias_gyr(1)*tStep*eye(3)];
 
 %predict covariance matrix
+
+P_k_m =  A_k_1*EKF_att.P_hat*A_k_1' + Q_k;
 EKF_att.P_hat = A_k_1*EKF_att.P_hat*A_k_1' + Q_k;
 
 %% update 
@@ -149,15 +154,16 @@ else
 %     C_k = [dR_dq_0*[0;0;g], dR_dq_1*[0;0;g], dR_dq_2*[0;0;g], dR_dq_3*[0;0;g], zeros(3);
 %            dR_dq_0*mag, dR_dq_1*mag, dR_dq_2*mag, dR_dq_3*mag, zeros(3)];
 
-    C_k = [zeros(3,1), cross_mat(rotMat'*[0; 0; -g_acc]), zeros(3,3); %positive cross with trans Rot mat works with exp data - noisy tho?
-            zeros(3,1), cross_mat(rotMat'*mag), zeros(3,3)];
+    C_k = [zeros(3,1), cross_mat(rotMat'*mag), zeros(3,3);
+           zeros(3,1), cross_mat(rotMat'*[0; 0; -g_acc]), zeros(3,3)]; %positive cross with trans Rot mat works with exp data - noisy tho?
+           
        
-    R_k = diag([sensParams.var_acc; sensParams.var_mag]);
+    R_k = diag([sensParams.var_mag; sensParams.var_acc]);
     
-    y_k = [u_b_acc; u_b_mag];
+    y_k = [u_b_mag; u_b_acc ];
     
 %     y_k_hat = C_k*[q_k_m; bias_gyr_k_m];
-    y_k_hat = [rotMat'*[0; 0; -g_acc]; rotMat'*mag];
+    y_k_hat = [ rotMat'*mag; rotMat'*[0; 0; -g_acc]];
     
     EKF_att.innovation = y_k - y_k_hat;
     
@@ -174,7 +180,7 @@ r_k = y_k - y_k_hat;
 
 
 
-K_k = EKF_att.P_hat*C_k'/(R_k + C_k*EKF_att.P_hat*C_k')';
+K_k = EKF_att.P_hat*C_k'/(R_k + C_k*EKF_att.P_hat*C_k');
 
 if meas_size == 3
     EKF_att.K_k = [zeros(7,3), K_k];

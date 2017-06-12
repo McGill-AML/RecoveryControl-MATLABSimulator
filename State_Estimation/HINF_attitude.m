@@ -95,7 +95,7 @@ A_k_1 = [ A_k_1_1, A_k_1_2;
 Q_k = tStep*diag([sensParams.var_gyr; sensParams.var_gyr(1); sensParams.var_bias_gyr*.001]); 
 
 %predict covariance matrix
-HINF.P_hat = A_k_1*HINF.P_hat_eps*A_k_1' + Q_k; %used to be B_k_1*B_k_1';
+HINF.P_hat = A_k_1*HINF.P_hat*A_k_1' + Q_k; %used to be B_k_1*B_k_1';
 
 %% update 
          
@@ -177,7 +177,7 @@ K_k = [K_k1; K_k2];
 L_k = (eye(7) - K_k*C_k)*HINF.P_hat*HINF.G_k'/(eye(4) - HINF.G_k*HINF.P_hat*HINF.G_k');
 
 %update covariance
-HINF.P_hat_eps = (eye(7) - K_k*C_k + L_k*HINF.G_k)*HINF.P_hat*(eye(7) - K_k*C_k + L_k*HINF.G_k)' + K_k*R_k*K_k' - L_k*L_k';
+HINF.P_hat = (eye(7) - K_k*C_k + L_k*HINF.G_k)*HINF.P_hat*(eye(7) - K_k*C_k + L_k*HINF.G_k)' + K_k*R_k*K_k' - L_k*L_k';
 
 %update states
 q_upd =  K_k1*r_k;
@@ -191,7 +191,7 @@ HINF.X_hat.bias_gyr = bias_gyr_k_m + K_k2*r_k;
 
 HINF.X_hat.omega_hat = u_b_gyr - HINF.X_hat.bias_gyr;
 
-HINF.P_hat_eps = 0.5*(HINF.P_hat_eps + HINF.P_hat_eps'); % make sure symetric
+HINF.P_hat = 0.5*(HINF.P_hat + HINF.P_hat'); % make sure symetric
 
 
 

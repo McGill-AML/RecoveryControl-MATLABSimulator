@@ -1,7 +1,7 @@
 % clearvars -except SPKF ASPKF rmse loop_no SE_timer Setpoint Trajectory gamma
-%  clear;
-%  fileNo =9
-%  tic;
+ clear;
+ fileNo = 17
+ tic;
 global g mag
 global timeImpact
 global globalFlag
@@ -79,7 +79,7 @@ mag = rotMat*mag_b;
 
 
 
-corMag = 0;
+corMag = 1;
 
 
 % init variables for sim to NaN so they throw errors if used. req'd for
@@ -131,6 +131,16 @@ for ii = 1:length(ATT_qw)
         ATT_qz(ii:jj-1) = ATT_qz(jj);
     end
 end
+
+for ii = 1:length(BATT_Curr)
+    if isnan(BATT_Curr(ii))
+        jj = ii;
+        while isnan(BATT_Curr(jj))
+            jj = jj + 1;
+        end
+        BATT_Curr(ii:jj-1) = BATT_Curr(jj);
+    end
+end
 % 
 % Est_ICs.q = [ATT_qw(1); ATT_qx(1); ATT_qy(1); ATT_qz(1)];
 
@@ -151,6 +161,8 @@ AHINF = initAHINF(Est_ICs,useExpData);
 SPKF_norm = initCOMP_PX4(Est_ICs,useExpData);
 % SPKF_norm.gyr_bias_k_i =.05;
 
+
+% Est_sensParams.EKF.var_bias_gyr = Est_sensParams.EKF.var_bias_gyr*0;
 
 SE_timer = zeros(11,1);
 
@@ -181,7 +193,7 @@ if exist('running_a_loop','var')
 % % AHINF.delta_rate = hinf_val(change_two)/10;
 % % 
 % % %     
-%     Est_sensParams.var_acc = Est_sensParams.var_acc*ekf_mag_acc_vary(change_two);
+%     Est_sensParams.EKF.var_bias_gyr = Est_sensParams.EKF.var_bias_gyr*ekf_mag_acc_vary(change_two);
 %     Est_sensParams.var_mag = Est_sensParams.var_mag*ekf_mag_acc_vary(change_two);
 % gmax_val =  [.1, .1, .2, 0.2, 0.3];
 % grate_val = [0.005, 0.01, 0.01, 0.05, .01];
@@ -193,45 +205,45 @@ if exist('running_a_loop','var')
 % 
 % EKF_att.accel_bound =  acc_b_val(change_one);
 
-    if change_one == 2
-%           SPKF.accel_bound = 3;
-%           EKF_att.accel_bound = 3;
-%             Est_sensParams.var_mag(3) = Est_sensParams.var_mag(3)/100;
-%         
-%         HINF.accel_bound = 2;
-          
-%         Est_sensParams.var_mag = Est_sensParams.var_mag *10;
-    elseif change_one == 3 
-%           SPKF.accel_bound = 1;
-%           EKF_att.accel_bound = 1;
-%         
-%         HINF.accel_bound = 4;
-             
-%           ASPKF.G_max = 3;
-%           ASPKF.G_rate = .1;
-%         Est_sensParams.var_acc = Est_sensParams.var_acc*10;
-    elseif change_one == 4
-%             Est_sensParams.var_acc = Est_sensParams.var_acc/10;
-%           SPKF.accel_bound = 0.5;
-%           EKF_att.accel_bound = 0.5;
-%           SPKF.kappa = -3;
-          
-%         Est_sensParams.var_bias_gyr = Est_sensParams.var_bias_gyr*.01;
-    elseif change_one == 5
-%           SPKF.accel_bound = 4;
-%           EKF_att.accel_bound = 4;
-%           SPKF.kappa = -6;
+%     if change_one == 2
+% %           SPKF.accel_bound = 3;
+% %           EKF_att.accel_bound = 3;
+% %             Est_sensParams.var_mag(3) = Est_sensParams.var_mag(3)/100;
+% %         
+% %         HINF.accel_bound = 2;
 %           
-%           HINF.accel_bound = 4;
-          
-%           ASPKF.G_max = 3;
-%           ASPKF.G_rate = .1;
-%         Est_sensParams.var_gyr = Est_sensParams.var_gyr*100;
-%         hinf_val = [0.05, 0.1, 0.7, 10, 50];
-%         AHINF.delta_max = hinf_val(change_two);
-%         AHINF.delta_rate = hinf_val(change_two)/10;
-%         Est_sensParams.var_bias_gyr = Est_sensParams.var_bias_gyr*.01;
-    end
+% %         Est_sensParams.var_mag = Est_sensParams.var_mag *10;
+%     elseif change_one == 3 
+% %           SPKF.accel_bound = 1;
+% %           EKF_att.accel_bound = 1;
+% %         
+% %         HINF.accel_bound = 4;
+%              
+% %           ASPKF.G_max = 3;
+% %           ASPKF.G_rate = .1;
+% %         Est_sensParams.var_acc = Est_sensParams.var_acc*10;
+%     elseif change_one == 4
+% %             Est_sensParams.var_acc = Est_sensParams.var_acc/10;
+% %           SPKF.accel_bound = 0.5;
+% %           EKF_att.accel_bound = 0.5;
+% %           SPKF.kappa = -3;
+%           
+% %         Est_sensParams.var_bias_gyr = Est_sensParams.var_bias_gyr*.01;
+%     elseif change_one == 5
+% %           SPKF.accel_bound = 4;
+% %           EKF_att.accel_bound = 4;
+% %           SPKF.kappa = -6;
+% %           
+% %           HINF.accel_bound = 4;
+%           
+% %           ASPKF.G_max = 3;
+% %           ASPKF.G_rate = .1;
+% %         Est_sensParams.var_gyr = Est_sensParams.var_gyr*100;
+% %         hinf_val = [0.05, 0.1, 0.7, 10, 50];
+% %         AHINF.delta_max = hinf_val(change_two);
+% %         AHINF.delta_rate = hinf_val(change_two)/10;
+% %         Est_sensParams.var_bias_gyr = Est_sensParams.var_bias_gyr*.01;
+%     end
 
 end
 %% Initialize History Arrays
@@ -243,6 +255,8 @@ Hist = inithist(SimParams, state, stateDeriv, Pose, Twist, Control, PropState, C
 magfilt = zeros(3,length(TIME));
 gyrfilt = zeros(3,length(TIME));
 accfilt = zeros(3,length(TIME));
+
+
 
 %% Simulation Loop
 for iSim = 2:length(TIME)
@@ -265,15 +279,15 @@ for iSim = 2:length(TIME)
 %     [Sensor.acc, move_avg_acc] = moving_avg_filt(Sensor.acc, move_avg_acc);
     %% State Estimation
 %     tic;
-    SPKF = SPKF_attitude(Sensor, SPKF, EKF, Est_sensParams, tStep, useExpData);
+%     SPKF = SPKF_attitude(Sensor_SPKF, SPKF, EKF, Est_sensParams, tStep, useExpData);
 %     SE_timer(1) = SE_timer(1) + toc;
 %     
 %     tic;
-    ASPKF = ASPKF_attitude(Sensor, ASPKF, EKF, Est_sensParams, tStep, useExpData,0);
+%     ASPKF = ASPKF_attitude(Sensor_SPKF, ASPKF, EKF, Est_sensParams, tStep, useExpData,0);
 %     SE_timer(2) = SE_timer(2) + toc;
 %     
 %     tic;
-    EKF_att = EKF_attitude(Sensor, EKF_att, EKF, Est_sensParams, tStep,useExpData);
+    EKF_att = EKF_attitude(Sensor_SPKF, EKF_att, EKF, Est_sensParams.EKF, tStep,useExpData);
 %     SE_timer(3) = SE_timer(3) + toc;
 %     
 %     tic;
@@ -282,11 +296,11 @@ for iSim = 2:length(TIME)
 
 %     
 %     tic;
-    COMP = CompFilt_attitude(Sensor_filt, COMP, EKF, Est_sensParams, tStep,useExpData);
+%     COMP = CompFilt_attitude(Sensor_filt, COMP, EKF, Est_sensParams, tStep,useExpData);
 %     SE_timer(5) = SE_timer(5) + toc;
 %     
 %     tic;
-    HINF = HINF_attitude(Sensor, HINF, EKF, Est_sensParams, tStep, useExpData);
+    HINF = HINF_attitude(Sensor_SPKF, HINF, EKF, Est_sensParams.EKF, tStep, useExpData);
 %     SE_timer(6) = SE_timer(6) + toc;
     
 %     tic;
@@ -298,7 +312,7 @@ for iSim = 2:length(TIME)
 %     SE_timer(8) = SE_timer(8) + toc;
     
 %     tic;
-    ASPKF_opt = ASPKF_opt_attitude(Sensor, ASPKF_opt, AEKF, Est_sensParams, tStep, useExpData);
+%     ASPKF_opt = ASPKF_opt_attitude(Sensor_SPKF, ASPKF_opt, AEKF, Est_sensParams, tStep, useExpData);
 %     SE_timer(9) = SE_timer(9) + toc;
 %     
 %     tic;
@@ -306,11 +320,11 @@ for iSim = 2:length(TIME)
 %     SE_timer(9) = SE_timer(9) + toc;
     
 %     tic;
-    AHINF = AHINF_attitude(Sensor, AHINF, EKF, Est_sensParams, tStep, useExpData);
+    AHINF = AHINF_attitude(Sensor_SPKF, AHINF, EKF, Est_sensParams.EKF, tStep, useExpData);
 %     SE_timer(10) = SE_timer(10) + toc;
 
 %     tic;
-    SPKF_norm = CompFilt_PX4(Sensor_filt, SPKF_norm, EKF, Est_sensParams, tStep, useExpData);
+%     SPKF_norm = CompFilt_PX4(Sensor_filt, SPKF_norm, EKF, Est_sensParams, tStep, useExpData);
 %     SE_timer(4) = SE_timer(4) + toc;
     
 %     tic;
@@ -333,14 +347,16 @@ for iSim = 2:length(TIME)
                     
 end
 
-toc
+% toc
 
 %% Generate plottable arrays
 Plot = hist2plot(Hist, useExpData);
 
 Plot.times = TIME;
 
-% Plot.quaternions = [ATT_qw'; ATT_qx'; ATT_qy'; ATT_qz'];
+Plot.quaternions = [ATT_qw'; ATT_qx'; ATT_qy'; ATT_qz'];
+
+toc;
 
 Plot.posns = [VISN_X'; VISN_Y'; VISN_Z'];
 
@@ -370,6 +386,7 @@ end
 Vicon_NED = cleanVicon(Vicon_NED);
 
 Plot.quaternions = Vicon_NED;
+% Plot.quaternions = [ATT_qw'; ATT_qx'; ATT_qy'; ATT_qz'];
 
 %rotate Px4 to match up with vicon init - why doesn't PX4 init to same? 
 quat_PX42NED = quatmultiply([ATT_qw(1); ATT_qx(1); ATT_qy(1); ATT_qz(1)], quatinv(Vicon_NED(:,1)));
@@ -394,12 +411,12 @@ if ~exist('running_a_loop','var')
     
     rmseEUL = [];
     rmse = [];
-    rmse = rmse_att(Plot,sensParams, rmse, 0, useExpData, 1, fileNo, crashIndex, viconDropIndex);
+    rmse = rmse_att(Plot,sensParams, rmse, 0, useExpData, 1, fileNo, crashIndex, viconDropIndex, vicDelay);
     
 %     rmse_position(loop_no,:) = rmse_pos(Plot,sensParams,time_of_recovery/tStep);
 
     
-    rmseEUL = rmse_att_euler(Plot, rmseEUL, 0, useExpData, 1, fileNo, crashIndex, viconDropIndex);
+    rmseEUL = rmse_att_euler(Plot, rmseEUL, 0, useExpData, 1, fileNo, crashIndex, viconDropIndex, vicDelay);
 end
 
 font_size = 15;

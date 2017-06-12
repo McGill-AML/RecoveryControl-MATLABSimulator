@@ -1,6 +1,6 @@
 function [SRSPKF] = initSRSPKF(Est_ICs, useExpData)
 %estimator constants
-SRSPKF.kappa = -3; % SRSPKF scaling factor
+SRSPKF.kappa = -6; % SRSPKF scaling factor
 
 %initial states ang_vel, quat, gyro bias
 SRSPKF.X_hat.q_hat = Est_ICs.q;
@@ -22,7 +22,7 @@ SRSPKF.accel_bound = 0.5; % +/- how much larger thna gravity before not used in 
 
 SRSPKF.use_acc = 1; % whether or not accelerometer reading is used in update
 
-SRSPKF.alpha = 1; %dictates spread of sigma points
+SRSPKF.alpha = 0.5; %dictates spread of sigma points
 
-SRSPKF.beta = 0; %2 is optimal for gaussian noise
+SRSPKF.beta = 2; %2 is optimal for gaussian noise
 

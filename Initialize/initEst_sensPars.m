@@ -3,11 +3,11 @@ function [Est_sensParams] = initEst_sensPars(sensParams, useExpData)
 Est_sensParams = sensParams;
 
 if useExpData == 1 % changed this shit too.
- Est_sensParams.var_acc = [1; 1; 1]*300; % 300 %abs(sensParams.var_acc)*1;% + randn(3,1)*0.1);
+ Est_sensParams.var_acc = [1; 1; 1]*500; % 300 %abs(sensParams.var_acc)*1;% + randn(3,1)*0.1);
 
  Est_sensParams.var_gyr =  abs(sensParams.var_gyr)*1;% + randn(3,1)*0.0003);
 
- Est_sensParams.var_mag = [7*1e-3;  7*1e-3;  7*1e-3]*3000;% abs(sensParams.var_mag)*1;% + randn(3,1)*0.00003);
+ Est_sensParams.var_mag = [7*1e-3;  7*1e-3;  7*1e-3]*1000;%3000 abs(sensParams.var_mag)*1;% + randn(3,1)*0.00003);
 
  Est_sensParams.var_gps =  sensParams.var_gps;% + [0.00000001; -0.00000001 ; 0.00003; 0.00001; 0.00001]; %x, y, height, x-dot y-dot
 
@@ -22,11 +22,11 @@ Est_sensParams.var_bias_mag =  sensParams.var_bias_mag;
 %% EKF
 Est_sensParams.EKF = sensParams;
 
- Est_sensParams.EKF.var_acc = [1; 1; 1]*300; %abs(sensParams.var_acc)*1;% + randn(3,1)*0.1);
+ Est_sensParams.EKF.var_acc = [1; 1; 1]*500;%300 %abs(sensParams.var_acc)*1;% + randn(3,1)*0.1);
 
  Est_sensParams.EKF.var_gyr =  abs(sensParams.var_gyr)*1;% + randn(3,1)*0.0003);
 
- Est_sensParams.EKF.var_mag = [7*1e-3;  7*1e-3;  7*1e-3]*3000;% abs(sensParams.var_mag)*1;% + randn(3,1)*0.00003);
+ Est_sensParams.EKF.var_mag = [7*1e-3;  7*1e-3;  7*1e-3]*1000;%3000 abs(sensParams.var_mag)*1;% + randn(3,1)*0.00003);
 
  Est_sensParams.EKF.var_gps =  sensParams.var_gps;% + [0.00000001; -0.00000001 ; 0.00003; 0.00001; 0.00001]; %x, y, height, x-dot y-dot
 
@@ -34,7 +34,7 @@ Est_sensParams.EKF = sensParams;
 
 Est_sensParams.EKF.var_bias_acc =   sensParams.var_bias_acc;
 
-Est_sensParams.EKF.var_bias_gyr =  sensParams.var_bias_gyr*.1;
+Est_sensParams.EKF.var_bias_gyr =  sensParams.var_bias_gyr*100; %0.1
 
 Est_sensParams.EKF.var_bias_mag =  sensParams.var_bias_mag;
 else

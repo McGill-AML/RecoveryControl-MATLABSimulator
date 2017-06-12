@@ -166,6 +166,9 @@ for ii = [1:10, (17+SPKF.use_acc*3):(25+SPKF.use_acc*3)]
     
     Omega_k_p = [cos(0.5*psi_norm*tStep), -psi_k_p';
                   psi_k_p, cos(0.5*psi_norm*tStep)*eye(3)-cross_mat(psi_k_p)];
+
+
+
 %               
 %     %estimate orientation using estimated ang vel - Fiona conv
 %     psi_norm = norm(omega_sig(:,ii),2);
@@ -175,7 +178,13 @@ for ii = [1:10, (17+SPKF.use_acc*3):(25+SPKF.use_acc*3)]
 %                   psi_k_p, cos(-0.5*psi_norm*tStep)*eye(3)+cross_mat(psi_k_p)]; % this is fionas way
     
     q_k_m_sig(:,ii) = Omega_k_p*q_k_1_sig(:,ii); %predicted quaternion sigma points
-%     q_k_m_sig(:,ii) = q_k_m_sig(:,ii)/norm(q_k_m_sig(:,ii)); %renorm just incase
+
+
+    % using this model cause I was checking against my cpp code, which uses
+    % this derivative instead of the discretized one above.
+%     q_k_m_sig(:,ii) = q_k_1_sig(:,ii) + 0.5*quatmultiply(q_k_1_sig(:,ii), [0;omega_sig(:,ii) ])*tStep;
+    
+    q_k_m_sig(:,ii) = q_k_m_sig(:,ii)/norm(q_k_m_sig(:,ii)); %renorm just incase
     
     q_k_err(:,ii) = quatmultiply([q_k_m_sig(1,1);-q_k_m_sig(2:4,1)],q_k_m_sig(:,ii)); %convert back to error
     %orientation propagated values
@@ -184,7 +193,7 @@ for ii = [1:10, (17+SPKF.use_acc*3):(25+SPKF.use_acc*3)]
      Sigma_pts_k_m(1:3,ii) = f*q_k_err(2:4,ii)/(a+q_k_err(1,ii)); %convert quat error to MRP
     
     Sigma_pts_k_m(4:6,ii) = Sigma_pts_k_1(4:6,ii); %no noise terms to add.
-    Sigma_pts_k_m(13:end,ii) = Sigma_pts_k_1(13:end,ii);
+    Sigma_pts_k_m(7:end,ii) = Sigma_pts_k_1(7:end,ii);
 end
 
 
@@ -196,7 +205,7 @@ for ii = [11:(16+SPKF.use_acc*3), (26+SPKF.use_acc*3):(31+SPKF.use_acc*3*2)]
     Sigma_pts_k_m(1:3,ii) = Sigma_pts_k_m(1:3,1); %convert quat error to MRP
     
     Sigma_pts_k_m(4:6,ii) = Sigma_pts_k_1(4:6,ii) + tStep*Sigma_pts_k_1(10:12,ii) ;
-    Sigma_pts_k_m(13:end,ii) = Sigma_pts_k_1(13:end,ii);
+    Sigma_pts_k_m(7:end,ii) = Sigma_pts_k_1(7:end,ii);
 end
 
 
@@ -221,6 +230,7 @@ SPKF.X_hat.X_k_m = X_k_m;
 %%
 %measurement sigma and correct
 % bound so if there's large acceleration (besides gravity) dont use
+
 if ~SPKF.use_acc
     %only use magnetometer
     
@@ -235,7 +245,7 @@ if ~SPKF.use_acc
         
     end
     %same rotation but add noise
-    for ii = [1, 14:16, 29:31]
+    for ii = [14:16, 29:31]
         Sigma_Y(1:3,ii) = Sigma_Y(1:3,1) + Sigma_pts_k_m(13:15,ii); %magnetometer
 %         Sigma_Y(1:3,ii) = Sigma_Y(1:3,ii)/norm(Sigma_Y(1:3,ii));
     end

@@ -16,7 +16,7 @@ ImpactParams = initparams_navi;
 SimParams.recordContTime = 0;
 SimParams.useFaesslerRecovery = 1;%Use Faessler recovery
 SimParams.useRecovery = 1; 
-SimParams.timeFinal = 60;
+SimParams.timeFinal = 15;
 tStep = 1/100;%1/200;
 
 ImpactParams.wallLoc = 0.5;%1.5;
@@ -43,7 +43,7 @@ localFlag = initflags;
 ImpactIdentification = initimpactidentification;
 
 %% Set initial Conditions
-IC.posn = [ImpactParams.wallLoc-0.65;0;0.15]; 
+IC.posn = [ImpactParams.wallLoc-1.65;0;5]; % [ImpactParams.wallLoc-.65; 0; 0.15]; 
 
 Trajectory(1).posn = IC.posn;
 
@@ -229,9 +229,9 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
     
     %% Impact Detection    
     [ImpactInfo, ImpactIdentification] = detectimpact(iSim, ImpactInfo, ImpactIdentification,...
-                                                      Sensor,Hist.poses,PREIMPACT_ATT_CALCSTEPFWD);
+                                                      Sensor,Hist.poses,PREIMPACT_ATT_CALCSTEPFWD, tStep);
     [FuzzyInfo] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
-                                    Sensor, Hist.poses(end), SimParams, Control, FuzzyInfo);
+                                    Sensor, Hist.poses(round(iSim/tStep+1)), SimParams, Control, FuzzyInfo);
                                 
     % Calculate accelref in world frame based on FuzzyInfo.output, estWallNormal
     if sum(FuzzyInfo.InputsCalculated) == 4 && Control.accelRefCalculated == 0;
@@ -293,13 +293,13 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 %     [Sensor.acc, move_avg_acc] = moving_avg_filt(Sensor.acc, move_avg_acc);
     %% State Estimation
 %     tic;
-    SPKF = SPKF_attitude(Sensor, SPKF, EKF, Est_sensParams, tStep, useExpData);
+%     SPKF = SPKF_attitude_slow(Sensor, SPKF, EKF, Est_sensParams, tStep, useExpData);
 %     timer(1) = timer(1) + toc;
     
 
 % % %     
 %     tic;
-    ASPKF = ASPKF_attitude(Sensor, ASPKF, EKF, Est_sensParams, tStep, useExpData, 0);
+%     ASPKF = ASPKF_attitude(Sensor, ASPKF, EKF, Est_sensParams, tStep, useExpData, 0);
 %     timer(2) = timer(2) + toc;
 %     
 %     tic;
@@ -312,7 +312,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 
 % % % % %     
 %     tic;
-    COMP = CompFilt_attitude(Sensor_filt, COMP, EKF, Est_sensParams, tStep, useExpData);
+%     COMP = CompFilt_attitude(Sensor_filt, COMP, EKF, Est_sensParams, tStep, useExpData);
 %     timer(5) = timer(5) + toc;
 % % %     
  
@@ -325,7 +325,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 %     timer(7) = timer(7) + toc;
 %     
 %     tic;
-%     SRSPKF = SRSPKF_attitude(Sensor, SRSPKF, EKF, Est_sensParams, tStep, useExpData);
+%     SRSPKF = SRSPKF_attitude(Sensor, SRSPKF, EKF, Est_sensParams, tStep);
 %     timer(7) = timer(7) + toc;
 %     
 %     tic;
@@ -333,7 +333,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 %     timer(8) = timer(8) + toc;
 %     
 %     tic;
-    ASPKF_opt = ASPKF_opt_attitude(Sensor, ASPKF_opt, EKF, Est_sensParams, tStep, useExpData);
+%     ASPKF_opt = ASPKF_opt_attitude(Sensor, ASPKF_opt, EKF, Est_sensParams, tStep, useExpData);
 %     timer(9) = timer(9) + toc;
     
 %     tic;
@@ -345,7 +345,7 @@ for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep
 %     timer(10) = timer(10) + toc;
 
 %     tic;
-    SPKF_norm = CompFilt_PX4(Sensor_filt, SPKF_norm, EKF, Est_sensParams, tStep, useExpData);
+%     SPKF_norm = CompFilt_PX4(Sensor_filt, SPKF_norm, EKF, Est_sensParams, tStep, useExpData);
 %     timer(11) = timer(11) + toc;
     
 %     tic;

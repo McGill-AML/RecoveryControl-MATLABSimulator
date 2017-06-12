@@ -9,10 +9,10 @@ EKF_att.X_hat.bias_gyr = Est_ICs.bias_gyr;
 
 EKF_att.P_hat = Est_ICs.P_init_att;
 
-EKF_att.P_hat(1:4,1:4) = EKF_att.P_hat(1:4,1:4)*0.1;
-
 if useExpData == 0 
     EKF_att.P_hat(5:7,5:7) = EKF_att.P_hat(5:7,5:7)*10;
+else
+    EKF_att.P_hat(1:4,1:4) = EKF_att.P_hat(1:4,1:4)*0.001;
 end
 
 

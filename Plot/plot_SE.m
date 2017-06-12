@@ -1,36 +1,36 @@
 % Plot scripts
 
-plot_SPKF =1;
+plot_SPKF = 0;
 plot_ASPKF =0;
 plot_EKF = 0;
 plot_AEKF = 0;
 plot_COMP = 0;
-plot_HINF =0;
+plot_HINF =1;
 plot_SPKF_full = 0;
 plot_EKF_att = 1;
 plot_SRSPKF = 0;
 plot_SRSPKF_full = 0;
 plot_ASPKF_opt = 0;
-plot_AHINF = 0;
-plot_SPKF_norm = 1;
+plot_AHINF = 1;
+plot_SPKF_norm = 0;
 
 plot_pos = 0;
 plot_cov = 0;
 plot_vel = 0;
-plot_quat =0;
-plot_ASPKF_stuff = 1;
+plot_quat =1;
+plot_ASPKF_stuff = 0;
 plot_angvel = 0;
 plot_eul_ang =0;
 plot_acceleroms = 0;
 plot_gyros = 0;
 plot_mag = 0;
 plot_crash_occur = 0;
-plot_gyro_bias =0;
+plot_gyro_bias =1;
 plot_accel_bias = 0;
 plot_gps = 0;
 plot_baro = 0;
 plot_animate = 0;
-plot_AHINF_stuff = 0;
+plot_AHINF_stuff = 1;
 
 if 0 
     
@@ -230,7 +230,7 @@ if plot_quat == 1
         plot(Plot.times,Plot.ASPKF_opt_quat(1,:),'y--', 'Linewidth',line_width);
     end
     if plot_AHINF == 1
-        plot(Plot.times,Plot.AHINF_quat(1,:),'g--', 'Linewidth',line_width);
+        plot(Plot.times,Plot.AHINF_quat(1,:),'c--', 'Linewidth',line_width);
     end
     if plot_SPKF_norm == 1
         plot(Plot.times,Plot.SPKF_norm_quat(1,:), 'y','Linewidth',line_width);
@@ -270,7 +270,7 @@ if plot_quat == 1
         plot(Plot.times,Plot.ASPKF_opt_quat(2,:),'y--', 'Linewidth',line_width);
     end
     if plot_AHINF == 1
-        plot(Plot.times,Plot.AHINF_quat(2,:),'g--', 'Linewidth',line_width);
+        plot(Plot.times,Plot.AHINF_quat(2,:),'c--', 'Linewidth',line_width);
     end
     if plot_SPKF_norm == 1
         plot(Plot.times,Plot.SPKF_norm_quat(2,:), 'y','Linewidth',line_width);
@@ -310,7 +310,7 @@ if plot_quat == 1
         plot(Plot.times,Plot.ASPKF_opt_quat(3,:),'y--', 'Linewidth',line_width);
     end
     if plot_AHINF == 1
-        plot(Plot.times,Plot.AHINF_quat(3,:),'g--', 'Linewidth',line_width);
+        plot(Plot.times,Plot.AHINF_quat(3,:),'c--', 'Linewidth',line_width);
     end
     if plot_SPKF_norm == 1
         plot(Plot.times,Plot.SPKF_norm_quat(3,:), 'y','Linewidth',line_width);
@@ -350,7 +350,7 @@ if plot_quat == 1
         plot(Plot.times,Plot.ASPKF_opt_quat(4,:),'y--', 'Linewidth',line_width);
     end
     if plot_AHINF == 1
-        plot(Plot.times,Plot.AHINF_quat(4,:),'g--', 'Linewidth',line_width);
+        plot(Plot.times,Plot.AHINF_quat(4,:),'c--', 'Linewidth',line_width);
     end
     if plot_SPKF_norm == 1
         plot(Plot.times,Plot.SPKF_norm_quat(4,:), 'y','Linewidth',line_width);
@@ -650,7 +650,7 @@ if plot_gyro_bias ==1
         plot(Plot.times,Plot.ASPKF_opt_gyr_bias(1,:),'y--', 'Linewidth',line_width);
     end
     if plot_AHINF == 1
-        plot(Plot.times,Plot.AHINF_gyr_bias(1,:),'g--', 'Linewidth',line_width);
+        plot(Plot.times,Plot.AHINF_gyr_bias(1,:),'c--', 'Linewidth',line_width);
     end
     if plot_SPKF_norm == 1
         plot(Plot.times,Plot.SPKF_norm_gyr_bias(1,:), 'y','Linewidth',line_width);
@@ -690,7 +690,7 @@ if plot_gyro_bias ==1
         plot(Plot.times,Plot.ASPKF_opt_gyr_bias(2,:),'y--', 'Linewidth',line_width);
     end
     if plot_AHINF == 1
-        plot(Plot.times,Plot.AHINF_gyr_bias(2,:),'g--', 'Linewidth',line_width);
+        plot(Plot.times,Plot.AHINF_gyr_bias(2,:),'c--', 'Linewidth',line_width);
     end
     if plot_SPKF_norm == 1
         plot(Plot.times,Plot.SPKF_norm_gyr_bias(2,:), 'y','Linewidth',line_width);
@@ -730,7 +730,7 @@ if plot_gyro_bias ==1
         plot(Plot.times,Plot.ASPKF_opt_gyr_bias(3,:),'y--', 'Linewidth',line_width);
     end
     if plot_AHINF == 1
-        plot(Plot.times,Plot.AHINF_gyr_bias(3,:),'g--', 'Linewidth',line_width);
+        plot(Plot.times,Plot.AHINF_gyr_bias(3,:),'c--', 'Linewidth',line_width);
     end
     if plot_SPKF_norm == 1
         plot(Plot.times,Plot.SPKF_norm_gyr_bias(3,:), 'y','Linewidth',line_width);

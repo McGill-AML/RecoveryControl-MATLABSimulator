@@ -1,13 +1,29 @@
 % script to import data
 % try 38
-% fileNo =30;
+fileNo = 55
 
 if fileNo < 10;
-    px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\05-Recovery for Journal\March\px4logs\csv\q0',num2str(fileNo),'.csv']);
+    px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\Spring 2017\March 8th Indoors Zero Reference Acceleration\px4logs\csv\q0',num2str(fileNo),'.csv']);
 else
-    px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\05-Recovery for Journal\March\px4logs\csv\q',num2str(fileNo),'.csv']);
+    px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\Spring 2017\March 8th Indoors Zero Reference Acceleration\px4logs\csv\q',num2str(fileNo),'.csv']);
 end
 % px4Data = importdata(['D:\Dropbox\Masters\Navi\Adrian_data\CompassMot\battery_rev.csv']);
+
+% px4Data = importdata(['D:\Dropbox\Masters\Navi\Adrian_data\May5th\px4log-2017-05-11\08_04_38.csv']);
+
+
+% if fileNo < 10;
+%     px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\Spring 2017\April 7th Indoors - Same as Field Trial Conditions\csv\s0',num2str(fileNo),'.csv']);
+% else
+%     px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\Spring 2017\April 7th Indoors - Same as Field Trial Conditions\csv\s',num2str(fileNo),'.csv']);
+% end
+% 
+% % if fileNo < 10;
+% %     px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\Spring 2017\May 16th EKF attitude estimate\csv\a0',num2str(fileNo),'.csv']);
+% % else
+% %     px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\Spring 2017\May 16th EKF attitude estimate\csv\a',num2str(fileNo),'.csv']);
+% % end
+
 
 % remove only data I want from the .csv file
 for ii = 1:length(px4Data.colheaders)
@@ -86,7 +102,7 @@ VISN_Y(remove_index) = [];
 VISN_Z(remove_index) = [];
 BATT_Curr(remove_index) = [];
 ATTC_Thrust(remove_index) = [];
-IRST_RS(remove_index) = [];
+% IRST_RS(remove_index) = [];
 
 
     

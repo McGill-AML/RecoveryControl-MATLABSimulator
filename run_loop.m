@@ -1,17 +1,17 @@
 % % % % % loop to test variables
-% clear;
-% 
-% timer = zeros(11,1);
-% 
-% angle_head = 1;
-% posn_hit = 0;
-% 
-% rmseEUL = [];
-% rmse =[];
-% loop_no = 1;
+clear;
+
+timer = zeros(11,1);
+
+angle_head = 1;
+posn_hit = 0;
+
+rmseEUL = [];
+rmse =[];
+loop_no = 1;
 % for change_one = 1:2
 %     for change_two = 1:5
-        for ICset =79:200
+        for ICset = 1
             tic;
             loop_no
             clearvars -except loop_no timer rmse angle_head posn_hit rmse_position rmseEUL change_one change_two ICset
@@ -30,13 +30,13 @@
             % Setpt 1
             Setpoint.head = angle_head;
             Setpoint.time = 5;
-            Setpoint.posn = [-0.15;0;0.15];
+            Setpoint.posn = [1.15; 0; 5]; %[-0.15;0;0.15];
             Trajectory = Setpoint;
             
             % Setpt 1
             Setpoint.head = angle_head;
             Setpoint.time = Setpoint.time + 5;
-            Setpoint.posn = [-0.15;0;5];
+            Setpoint.posn = [1.15; 0; 5]; %[-0.15;0;0.15];
             Trajectory = [Trajectory;Setpoint];
             
             %     % Setpt 1
@@ -119,7 +119,7 @@
             rmseEUL = rmse_att_euler(Plot,  rmseEUL, time_of_recovery/tStep, useExpData, loop_no, 0, 0, 0, 0);
             
             
-            save('scenario_1_fix_PX4','rmse','rmseEUL');
+%             save('scenario_1_fix_PX4','rmse','rmseEUL');
             loop_no = loop_no+1;
 
 
