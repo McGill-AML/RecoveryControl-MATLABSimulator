@@ -1,7 +1,7 @@
 close all
 hold on
 grid on
-for trial = 1:117
+for trial = 1:101
     if(Batch(trial).ImpactInfo.isStable == 1)
         h1 = scatter(5*(Batch(trial).i-1)-30, 0.5+0.25*(Batch(trial).j-1),'b');
     else

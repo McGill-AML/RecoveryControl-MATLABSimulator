@@ -1,3 +1,4 @@
+
 clear all
 
 global g timeImpact globalFlag poleRadius numTrials
@@ -10,14 +11,16 @@ SimParams.useRecovery = 0;
 Batch = [];
 record = [];
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
-numOffset = 36;
+numOffset = 37;
 numPitch = 46;
 elapsedTime = 0;
 
-for iPitch = 1:5:45%:numPitch 
+
+for iPitch = 1:2
     pitchImpact = 1 - iPitch; 
-    tic
-    for iOffset=1:3:36%1:numOffset
+    
+
+    for iOffset=37
         recoverySuccessful = 0;
         disp(numOffset*(iPitch-1)+iOffset);
         offset = -1+2*((iOffset-1)/(numOffset-1));
@@ -139,14 +142,15 @@ for iPitch = 1:5:45%:numPitch
                  Plot.recoveryStage, Hist.states, Plot.normalForces, timeImpact}; 
         
         elapsedTime = toc + elapsedTime
-        Batch = [Batch; Trial];
+%         Batch = [Batch; Trial];
     end
 end
 
-save('june_3_with_recovery_test.mat','Batch');
+
+save('june_3_without_recovery_test.mat','Batch');
 %%
-close all
+% close all
 % % % for iter=1
-     animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',800);
+%      animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',800);
 % end
 % plot(Plot.times,abs(Plot.propRpms))

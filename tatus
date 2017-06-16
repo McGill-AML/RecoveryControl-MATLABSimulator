@@ -1,0 +1,867 @@
+[33mcommit b11abd90c511b80b3ec2955fc283c250c9ea4ba7[m
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Wed Jun 14 16:08:25 2017 -0400
+
+    Commiting a few minor changes
+
+[33mcommit 470aaa12a5e46fb335d520cf79773b62009dad86[m
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Wed Jun 14 15:01:19 2017 -0400
+
+    Commiting a few minor changes
+
+[33mcommit 3a7a4b67d8cabeab6ffcafab4d50440554fb5cb5[m
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Wed Jun 14 14:14:56 2017 -0400
+
+    Commiting a few minor changes
+
+[33mcommit 39eae4b79540ee9c050b9eefb350d0608803fb65[m
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Tue Jun 13 17:10:09 2017 -0400
+
+    Some updates for ploting animation, Yaw spikes
+
+[33mcommit 7839191de1848667bdb412b4edd08c2c664a7291[m
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Fri Jun 9 17:35:18 2017 -0400
+
+    Corrected Animation Display and Normal
+
+[33mcommit 9bcc177c7449a796ff608e9edc16b6c716ddfa67[m
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Thu Jun 8 17:55:02 2017 -0400
+
+    Number of impacts being recorded and displayed with the animation
+
+[33mcommit a2faf57c6d3f4461486e43d4a962396a73e46d87[m
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Wed Jun 7 12:21:59 2017 -0400
+
+    Semms to be working but Batch still unsymmetric
+
+[33mcommit 2b680c184983050fab95e6f11dd97570a31760c7[m
+Merge: fc2267c 12fa4ae
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Mon Jun 5 12:36:31 2017 -0400
+
+    Batch bug rectified
+
+[33mcommit fc2267cbad715cc18f762c86b7a6bd5d2a8668dd[m
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Mon Jun 5 12:29:44 2017 -0400
+
+    Batch bug rectified
+
+[33mcommit 12fa4ae9d9a4188e238e212661b8cc1f616a7d41[m
+Merge: e6415f8 c650154
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Mon Jun 5 12:22:35 2017 -0400
+
+    working fine
+
+[33mcommit 7d5b7e2eeaa897c24e3b4bb51db92844f4cb9e58[m
+Merge: fc00206 c650154
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Sat Jun 3 17:37:20 2017 -0400
+
+    not matching yet
+
+[33mcommit fc0020652b6d715e730cc1319a46e8daab1344fe[m
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Sat Jun 3 17:33:29 2017 -0400
+
+    not matching yet
+
+[33mcommit c650154687ad6b6645daa209b4a2ba9ba81609ff[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Sat Jun 3 17:32:38 2017 -0400
+
+    if were lucky things are working now
+
+[33mcommit 6d816ae85d019724246195d5fa641afabe5f1ea6[m
+Merge: e21eac4 28a87ee
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Sat Jun 3 16:23:21 2017 -0400
+
+    batch not matching the actual data
+
+[33mcommit e21eac4e30e923ad38ebc7b2fb36eb6ba36649b6[m
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Sat Jun 3 16:22:22 2017 -0400
+
+    batch not matching the actual data
+
+[33mcommit 28a87ee6cbb3bb9a5fffea63ebf66c10fb6c77c1[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Sat Jun 3 16:17:51 2017 -0400
+
+    simplified check recovery stage
+
+[33mcommit e6415f82244f1def2161687d09165468ab2de7d0[m
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Fri Jun 2 19:00:15 2017 -0400
+
+    because I have to
+
+[33mcommit 262a80aa2ecf4b96904ba05b85461603ee8a353d[m
+Merge: 34ff46d da806c2
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Fri Jun 2 14:02:57 2017 -0400
+
+    up to date?
+
+[33mcommit 34ff46da21643a421ada29c6a3dd14da084cc788[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Fri Jun 2 14:00:36 2017 -0400
+
+    old stuff
+
+[33mcommit d01d1141b522c406c2dc4e92cc15a6dd8627aa5c[m
+Merge: 8dac4c9 da806c2
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Fri Jun 2 13:11:20 2017 -0400
+
+    Merge branch 'pole' of https://github.com/McGill-AML/RecoveryControl-MATLABSimulator into pole
+    
+    Conflicts:
+    	Dynamics/findcontact.m
+    	rerun_trial_withoutRecovery.m
+
+[33mcommit da806c2b724dd235dd907b3f3370a0e98f193eec[m
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Fri Jun 2 13:09:34 2017 -0400
+
+    now recording Batch, edit to controller and reduced computation size
+
+[33mcommit 8dac4c9ed4ddae0eca47cbab0e01ee963ee03585[m
+Merge: ab487e2 f3f4b48
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Fri Jun 2 12:43:10 2017 -0400
+
+    Merge branch 'pole' of https://github.com/McGill-AML/RecoveryControl-MATLABSimulator into pole
+    
+    Conflicts:
+    	Dynamics/findcontact.m
+    	rerun_trial_withoutRecovery.m
+    	test.m
+
+[33mcommit ab487e2fcf45adfd1a0ed90ad0bc1bf24c7cdc3e[m
+Merge: 31acec9 cd60c5d
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Fri Jun 2 12:36:51 2017 -0400
+
+    Merge branch 'pole' of https://github.com/McGill-AML/RecoveryControl-MATLABSimulator into pole
+    
+    Conflicts:
+    	Display/animate.m
+    	Dynamics/findcontact.m
+    	rerun_trial.m
+
+[33mcommit f3f4b48cfefb2afc570a65d0fd507b1cb064be8f[m
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Fri Jun 2 12:32:59 2017 -0400
+
+    didnt record Batch
+
+[33mcommit 31acec9f7d5898f57b238dcf3b4542eed4d9730c[m
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Thu Jun 1 17:39:24 2017 -0400
+
+    pulkits fiona method 4 intersection invicible
+
+[33mcommit cd60c5d2d8e45ba56d8553bb5d67111528b18e6f[m
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Thu Jun 1 17:30:02 2017 -0400
+
+    latest minimum distance code
+
+[33mcommit 752f604c00c30bb5080c7b306e4ef9d99367fcaf[m
+Merge: 449c5db 08d13a6
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Wed May 31 12:59:30 2017 -0400
+
+    Merge branch 'pole' of https://github.com/McGill-AML/RecoveryControl-MATLABSimulator into pole
+
+[33mcommit 08d13a61fb51baa22b5be83c7778c7ef20117d8a[m
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Tue May 30 17:35:57 2017 -0400
+
+    now 4 contact points doesnt work
+
+[33mcommit 449c5dbbfb51fac9c6816259f9392efb15e8dba2[m
+Merge: f5cf142 10be5b6
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Tue May 30 16:41:04 2017 -0400
+
+    faulty code
+
+[33mcommit f5cf14273d5888067c341b05e621699dfe1eca2f[m
+Author: Pulkit Rustagi <rustagi.pulkit@gmail.com>
+Date:   Tue May 30 16:18:03 2017 -0400
+
+    faulty code
+
+[33mcommit 10be5b6a047da67e890cdd57ece00fab438dd696[m
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Tue May 30 16:06:31 2017 -0400
+
+    beautiful correct math best ever hell yeah
+
+[33mcommit d8cd79a2deed6f89b0f14485527749f873233b4e[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Tue May 30 14:50:42 2017 -0400
+
+    found solutions
+
+[33mcommit 45bf48a50381bb977f49d78c8c39e1d6da112e81[m
+Merge: ecf36e8 fc367f9
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Tue May 30 12:18:55 2017 -0400
+
+    Merge branch 'pole' of https://github.com/McGill-AML/RecoveryControl-MATLABSimulator into pole
+
+[33mcommit ecf36e8a1d017698ef513974281d7dc1efab07dc[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Tue May 30 12:18:23 2017 -0400
+
+    all wrong up til now
+
+[33mcommit fc367f97f65d9d474b3402a2a633740c666f73ec[m
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Mon May 29 21:00:57 2017 -0400
+
+    no way to compute deflection!
+
+[33mcommit d855fd65b32da539235aee941d4800cd748534d2[m
+Merge: b5f06c0 b427161
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Fri May 26 17:30:57 2017 -0400
+
+    Merge branch 'pole' of https://github.com/McGill-AML/RecoveryControl-MATLABSimulator into pole
+
+[33mcommit b5f06c037abd6c52d93bebed6182dc0535a5a18e[m
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Fri May 26 17:30:42 2017 -0400
+
+    all trials running now
+
+[33mcommit b4271611cb60cba030a586ea042c46ebbc3d0c8e[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Fri May 26 17:28:35 2017 -0400
+
+    smaller batch size
+
+[33mcommit e745f510a11d9c56e4c3c77576ebbef14393f161[m
+Merge: 36919ae d1f5696
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Fri May 26 17:26:25 2017 -0400
+
+    Merge branch 'pole' of https://github.com/McGill-AML/RecoveryControl-MATLABSimulator into pole
+
+[33mcommit 36919ae7e358fdad17d8d3c393082d3470475c9c[m
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Fri May 26 17:25:21 2017 -0400
+
+    ready to run smaller batch size
+
+[33mcommit d1f5696fb8672dc6347d241e78b508e306711c64[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Fri May 26 15:53:26 2017 -0400
+
+    now really ready
+
+[33mcommit 3a31a9f85ee2fba1280e248a8c81132f268e5ae6[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Fri May 26 15:51:59 2017 -0400
+
+    ready for recovery rerun
+
+[33mcommit 4f22a893632d9f13118a285536e8f6e61ffb94bb[m
+Merge: fd56401 add38f1
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Fri May 26 15:51:22 2017 -0400
+
+    Merge branch 'pole' of https://github.com/McGill-AML/RecoveryControl-MATLABSimulator into pole
+
+[33mcommit add38f19ff440181ae55a41be49f46939c152081[m
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Fri May 26 15:50:57 2017 -0400
+
+    ready to rerun
+
+[33mcommit fd56401c2414c24c3e4645146208efa9cacff864[m
+Merge: cb0b2f4 cc6fdf3
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Fri May 26 15:46:45 2017 -0400
+
+    ok now?
+
+[33mcommit cc6fdf3069a9f7cbd4bb2536ec2d7aad50a10d5b[m
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Fri May 26 15:40:53 2017 -0400
+
+    changed contact point computation, is correct now
+
+[33mcommit cb0b2f43cf38d737498a039513c5108b3cd2ea3f[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Fri May 26 15:39:21 2017 -0400
+
+    everything before this was wrong for the pole
+
+[33mcommit 09f990684e5cc05a9eb3786b4b119994eb280881[m
+Merge: cb70f81 52c83c7
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Thu May 25 18:29:11 2017 -0400
+
+    Merge branch 'pole' of https://github.com/McGill-AML/RecoveryControl-MATLABSimulator into pole
+    
+    Conflicts:
+    	start_iteration.m
+
+[33mcommit cb70f817f938996f3cf48092f900a5504d03c1f9[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Thu May 25 16:08:02 2017 -0400
+
+    minor changes
+
+[33mcommit 52c83c799347c1c90ce969d26e4dc703f31a496b[m
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Thu May 25 16:06:40 2017 -0400
+
+    with vertical velocity control
+
+[33mcommit ddc38db338ee745d751946de99301e8ae3d14465[m
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Thu May 25 13:02:52 2017 -0400
+
+    ran simulations and made success/failure plots
+
+[33mcommit b91a0639d3705f9a475e0990c33567457175e91d[m
+Merge: f6e29c1 6681de4
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Wed May 24 16:04:06 2017 -0400
+
+    Merge branch 'pole' of https://github.com/McGill-AML/RecoveryControl-MATLABSimulator into pole
+
+[33mcommit 6681de4d1cc0d2be54855ee969b37ea2d96457ee[m
+Author: garethdicker <gareth.dicker@hotmail.com>
+Date:   Wed May 24 15:49:50 2017 -0400
+
+    Iteration over pitch and offset
+
+[33mcommit f6e29c1ef0bbcf6c0866ac18abdf9f18d0d819c8[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Tue May 23 16:58:49 2017 -0400
+
+    pole is good
+
+[33mcommit 3738cb15f730c104b796391df227c5acf61e27bc[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Mon May 22 11:57:00 2017 -0400
+
+    start.m is good params now
+
+[33mcommit f5da44c67091656b3195b3d58a8a08ec49c461f6[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Mon May 22 11:45:36 2017 -0400
+
+    checking failure cases
+
+[33mcommit 2810e3b68c978d691e8d034f3ee202fd9e553e11[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Sun May 21 11:33:01 2017 -0400
+
+    succesful offset simulation has been run
+
+[33mcommit cf54ee19ac87b2e68e55ef371ab458c402e53ea9[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Sat May 20 19:00:40 2017 -0400
+
+    ready for rerun
+
+[33mcommit 2f142d8c8ef11bcf4de89ec2119a7081fe86958c[m
+Author: joshlevin88 <joshua.levin@mail.mcgill.ca>
+Date:   Sat May 20 16:06:24 2017 -0400
+
+    not ready for final simulation yet
+
+[33mcommit 559b5f6835b91ef134159bf1c01ac910662cc3a9[m
+Author: garethdicker <dicker.gareth@gmail.com>
+Date:   Tue Apr 25 17:34:59 2017 -0400
+
+    debugged divide by zero
+
+[33mcommit 40f0d71b59b164b7e5b9953c3b76b634df829e41[m
+Author: garethdicker <dicker.gareth@gmail.com>
+Date:   Tue Apr 25 14:06:41 2017 -0400
+
+    adfb
+
+[33mcommit cb30edbb5ccd6b43eba27b694446852c83e7395a[m
+Author: garethdicker <dicker.gareth@gmail.com>
+Date:   Mon Apr 24 18:34:02 2017 -0400
+
+    awer
+
+[33mcommit a300e6cbe80e11ad1ad71bc81750b5c8ee15c556[m
+Author: garethdicker <dicker.gareth@gmail.com>
+Date:   Fri Apr 21 16:46:01 2017 -0400
+
+    bal
+
+[33mcommit 225c8e6c0e84d5a0c835c68cf357483f83a8a6d7[m
+Author: garethdicker <dicker.gareth@gmail.com>
+Date:   Fri Apr 21 16:14:08 2017 -0400
+
+    nada
+
+[33mcommit c936b156c848c4a36c55047f9dafbe174c7f3f37[m
+Author: garethdicker <dicker.gareth@gmail.com>
+Date:   Fri Apr 21 15:49:50 2017 -0400
+
+    ready to compare to wall collision
+
+[33mcommit 56b1de9eb671d76a2daaeabde6f24f092ba4165e[m
+Author: garethdicker <dicker.gareth@gmail.com>
+Date:   Thu Apr 20 12:50:48 2017 -0400
+
+    first Monte Carlo pole sim successfull
+
+[33mcommit 2755f54affacbbfaba1d3f4d6e73d12a209a4127[m
+Author: garethdicker <dicker.gareth@gmail.com>
+Date:   Wed Apr 19 14:14:16 2017 -0400
+
+    everything seems to be working but there are probably errors
+
+[33mcommit 004bbc128e1689043f6242d6d8bc2b781a9dba3e[m
+Author: garethdicker <dicker.gareth@gmail.com>
+Date:   Tue Apr 18 15:01:32 2017 -0400
+
+    First pole commit, not yet functional
+
+[33mcommit 4663b48d2850107d82efc04db16417e85e7394a1[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Mon Dec 12 17:39:48 2016 -0500
+
+    Update README.md
+
+[33mcommit 0678972551b1a3c7d685997ea609e45afdcab673[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Mon Dec 12 17:23:41 2016 -0500
+
+    Fiona's final thesis commit
+
+[33mcommit 7e28b2c7f47b62c6af6e4061e630c742e8e2973f[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Thu Nov 3 16:28:43 2016 -0400
+
+    Create README.md
+
+[33mcommit 98b6f9122853e40c492d0ad1c87bd47761eacaee[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Mon Sep 26 18:26:37 2016 -0400
+
+    Sensors added, can match experiment set G with offboard control
+
+[33mcommit 5980cd8cf843b7274b913351f00e9d45ce8f09d5[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Jul 27 12:26:29 2016 -0400
+
+    Cleanup + Added Trajectory startsim for Adrian
+
+[33mcommit 947668ac2e58144d9beb23122b5ef64eaec16a54[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Jul 20 15:17:26 2016 -0400
+
+    removed Experiment Comparisons
+
+[33mcommit 1f215b0806d220facc0b3fb6cbd7d463ec385745[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Jul 20 15:08:02 2016 -0400
+
+    before forking to recovery
+
+[33mcommit 365cd79c3413fb5d884acf6ab1accac11c3dae55[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Thu Jul 14 15:43:39 2016 -0400
+
+    more fuzzy logic rules added
+
+[33mcommit 055801236f9c41de09896f9db32e8cd6c62ccf54[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Tue Jul 12 15:19:37 2016 -0400
+
+    fuzzy logic pretty good
+
+[33mcommit 44009a8dc99b4413b44b0adc0a544c692b298413[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Jul 6 12:43:48 2016 -0400
+
+    Fuzzy Logic working a bit
+
+[33mcommit 57cf3f4375f0cb20f929bb445569cf8bb89c6b92[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Mon Jun 27 15:57:52 2016 -0400
+
+    first stab at fuzzy logic process
+
+[33mcommit 9028991efa031ffcf5250350efb164abd6c97525[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Tue Jun 21 13:18:12 2016 -0400
+
+    Impact Detection added
+
+[33mcommit 01062590208b9112588db4e30470abe11032bcd7[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Mon Jun 20 13:51:22 2016 -0400
+
+    Removed ICUAS weird updates
+
+[33mcommit bc9d83abd67ad1807abe51bcfb3cc806aee3af22[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Fri May 13 20:38:19 2016 -0400
+
+    Added Gareth's recovery controller, stick regime in friction
+
+[33mcommit b7d5656e5711b91d78b63bd3914627d4e5169ac9[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Fri May 6 16:01:51 2016 -0400
+
+    Friction added to contact model
+
+[33mcommit a4494108e30fed5149b1d99e03a59d09da346e8a[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Thu Mar 3 10:25:28 2016 -0500
+
+    fixed bug on Mz prop rotation directions
+
+[33mcommit 3346ec6284d397c0644be29942ff82f284046379[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Thu Jan 21 13:15:44 2016 -0500
+
+    Only files I want
+
+[33mcommit 65beff93c939e83f4ae3b68c3c1ec91e65cdd859[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Thu Jan 21 13:08:55 2016 -0500
+
+    Removed files
+
+[33mcommit b15be486d630537ec1e2bd6b43670175fda141b6[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Thu Jan 21 13:04:14 2016 -0500
+
+    Reorganized with Gareth
+
+[33mcommit a2fe8ea587b3f24a2ae5924e0638dd7b68d5f834[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Mon Jan 18 10:30:16 2016 -0500
+
+    Reorganized code into structs
+
+[33mcommit 6597bd3ddad0323a878d33d3629abe876078eb91[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Thu Dec 17 12:30:30 2015 -0500
+
+    Experiment comparisons to sim
+
+[33mcommit c1eac450edeb01ae524072f6d1426fe3e1972b56[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Thu Sep 17 18:06:42 2015 -0400
+
+    IC attitude, motor speeds post impact
+
+[33mcommit ddc264ee6ecbe61d91c94f62dd15c58ca13ab2d4[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Sep 2 19:15:18 2015 -0400
+
+    try to simulate experiments
+
+[33mcommit 7fe8a9e0df396395d4ec6208449bb07e7bbe1949[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Sep 2 10:51:56 2015 -0400
+
+    more batch contact sim
+
+[33mcommit 115771babf6e2937534a03d74cc4e923034b70fb[m
+Merge: 4689ba0 bff8932
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Sep 2 10:50:04 2015 -0400
+
+    Merge branch 'master' of https://github.com/fionachui/Matlab-Simulator
+
+[33mcommit 4689ba09b85b08fa169db73d81b89d42a5eee51e[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Sep 2 10:48:37 2015 -0400
+
+    Batch Contact Sims
+
+[33mcommit bff89327a20457c4316d62fbb2173696950cb590[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Aug 12 16:36:54 2015 -0400
+
+    Delete TestFun.m
+
+[33mcommit 5042ecf9e2646945e9232f97d7a91c774c04e32f[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Aug 12 16:36:32 2015 -0400
+
+    Rename ControllerZhang2.m to obs_ControllerZhang2.m
+
+[33mcommit 980111f65e7ed7de7160ba67d1284a83d43e4de1[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Aug 12 16:36:16 2015 -0400
+
+    Rename ControllerZhang_quat.m to obs_ControllerZhang_quat.m
+
+[33mcommit a0cbdf5be7107dc36cc0bdb0cce3b6ce561ba831[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Aug 12 16:35:41 2015 -0400
+
+    Rename SpiriVisualization1.m to obs_SpiriVisualization1.m
+
+[33mcommit 4f6b06b487e6edf63868af2c12df5adc0d9a0655[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Aug 12 16:35:19 2015 -0400
+
+    Rename SpiriMotion.m to obs_SpiriMotion.m
+
+[33mcommit 23231f39268fbb7b2a6d4664d94cc8f6c0961b81[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Aug 12 16:34:36 2015 -0400
+
+    Latest sim for Gareth
+
+[33mcommit 403880302a6051cb90c8f24c00c1a719c6b5fb79[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Mon Aug 10 15:28:21 2015 -0400
+
+    4 contact pts
+
+[33mcommit 1351010818e8e87302daac2f3981bdb5a508b6ba[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Thu Aug 6 16:43:03 2015 -0400
+
+    Four contact ribbons, slanted
+
+[33mcommit eca4d297e6913050f56c58a94a96494f903f8b94[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Aug 5 18:07:33 2015 -0400
+
+    Better Single Ribbon Contact
+
+[33mcommit 45eb0f1fd7aeea71b162a154b48919e451e6c9be[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Aug 5 18:04:46 2015 -0400
+
+    t
+
+[33mcommit 04ada5f12f7ee36a9896a24d39c7f5388f8890de[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Tue Jul 28 00:54:38 2015 -0400
+
+    Second attempt at quaternion attitude
+
+[33mcommit 484639ad40305ef7c54b85c9179e45d52fa132fd[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Mon Jul 27 20:24:03 2015 -0400
+
+    First attempt at quaternion attitude
+
+[33mcommit a716cc419c16f7894b3f4f5bb5a07317d6f71058[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Thu Jul 23 17:43:37 2015 -0400
+
+    Prop accel saturation added
+
+[33mcommit b6c73b8817cd56ee2c00e524c7cb8fd77c419a78[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Wed Jul 22 11:56:41 2015 -0400
+
+    Add Graphs_Contact and Contact_Stats
+
+[33mcommit 8646d1fe7157111308f66a5307a53cb464178216[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Tue Jul 21 11:25:14 2015 -0400
+
+    Contact with defl Rate
+
+[33mcommit dd619575ef2a3f3e5786409b5b8c4ac9b016a741[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Fri Jul 17 12:13:23 2015 -0400
+
+    Yaw controller updated, stay away from pi / -pi
+
+[33mcommit 81e65d47938ae91afca0e728b34c065d5cb7fddf[m
+Author: fionachui <fionachui.23@gmail.com>
+Date:   Thu Jul 16 19:17:10 2015 -0400
+
+    New mass and propeller parameters in InitSpiriParams.m, Added derivative and integral gains to Yaw controller, Added propeller speed and accel. variables in rad/s and rad/s^2 for moment calculations.
+
+[33mcommit e5100a40689330a0dcb014edd7a8f68ffbba62a6[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Thu Jul 16 14:54:04 2015 -0400
+
+    Continuous contact deflection and forces
+
+[33mcommit 2e0305117872cd5e650ac9976cd976b48a3ff117[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Mon Jul 13 13:52:32 2015 -0400
+
+    Changed Kt and Dt
+
+[33mcommit 0825e7656c0ae003fa3f6887a6d76412d69f648b[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Mon Jul 13 13:31:41 2015 -0400
+
+    For Gareth
+
+[33mcommit 322f8b2414d2cb16dfcddc55f439d582a99bf45f[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Thu Jul 9 23:20:33 2015 -0400
+
+    Working again
+
+[33mcommit ba434f8e9ddf5cdb7b99b57d541d2d2e699cde2c[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Thu Jul 9 18:34:32 2015 -0400
+
+    Revert "Controller working"
+    
+    This reverts commit fc3d37d8c7f928be1fe0017932165879e2318e8c.
+    
+    Conflicts:
+    	ControllerZhang.asv
+    	ControllerZhang.m
+    	SpiriMotion.m
+    	StartSimulator.m
+
+[33mcommit fefc50c62c8d731d34f017e256ed19db01ee9b42[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Thu Jul 9 18:22:37 2015 -0400
+
+    Revert "Controller working"
+    
+    This reverts commit fc3d37d8c7f928be1fe0017932165879e2318e8c.
+    
+    Conflicts:
+    	ControllerZhang.asv
+    	ControllerZhang.m
+    	SpiriMotion.m
+    	StartSimulator.m
+
+[33mcommit 8d92407a60d68e4330530e7767b1c08a3f3a5643[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Thu Jul 9 18:18:10 2015 -0400
+
+    figures
+
+[33mcommit 2359a38b7af185161be789f3572426215acffeea[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Thu Jul 9 18:07:09 2015 -0400
+
+    tried to implement integration
+
+[33mcommit fc3d37d8c7f928be1fe0017932165879e2318e8c[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Thu Jul 9 12:21:03 2015 -0400
+
+    Controller working
+    
+    saturations commented out
+
+[33mcommit b23d49614090b557e957a834070176269528bbf3[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Tue Jul 7 12:11:15 2015 -0400
+
+    Batch Simulation
+
+[33mcommit 3f535e989e876fb9cf2c2e2857f3d658cb9b9a19[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Fri Jul 3 16:32:11 2015 -0400
+
+    Controller Response
+    
+    - cleaned up code
+    - implemented Settling Time (TS) and Percent Overshoot (PO) for position
+    and heading
+
+[33mcommit 68bfe9446382888a55586005d423f208f6bb2230[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Thu Jul 2 18:51:30 2015 -0400
+
+    Updated deflection calculation
+    
+    - Deflection is X-distance from Pc_w to wall
+    - Pc_w is point farthest into the wall in the X-direction
+    - Fc and Mc also included
+
+[33mcommit f0ada96f4457d6576887e4c1d65e7a80bd6a104e[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Thu Jul 2 13:39:00 2015 -0400
+
+    Correct world and body axes
+    
+    - correct world and body axes
+    - working position controller
+    - contact detection in development
+
+[33mcommit d29c19561473b36d9af957ada1423f944b723d3e[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Thu Jun 4 18:02:34 2015 -0400
+
+    Contact Model - defl and Fc calculated inside EoM
+
+[33mcommit 7bfc76708da9d449bdbd1c2187ed32244600ae4d[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Thu Jun 4 14:35:51 2015 -0400
+
+    Messed up contact detection
+    
+    - will try to fix for next version!
+
+[33mcommit cb9d927ad4bed8ea532aaf0703edb280be951905[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Tue Jun 2 19:09:38 2015 -0400
+
+    Hunt & Crossley contact model
+    
+    - lambda calculated from Herbert & McWhannell
+
+[33mcommit 8e79f8d6a265ad5c280ad4aa217c073edf32e4d9[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Mon Jun 1 17:01:51 2015 -0400
+
+    Visualization Changes
+    
+    - Contacting sphere is now a section of the sphere
+    - Contacting sphere rotates with Spiri
+
+[33mcommit fedf1efbf66b076bc87d9f60311eb3c41d836340[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Thu May 28 17:11:05 2015 -0400
+
+    Initial Contact Model
+    
+    - Deflection calculated from same point on ribbon & wall throughout the
+    impact
+    - Contact force applied using Hertz's model
+    - Contact force applied in direction normal to the midplane circle
+    - Mc = cross(rc,Fc)
+
+[33mcommit 639013c3ab2bb1cd4bf55c97d72078f7a3dc748c[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Wed May 27 22:16:23 2015 -0400
+
+    Initial Commit
+    
+    - Spiri Quadcopter Controller
+    - Position Controller (Altitude, Horizontal position, Attitude)
+    - Trajectory Controller
+
+[33mcommit 4a6f374a2dc9b7c73169d547804124a36f6870fa[m
+Author: Fiona Chui <fionachui.23@gmail.com>
+Date:   Wed May 27 22:13:31 2015 -0400
+
+    :lollipop: Added .gitattributes & .gitignore files

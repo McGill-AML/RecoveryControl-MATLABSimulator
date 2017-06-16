@@ -1,6 +1,6 @@
 clear all
-bumperNormalWorld = [-0.0616 0.0616 0.9962];
-bumperCenterWorld = [1 0.0049 0];% [1 0 0];
+bumperNormalWorld = [1 0 1];
+bumperCenterWorld = [1 0 4];% [1 0 0];
 poleVertical = [0 0 1];
 poleVertical = poleVertical/norm(poleVertical);
 iBumper = 1;
@@ -12,6 +12,7 @@ A = norm(H);%sqrt(H(1)^2+H(2)^2+H(3)^2);%norm(H);
 B = norm(I);%sqrt(I(1)^2+I(2)^2+I(3)^2);%norm(I);
 D = dot(H,I);%H(1)*I(1) +H(2)*I(2)+H(3)*I(3);%dot(H,I)
 E = dot(poleVertical,-bumperCenterWorld);%-(poleVertical(1)*bumperCenterWorld(1) + poleVertical(2)*bumperCenterWorld(2) + poleVertical(3)*bumperCenterWorld(3)); %dot(poleVertical,-bumperCenterWorld);
+
 
 coeffs = [A^2, ...
           2*E*A^2 + 2*D, ...

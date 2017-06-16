@@ -2,9 +2,9 @@ function [ Contact ] = findcontact(rotMat,state)
     %findcontact.m Returns contact information based on current state and
     % pole radius 
 
-    global BUMP_RADII BUMP_POSNS BUMP_NORMS BUMP_TANGS poleRadius
+    global BUMP_RADII BUMP_POSNS BUMP_NORMS BUMP_TANGS poleRadius numImpacts FirstNormalExpected
     Contact = initcontact(0);
-
+    
     for iBumper = 1:4
         % Transform bumper definitions to world frame
         bumperCenterWorld = rotMat'*BUMP_POSNS(:,iBumper) + state(7:9); % center of bumper
@@ -55,14 +55,15 @@ function [ Contact ] = findcontact(rotMat,state)
 
                 % need to find minimum distance and the bumper frame point
 
-                if norm([Contact.point.contactWorld(1,iBumper) Contact.point.contactWorld(2,iBumper)]) < poleRadius
-
+                if norm([Contact.point.contactWorld(1,iBumper) Contact.point.contactWorld(2,iBumper)]) <= poleRadius
+                    if numImpacts==0
+                        FirstNormalExpected= [Contact.point.contactWorld(1:2,iBumper);0]/norm(Contact.point.contactWorld(1:2,iBumper));
+                    end
                     Contact.defl(iBumper) = poleRadius - sqrt(Contact.point.contactWorld(1,iBumper)^2 + ...
                                                               Contact.point.contactWorld(2,iBumper)^2);
                     % horizontal normal from center of pole to contact point
                     poleContactNormal = [Contact.point.contactWorld(1:2,iBumper); 0] ...
-                                        /sqrt(Contact.point.contactWorld(1,iBumper)^2 + ...
-                                              Contact.point.contactWorld(2,iBumper)^2);
+                                        /sqrt(Contact.point.contactWorld(1,iBumper)^2 + Contact.point.contactWorld(2,iBumper)^2);
                     % Compute velocity of contact point in world frame
                     contactPointVelocityWorld = rotMat'*([state(1);state(2);state(3)] ...
                                                 + [(state(5)*Contact.point.contactBody(3,iBumper) - state(6)*Contact.point.contactBody(2,iBumper)); ...
@@ -84,11 +85,10 @@ function [ Contact ] = findcontact(rotMat,state)
                     else
                         Contact.slidingDirectionWorld(:,iBumper) = zeros(size(Contact.slidingVelocityWorld(:,iBumper)));
                     end
+
                 end 
-            else
-                disp(iBumper);
+
             end
         end
     end
-end
 

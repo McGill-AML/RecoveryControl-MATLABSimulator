@@ -1,6 +1,7 @@
-clear all
 
-global g timeImpact globalFlag poleRadius numTrials
+% clear all
+
+global timeImpact globalFlag poleRadius numImpacts FirstNormalExpected
 
 VxImpact = 2.0;
 yawImpact = 0.0;
@@ -9,15 +10,22 @@ poleRadius = 0.1;
 SimParams.useRecovery = 1;
 Batch = [];
 record = [];
+NumImpactTimeline=[];
+impactSwitchRecorder=[];
 [FuzzyInfo, PREIMPACT_ATT_CALCSTEPFWD] = initfuzzyinput();
-numOffset = 36;
+numOffset = 71;
 numPitch = 46;
 elapsedTime = 0;
 
-for iPitch = 1:5:45%:numPitch 
+
+for iPitch = 16%:numPitch
     pitchImpact = 1 - iPitch; 
-    tic
-    for iOffset=1:3:36%1:numOffset
+    yawImpact = 0.0;
+    rollImpact = 0.0;
+    for iOffset=36%:numOffset
+        NumImpactTimeline =[];
+        impactSwitchRecorder=[];
+        numImpacts=0;
         recoverySuccessful = 0;
         disp(numOffset*(iPitch-1)+iOffset);
         offset = -1+2*((iOffset-1)/(numOffset-1));
@@ -29,8 +37,8 @@ for iPitch = 1:5:45%:numPitch
         ImpactParams.wallLoc = 0.0;
         ImpactParams.wallPlane = 'YZ';
         ImpactParams.timeDes = 0.5; 
-        ImpactParams.frictionModel.muSliding = 0.3;%0.3;
-        ImpactParams.frictionModel.velocitySliding = 1e-4; %m/s
+        ImpactParams.frictionModel.muSliding =0.3;
+        ImpactParams.frictionModel.velocitySliding =1e-4; %m/s
         timeImpact = 10000;
         timeStabilized = 10000;
         IC = initIC;
@@ -42,7 +50,7 @@ for iPitch = 1:5:45%:numPitch
         ImpactIdentification = initimpactidentification;
         Control.twist.posnDeriv(1) = VxImpact; 
         IC.attEuler = [deg2rad(rollImpact);deg2rad(pitchImpact);deg2rad(yawImpact)];  
-        IC.posn = [-0.4; offset_meters; 2];
+        IC.posn = [-0.4; offset_meters; 1];
         Setpoint.posn(3) = IC.posn(3); 
         xAcc = 0;                                                               
         rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
@@ -63,7 +71,9 @@ for iPitch = 1:5:45%:numPitch
         Sensor = initsensor(state, stateDeriv);
         Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 
+        tempGlobalFlag=[0;0;0;0];  % added for to check number of collisions
         for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep   
+            
 %             disp(iSim)
             [ImpactInfo, ImpactIdentification] = detectimpact(iSim, tStep, ImpactInfo, ImpactIdentification,...
                                                               Hist.sensors,Hist.poses,PREIMPACT_ATT_CALCSTEPFWD, stateDeriv,state);
@@ -71,8 +81,8 @@ for iPitch = 1:5:45%:numPitch
 %                                             Sensor, Hist.poses(end), SimParams, Control, FuzzyInfo);
 
             if (ImpactInfo.firstImpactDetected && Control.accelRefCalculated == 0)
-                    Control.accelRef = 4.8*ImpactIdentification.wallNormalWorld;
-                    Control.accelRefCalculated = 1;
+                    Control.accelRef = 4.8*ImpactIdentification.wallNormalWorldCorrected2;
+                    Control.accelRefCalculated = 1;                  
             end
 
             if Control.accelRefCalculated*SimParams.useRecovery == 1    
@@ -131,22 +141,45 @@ for iPitch = 1:5:45%:numPitch
             [Pose, Twist] = updatekinematics(state, stateDeriv);
             Sensor = updatesensor(state, stateDeriv);
             Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
+          incrementedOnce=0;
+          
+          for i=1:4      % to keep track of number of impacts with the pole
+              if tempGlobalFlag(i)~= globalFlag.contact.isContact(i)
+                  if tempGlobalFlag(i)==0 && globalFlag.contact.isContact(i)==1 && incrementedOnce==0
+                      numImpacts=numImpacts+1;
+                      incrementedOnce=1;
+                  end
+                  tempGlobalFlag(i)= globalFlag.contact.isContact(i);
+              end
+          end
+          impactSwitchRecorder = [impactSwitchRecorder; globalFlag.contact.isContact'];
+          NumImpactTimeline = [NumImpactTimeline; numImpacts];
         end
+%         if SimParams.useRecovery == 0
+%             SWITCH = abs(Pose.attEuler(1)) < 0.2 && abs(Pose.attEuler(2)) < 0.2 && ...
+%                abs(Twist.attEulerRate(1)) < 2.0  && abs(Twist.attEulerRate(2)) < 2.0 ...
+%                && Twist.linVel(3) < 0.2;
+%            if SWITCH
+%                recoverySuccessful = 1;
+%            end
+%         end
         Plot = hist2plot(Hist);
         Trial = {offset, pitchImpact, ...
-                 recoverySuccessful, ImpactIdentification.wallNormalWorld, ...
-                 Plot.times, Plot.posns, Plot.defls, ...
-                 Plot.recoveryStage, Hist.states, Plot.normalForces, timeImpact}; 
+                 recoverySuccessful, ImpactIdentification.wallNormalWorldCorrected2, ...
+                 FirstNormalExpected, Plot.times, Plot.posns, Plot.defls, ...
+                 Plot.recoveryStage, Hist.states, Plot.normalForces, ...
+                 timeImpact,impactSwitchRecorder,numImpacts}; 
         
         elapsedTime = toc + elapsedTime
         Batch = [Batch; Trial];
     end
 end
 
-save('june_3_with_recovery_test.mat','Batch');
+
+% save('June 14 ___Test With Recovery Controller','Batch');
 %%
-close all
+% close all
 % % % for iter=1
-     animate(0,3,Hist,'XZ',ImpactParams,timeImpact,'NA',800);
+        animate(0,1,Hist,'XY',ImpactParams,timeImpact,'36 pitch__ioffset=15',400, NumImpactTimeline);
 % end
 % plot(Plot.times,abs(Plot.propRpms))

@@ -23,8 +23,7 @@ function [stateDeriv, Contact, PropState] = dynamicsystem(t,state,tStep,rpmContr
 
     global g m I Kt Dt Jr PROP_POSNS BUMP_POSNS %Inertial and Geometric Parameters
     global AERO_AREA AERO_DENS Cd Tv Kp Kq Kr %Aerodynamic Parameters
-    global timeImpact globalFlag poleRadius %Simulation global variables
-
+    global timeImpact globalFlag poleRadius BUMP_RADII%Simulation global variables
     %% Save Global Variables locally
 
     % Needed to match simulation propeller speeds to experiments
@@ -64,14 +63,13 @@ function [stateDeriv, Contact, PropState] = dynamicsystem(t,state,tStep,rpmContr
     %% Contact Detection and Force Calculation
 
     % if a collision is possible (0.3 is from CM to furthest bumper point)
-    if abs(norm(state(7:8)) < (poleRadius + 0.3))
+    if abs(norm(state(7:8)) < (poleRadius + 0.32))
         Contact = findcontact(rotMat, state); %find contact points
-
         for iBumper = 1:4
             if Contact.defl(iBumper) > 0
                 if globalFlag.contact.isContact(iBumper) == 0
                     globalFlag.contact.isContact(iBumper) = 1;
-                    globalFlag.contact.initialNormalVel(iBumper) = Contact.deflDeriv(iBumper);
+                    globalFlag.contact.initialNormalVel(iBumper) = Contact.deflDeriv(iBumper);                                        
                 end
 
                 % from thesis math, Hunt-Crossley method

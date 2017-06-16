@@ -1,6 +1,6 @@
 function [ImpactInfo, ImpactIdentification, timeCalc] = detectimpact(iSim, tStep, ImpactInfo,ImpactIdentification, Histsensors ,Histposes,PREIMPACT_ATT_CALCSTEPFWD, stateDeriv, state)
 %detectimpact.m CollisionIdentification phase
-
+    
     timeCalc = [0;0;0;0];
     
     if ImpactInfo.firstImpactDetected == 0  
@@ -9,7 +9,7 @@ function [ImpactInfo, ImpactIdentification, timeCalc] = detectimpact(iSim, tStep
         rotMat = quat2rotmat(Histposes(end).attQuat);
         accelWorld = rotMat'*Sensor.accelerometer;
         if norm(accelWorld(1:2))>= 1 && ImpactInfo.firstImpactOccured %Acceleration horizontal magnitude
-            global IMU_POSN g        
+            global IMU_POSN g       
             tic;
             ImpactInfo.firstImpactDetected = 1;
             ImpactIdentification.timeImpactDetected = iSim;            

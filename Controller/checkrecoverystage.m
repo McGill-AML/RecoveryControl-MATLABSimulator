@@ -12,6 +12,7 @@ function [Control, recoverySuccessful] = checkrecoverystage(Pose, Twist, Control
     SWITCH_2 = abs(Pose.attEuler(1)) < rollPitchThresh && abs(Pose.attEuler(2)) < rollPitchThresh && ...
                   abs(Twist.attEulerRate(1)) < bodyRatesThresh  && abs(Twist.attEulerRate(2)) < bodyRatesThresh ...
                   && Twist.linVel(3) < verticalVelocityThresh;
+              
    
     if Control.recoveryStage == 1
         if SWITCH_1

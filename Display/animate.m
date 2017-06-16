@@ -1,4 +1,4 @@
-function [ ] =animate( recordAnimation,frameStep,Hist,sideview,ImpactParams,timeImpact,videoFileName,endFrame)
+function [ ] =animate( recordAnimation,frameStep,Hist,sideview,ImpactParams,timeImpact,videoFileName,endFrame,NumImpactTimeline)
 %animate.m Animation of simulation using recorded quadrotor states 
 %   Author: Fiona Chui (fiona.chui@mail.mcgill.ca)
 %   Last Updated: December 12, 2016
@@ -51,8 +51,8 @@ axisYBody = [0;0.1;0];
 axisZBody = [0;0;0.1];
 
 %%  Calculate axes ranges for plotting
-axisMin = min([min(stateHist(:,7))-0.4,min(stateHist(:,8))-0.4,min(stateHist(:,9))-0.4]);
-axisMax = max([max(stateHist(:,7))+0.4,max(stateHist(:,8))+0.4,max(stateHist(:,9))+0.4]);
+axisMin = min([min(stateHist(1:endFrame,7))-0.4,min(stateHist(1:endFrame,8))-0.4,min(stateHist(1:endFrame,9))-0.4]);
+axisMax = max([max(stateHist(1:endFrame,7))+0.4,max(stateHist(1:endFrame,8))+0.4,max(stateHist(1:endFrame,9))+0.4]);
 
 %% Create world-frame wall points
 impactYPosn = stateHist(vlookup(t,timeImpact),8);
@@ -68,19 +68,11 @@ Z = [zeros(1,n+1); height*ones(1,n+1)];
 polePoints = [X;Y;Z];
 
 %% Animate!
+NumImpactTimeline=[0; NumImpactTimeline]; % as Impact Timeline doesnot start from 0 index so shift by 1 index
 for iFrame = 1:frameStep:endFrame %size(t,1) %set step to 1 for recording
     %% Rotate body-fixed points to world-frame points
-<<<<<<< HEAD
-<<<<<<< HEAD
-    iFrame
-    pause(0.2);
-=======
-=======
-
->>>>>>> c650154687ad6b6645daa209b4a2ba9ba81609ff
-%     iFrame
-%     pause(0.5)
->>>>>>> da806c2b724dd235dd907b3f3370a0e98f193eec
+    
+%     pause(0.1);
     q = [stateHist(iFrame,10);stateHist(iFrame,11);stateHist(iFrame,12);stateHist(iFrame,13)];
     q = q/norm(q);
     rotMat = quat2rotmat(q);
@@ -149,7 +141,7 @@ for iFrame = 1:frameStep:endFrame %size(t,1) %set step to 1 for recording
     set(xlhand,'fontsize',14);
     set(ylhand,'fontsize',14);
     set(zlhand,'fontsize',14);
-    title(strcat('t = ',num2str(t(iFrame),'%.2f'),' s'));
+    title(strcat('t = ',num2str(t(iFrame),'%.2f'),' s','   Impacts = ', num2str(NumImpactTimeline(round(t(iFrame)*200)+1))));
     
     setsimulationview(sideview);
    

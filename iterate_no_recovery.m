@@ -12,12 +12,20 @@ numOffset = 71;
 numPitch = 46;
 elapsedTime = 0;
 for iPitch = 1%:numPitch 
+<<<<<<< HEAD
+    pitchImpact = 40; % 1- iPitch; 
+=======
     pitchImpact = -45;%1 - iPitch; 
+>>>>>>> 10be5b6a047da67e890cdd57ece00fab438dd696
     tic
     for iOffset=1%:numOffset
         recoverySuccessful = 0;
         disp(numOffset*(iPitch-1)+iOffset);
+<<<<<<< HEAD
+        offset = 0.8; %-1+2*((iOffset-1)/(numOffset-1));
+=======
         offset = 0.2;%-1+2*((iOffset-1)/(numOffset-1));
+>>>>>>> 10be5b6a047da67e890cdd57ece00fab438dd696
         offset_meters = 0.35*offset;
         ImpactParams = initparams_navi;
         SimParams.recordContTime = 0;
