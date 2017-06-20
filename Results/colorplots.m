@@ -10,12 +10,12 @@ for iPitch = 1:numPitch
     for iOffset = 1:numOffset
         trial = trial+1;
         disp(trial);
-        offset = cell2mat(Batch(trial,1));
-        pitch = cell2mat(Batch(trial,2));
+%         offset = cell2mat(Batch(trial,1));
+%         pitch = cell2mat(Batch(trial,2));
         success = cell2mat(Batch(trial,3));
 %         normal = cell2mat(Batch(trial,4));
 %         times = cell2mat(Batch(trial,5));
-        positions = cell2mat(Batch(trial,7));
+%         positions = cell2mat(Batch(trial,7));
 %         deflections = cell2mat(Batch(trial,7));
 %         recoveryStages = cell2mat(Batch(trial,8));
 %         states = cell2mat(Batch(trial,9));
@@ -24,7 +24,7 @@ for iPitch = 1:numPitch
 
        
 %        heightLoss=[heightLoss, positions(3,1)-min(positions(3,:))];
-       if success==1
+       if success == 1 %heightLoss(end)<=2
             h1=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor','b','MarkerEdgeColor','b');
         else
             h2=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor','r','MarkerEdgeColor','r');

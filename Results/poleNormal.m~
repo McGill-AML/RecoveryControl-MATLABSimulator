@@ -102,7 +102,7 @@ for iPitch = 16%:numPitch     % poleNormal plot for 15 degree Pitch
 end
 colormap(map);
 caxis([-1 1]);
-title('Pole Normal Components With Varying Horizontal Offset(Pitch = 15^o)');
+title('');
 xlabel('Pole Normal X-Component');
 ylabel('Pole Normal Y-Component');
 % zlabel('Pitch');

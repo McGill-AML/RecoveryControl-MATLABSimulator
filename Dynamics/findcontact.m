@@ -57,7 +57,7 @@ function [ Contact ] = findcontact(rotMat,state)
 
                 if norm([Contact.point.contactWorld(1,iBumper) Contact.point.contactWorld(2,iBumper)]) <= poleRadius
                     if numImpacts==0
-                        FirstNormalExpected= [Contact.point.contactWorld(1:2,iBumper);0]/norm(Contact.point.contactWorld(1:2,iBumper));
+                        FirstNormalExpected(iBumper,:)= [Contact.point.contactWorld(1:2,iBumper);0]/norm(Contact.point.contactWorld(1:2,iBumper));
                     end
                     Contact.defl(iBumper) = poleRadius - sqrt(Contact.point.contactWorld(1,iBumper)^2 + ...
                                                               Contact.point.contactWorld(2,iBumper)^2);

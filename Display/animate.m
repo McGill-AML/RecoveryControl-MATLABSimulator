@@ -151,7 +151,7 @@ for iFrame = 1:frameStep:endFrame %size(t,1) %set step to 1 for recording
     drawnow;
 
     if recordAnimation == 1
-        frame = getframe;
+        frame = getframe(gcf);
         writeVideo(writerObj,frame);
     end
 

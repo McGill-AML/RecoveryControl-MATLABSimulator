@@ -18,11 +18,12 @@ numPitch = 46;
 elapsedTime = 0;
 
 
-for iPitch = 16%:numPitch
-    pitchImpact = 1 - iPitch; 
+for iPitch = 1:numPitch
+    pitchImpact = 1 - iPitch;
     yawImpact = 0.0;
     rollImpact = 0.0;
-    for iOffset=36%:numOffset
+    for iOffset=1:numOffset
+        FirstNormalExpected=zeros(4,3);
         NumImpactTimeline =[];
         impactSwitchRecorder=[];
         numImpacts=0;
@@ -51,8 +52,8 @@ for iPitch = 16%:numPitch
         Control.twist.posnDeriv(1) = VxImpact; 
         IC.attEuler = [deg2rad(rollImpact);deg2rad(pitchImpact);deg2rad(yawImpact)];  
         IC.posn = [-0.4; offset_meters; 1];
-        Setpoint.posn(3) = IC.posn(3); 
-        xAcc = 0;                                                               
+        Setpoint.posn(3) = IC.posn(3);
+        xAcc = 0;
         rotMat = quat2rotmat(angle2quat(-(IC.attEuler(1)+pi),IC.attEuler(2),IC.attEuler(3),'xyz')');
         SimParams.timeInit = 0; 
         Setpoint.head = IC.attEuler(3);
@@ -166,7 +167,7 @@ for iPitch = 16%:numPitch
         Plot = hist2plot(Hist);
         Trial = {offset, pitchImpact, ...
                  recoverySuccessful, ImpactIdentification.wallNormalWorldCorrected2, ...
-                 FirstNormalExpected, Plot.times, Plot.posns, Plot.defls, ...
+                 sum(FirstNormalExpected)/norm(sum(FirstNormalExpected)), Plot.times, Plot.posns, Plot.defls, ...
                  Plot.recoveryStage, Hist.states, Plot.normalForces, ...
                  timeImpact,impactSwitchRecorder,numImpacts}; 
         
@@ -176,10 +177,10 @@ for iPitch = 16%:numPitch
 end
 
 
-% save('June 14 ___Test With Recovery Controller','Batch');
+save('June 19 _Test With Recovery Controller','Batch');
 %%
 % close all
 % % % for iter=1
-        animate(0,1,Hist,'XY',ImpactParams,timeImpact,'36 pitch__ioffset=15',400, NumImpactTimeline);
+%         animate(1,1,Hist,'XY',ImpactParams,timeImpact,'15 pitch__offset= -0.2857_Multiple Impact TopView',200, NumImpactTimeline);
 % end
 % plot(Plot.times,abs(Plot.propRpms))
