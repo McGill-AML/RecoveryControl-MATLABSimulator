@@ -27,7 +27,7 @@ function [Control] = controllerrecovery(tStep, Pose, Twist, Control, Hist)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-global m g Ixx Iyy Izz u2RpmMat vertVelPrevious
+global m g Ixx Iyy Izz u2RpmMat vertVelPrevious yVelPrevious
 
 
 if sum(abs(Control.acc)) == 0
@@ -54,23 +54,16 @@ D_vertVel = 0.0;
 sp_vertVel = 0.0;
 vertVelError =  sp_vertVel - Twist.linVel(3);
 
-P_yVel = 9.0;
-D_yVel = 1.0;
+P_yVel = 4.0;
+D_yVel = 0.0;
 sp_yVel = 0.0;
 yVelError =  sp_yVel - Twist.linVel(2);
-
-P_xVel = 8.0;
-D_xVel = 0.0;
-sp_xVel = 2.0;
-xVelError =  sp_xVel - Twist.linVel(1);
-
 
 if Control.recoveryStage == 1
     Control.u(1) = -m*g;
 else
     Control.u(1) = -m*g + P_vertVel*(vertVelError) + D_vertVel*(vertVelPrevious - Twist.linVel(3))/tStep;
     vertVelPrevious = Twist.linVel(3);
-
 end
 
 % ----------> Saturate thrust here <-----------
@@ -131,10 +124,13 @@ vQ = propPQ*(Control.twist.angVel(2) - Twist.angVel(2));
 vR = propR *(Control.twist.angVel(3) - Twist.angVel(3)); 
 
 % compute body frame torques from desired body frame accelerations
-Control.u(2) = (vP - Twist.angVel(2)*Twist.angVel(3)*(Iyy-Izz)/Ixx)*Ixx;
+Control.u(2) = (vP - Twist.angVel(2)*Twist.angVel(3)*(Iyy-Izz)/Ixx)*Ixx+ ...
+               (P_yVel*(yVelError) + D_yVel*(yVelPrevious - Twist.linVel(2))/tStep);
+yVelPrevious = Twist.linVel(2);
+                    
+
 Control.u(3) = (vQ - Twist.angVel(1)*Twist.angVel(3)*(Izz-Ixx)/Iyy)*Iyy;
 Control.u(4) = (vR - Twist.angVel(1)*Twist.angVel(2)*(Ixx-Iyy)/Izz)*Izz;
-
 
 % compute desired propeller speeds in RPM
 rpmSquared = u2RpmMat*Control.u;

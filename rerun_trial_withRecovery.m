@@ -1,7 +1,7 @@
 
-% clear all
+clear all
 
-global timeImpact globalFlag poleRadius numImpacts FirstNormalExpected
+global timeImpact globalFlag poleRadius numImpacts FirstNormalExpected 
 
 VxImpact = 2.0;
 yawImpact = 0.0;
@@ -18,11 +18,12 @@ numPitch = 46;
 elapsedTime = 0;
 
 
-for iPitch = 1:numPitch
+for iPitch = 1%1:numPitch
     pitchImpact = 1 - iPitch;
     yawImpact = 0.0;
     rollImpact = 0.0;
-    for iOffset=1:numOffset
+    for iOffset=20%:numOffset
+        before_Ref=[0];
         FirstNormalExpected=zeros(4,3);
         NumImpactTimeline =[];
         impactSwitchRecorder=[];
@@ -82,8 +83,20 @@ for iPitch = 1:numPitch
 %                                             Sensor, Hist.poses(end), SimParams, Control, FuzzyInfo);
 
             if (ImpactInfo.firstImpactDetected && Control.accelRefCalculated == 0)
-                    Control.accelRef = 4.8*ImpactIdentification.wallNormalWorldCorrected2;
-                    Control.accelRefCalculated = 1;                  
+                    
+                ImpactIdentification.wallNormalWorldCorrected2
+
+                line = [ImpactIdentification.wallNormalWorldCorrected2(1:2); ...
+                        -sum(ImpactIdentification.wallNormalWorldCorrected2(1:2).*state(7:8))];
+                before_Ref = [Hist.states(7:8,1);1];
+                after_Ref  = [0;0;0];
+                after_Ref(1)  = before_Ref(1) - (2*line(1)/norm(line(1:2))^2)*(dot(line,before_Ref));
+                after_Ref(2)  = before_Ref(2) - (2*line(2)/norm(line(1:2))^2)*(dot(line,before_Ref));
+                after_Ref = after_Ref+[state(7:8);0];
+                after_Ref = after_Ref/norm(after_Ref);
+                
+                Control.accelRef = 4.8*after_Ref;
+                Control.accelRefCalculated = 1;                  
             end
 
             if Control.accelRefCalculated*SimParams.useRecovery == 1    
@@ -122,7 +135,8 @@ for iPitch = 1:numPitch
             else      
                 for j = 1:size(stateODE,1)
                     [stateDeriv, Contact, PropState] = dynamicsystem(tODE(j),stateODE(j,:), ...
-                                                                     tStep,Control.rpm,ImpactParams, PropState.rpm, ...
+                                                                     tStep,Control.rpm,ImpactParams, ...
+                                                                     PropState.rpm, ...
                                                                      Experiment.propCmds);            
                     if sum(globalFlag.contact.isContact)>0
                         Contact.hasOccured = 1;
@@ -142,7 +156,7 @@ for iPitch = 1:numPitch
             [Pose, Twist] = updatekinematics(state, stateDeriv);
             Sensor = updatesensor(state, stateDeriv);
             Hist = updatehist(Hist, t, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
-          incrementedOnce=0;
+            incrementedOnce=0;
           
           for i=1:4      % to keep track of number of impacts with the pole
               if tempGlobalFlag(i)~= globalFlag.contact.isContact(i)
@@ -156,14 +170,30 @@ for iPitch = 1:numPitch
           impactSwitchRecorder = [impactSwitchRecorder; globalFlag.contact.isContact'];
           NumImpactTimeline = [NumImpactTimeline; numImpacts];
         end
-%         if SimParams.useRecovery == 0
-%             SWITCH = abs(Pose.attEuler(1)) < 0.2 && abs(Pose.attEuler(2)) < 0.2 && ...
-%                abs(Twist.attEulerRate(1)) < 2.0  && abs(Twist.attEulerRate(2)) < 2.0 ...
-%                && Twist.linVel(3) < 0.2;
-%            if SWITCH
-%                recoverySuccessful = 1;
-%            end
-%         end
+        if SimParams.useRecovery == 0
+            bodyFrame_ZAxis = quatrotate(Pose.attQuat', [0 0 -1]);
+            bodyFrame_ZAxisDesired = [0; 0; 1];
+            Theta = acos(dot(bodyFrame_ZAxis, bodyFrame_ZAxisDesired));
+            if Theta == 0
+                errQuaternion = [1 0 0 0]';
+            else
+                n = cross(bodyFrame_ZAxis, bodyFrame_ZAxisDesired);
+                n = n/norm(n);
+                nBody = quatrotate(quatinv(Pose.attQuat)',n);
+                errQuaternion = real([cos(Theta/2)         ; nBody(1)*sin(Theta/2); ...
+                                      nBody(2)*sin(Theta/2); nBody(3)*sin(Theta/2)]);
+            end
+
+            SWITCH = abs(sin(Theta/2))<= 0.25 ... 
+                           && abs(Twist.attEulerRate(1)) < 2.0  ...
+                           && abs(Twist.attEulerRate(2)) < 2.0  ...
+                           && Twist.linVel(3) < 0.1             ... 
+                           && norm(state(7:8))>0.35 ...%Atleast a little away from the pole
+                           && (IC.posn(3)-state(9)<=3)
+            if SWITCH 
+                recoverySuccessful = 1;
+            end
+        end
         Plot = hist2plot(Hist);
         Trial = {offset, pitchImpact, ...
                  recoverySuccessful, ImpactIdentification.wallNormalWorldCorrected2, ...
@@ -177,10 +207,10 @@ for iPitch = 1:numPitch
 end
 
 
-save('June 19 _Test With Recovery Controller','Batch');
+% save('June 21 _With Recovery Controller_flag incorporated','Batch');
 %%
 % close all
 % % % for iter=1
-%         animate(1,1,Hist,'XY',ImpactParams,timeImpact,'15 pitch__offset= -0.2857_Multiple Impact TopView',200, NumImpactTimeline);
+        animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',400, NumImpactTimeline);
 % end
 % plot(Plot.times,abs(Plot.propRpms))

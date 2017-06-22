@@ -1,35 +1,60 @@
 %% Controller Improvement Plotter
-% % close all
-% figure();
-% hold on
-% grid on
-% numPitch = 46;
-% numOffset = 71;
-% heightLoss=[];
-% trial=0;
-% for iPitch = 1%:numPitch
-%     for iOffset = 1:numOffset
-%         trial = trial+1;
-%         disp(trial);
-%         success = cell2mat(Batch2(trial,3));
-%         positions = cell2mat(Batch(trial,7));  
-%        heightLoss=[heightLoss, positions(3,1)-min(positions(3,:))];
-%        if (success == 1)&&(heightLoss(end)>2)
-%             h1=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor','g','MarkerEdgeColor','g');
-%         elseif (success == 1)&&(heightLoss(end)<=2)
-%             h2=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor','y','MarkerEdgeColor','y');
-%        else 
-%             h3=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor','r','MarkerEdgeColor','r');
-%        end
-%         
-%         
-%    end
-% end
+% close all
+figure();
+hold on
+grid on
+numPitch = 46;
+numOffset = 71;
+heightLoss=[];
+trial=0;
+for iPitch = 1%:numPitch
+    for iOffset = 1:numOffset
+        trial = trial+1;
+        disp(trial);
+%         offset = cell2mat(Batch(trial,1));
+%         pitch = cell2mat(Batch(trial,2));
+        success = cell2mat(Batch2(trial,3));
+%         normal = cell2mat(Batch(trial,4));
+%         times = cell2mat(Batch(trial,5));
+        positions = cell2mat(Batch(trial,7));
+%         deflections = cell2mat(Batch(trial,7));
+%         recoveryStages = cell2mat(Batch(trial,8));
+%         states = cell2mat(Batch(trial,9));
+%         normalForces = cell2mat(Batch(trial,10));
+%         timeImpact = cell2mat(Batch(trial,11));
+
+       
+       heightLoss=[heightLoss, positions(3,1)-min(positions(3,:))];
+       if (success == 1)&&(heightLoss(end)>2)
+            h1=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor','g','MarkerEdgeColor','g');
+        elseif (success == 1)&&(heightLoss(end)<=2)
+            h2=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor','y','MarkerEdgeColor','y');
+       else 
+            h3=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor','r','MarkerEdgeColor','r');
+       end
+        
+        
+   end
+end
+
+legend([h1 h2 h3],'Recovery Improvement due to Contoller','Recovery In Both Cases','Failure in Both Cases');
+title('Improvement Comparison With and Without Controller');
+xlabel('Pitch (degrees)');
+ylabel('Offset (normalized)');
 % 
-% legend([h1 h2 h3],'Recovery Improvement due to Contoller','Recovery In Both Cases','Failure in Both Cases');
-% title('Improvement Comparison With and Without Controller');
-% xlabel('Pitch (degrees)');
-% ylabel('Offset (normalized)');
+% for iPitch = 1:46
+%     for iOffset = 1:3:37
+%         figure;
+%         color = [(heightLoss+1)/14 1-(heightLoss+1)/14 0.0];
+%         scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor',color,'MarkerEdgeColor',color);
+%     end
+% end
+
+% figure;
+% grid on;
+% histogram(heightLoss,15)
+% load('iterate_no_recovery.mat');
+% load('iterate_no_recovery.mat');
 
 %% Controller Blue Red plotter
 % close all
@@ -49,11 +74,13 @@ for iPitch = 1:numPitch
         success = cell2mat(Batch(trial,3));
         positions = cell2mat(Batch(trial,7));  
         heightLoss=[heightLoss, positions(3,1)-min(positions(3,:))];
-        if success==1
+        if heightLoss(end)<=2
              h1=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor','b','MarkerEdgeColor','b');
         else
             h2=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor','r','MarkerEdgeColor','r');
-        end        
+        end
+        
+        
    end
 end
 
