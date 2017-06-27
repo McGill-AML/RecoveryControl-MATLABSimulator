@@ -7,7 +7,7 @@ VxImpact = 2.0;
 yawImpact = 0.0;
 rollImpact = 0.0;
 poleRadius = 0.1; 
-SimParams.useRecovery = 1;
+SimParams.useRecovery = 0;
 Batch = [];
 record = [];
 NumImpactTimeline=[];
@@ -22,8 +22,8 @@ for iPitch = 1%1:numPitch
     pitchImpact = 1 - iPitch;
     yawImpact = 0.0;
     rollImpact = 0.0;
-    for iOffset=20%:numOffset
-        before_Ref=[0];
+    for iOffset=1:numOffset
+        before_Ref=[];
         FirstNormalExpected=zeros(4,3);
         NumImpactTimeline =[];
         impactSwitchRecorder=[];
@@ -39,8 +39,8 @@ for iPitch = 1%1:numPitch
         ImpactParams.wallLoc = 0.0;
         ImpactParams.wallPlane = 'YZ';
         ImpactParams.timeDes = 0.5; 
-        ImpactParams.frictionModel.muSliding =0.3;
-        ImpactParams.frictionModel.velocitySliding =1e-4; %m/s
+        ImpactParams.frictionModel.muSliding =0;%0.3;
+        ImpactParams.frictionModel.velocitySliding =0;%1e-4; %m/s
         timeImpact = 10000;
         timeStabilized = 10000;
         IC = initIC;
@@ -73,6 +73,7 @@ for iPitch = 1%1:numPitch
         Sensor = initsensor(state, stateDeriv);
         Hist = inithist(SimParams.timeInit, state, stateDeriv, Pose, Twist, Control, PropState, Contact, localFlag, Sensor);
 
+        bodyFrame_ZAxisDesired = quatrotate(Pose.attQuat', [0 0 -1]);
         tempGlobalFlag=[0;0;0;0];  % added for to check number of collisions
         for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep   
             
@@ -84,8 +85,9 @@ for iPitch = 1%1:numPitch
 
             if (ImpactInfo.firstImpactDetected && Control.accelRefCalculated == 0)
                     
-                ImpactIdentification.wallNormalWorldCorrected2
-
+                
+                ImpactIdentification.wallNormalWorldCorrected2;
+                ActualAcc=[Twist.worldAcc(1);Twist.worldAcc(2);0]/norm([Twist.worldAcc(1);Twist.worldAcc(2);0]);
                 line = [ImpactIdentification.wallNormalWorldCorrected2(1:2); ...
                         -sum(ImpactIdentification.wallNormalWorldCorrected2(1:2).*state(7:8))];
                 before_Ref = [Hist.states(7:8,1);1];
@@ -172,7 +174,6 @@ for iPitch = 1%1:numPitch
         end
         if SimParams.useRecovery == 0
             bodyFrame_ZAxis = quatrotate(Pose.attQuat', [0 0 -1]);
-            bodyFrame_ZAxisDesired = [0; 0; 1];
             Theta = acos(dot(bodyFrame_ZAxis, bodyFrame_ZAxisDesired));
             if Theta == 0
                 errQuaternion = [1 0 0 0]';
@@ -184,12 +185,11 @@ for iPitch = 1%1:numPitch
                                       nBody(2)*sin(Theta/2); nBody(3)*sin(Theta/2)]);
             end
 
-            SWITCH = abs(sin(Theta/2))<= 0.25 ... 
+            SWITCH = abs(sin(Theta/2))<= 0.25 ... % 30 degree bound wrt the IC
                            && abs(Twist.attEulerRate(1)) < 2.0  ...
                            && abs(Twist.attEulerRate(2)) < 2.0  ...
                            && Twist.linVel(3) < 0.1             ... 
-                           && norm(state(7:8))>0.35 ...%Atleast a little away from the pole
-                           && (IC.posn(3)-state(9)<=3)
+%                            && (IC.posn(3)-state(9)<=4)
             if SWITCH 
                 recoverySuccessful = 1;
             end
@@ -197,7 +197,7 @@ for iPitch = 1%1:numPitch
         Plot = hist2plot(Hist);
         Trial = {offset, pitchImpact, ...
                  recoverySuccessful, ImpactIdentification.wallNormalWorldCorrected2, ...
-                 sum(FirstNormalExpected)/norm(sum(FirstNormalExpected)), Plot.times, Plot.posns, Plot.defls, ...
+                 sum(FirstNormalExpected)/norm(sum(FirstNormalExpected)),ActualAcc, Plot.times, Plot.posns, Plot.defls, ...
                  Plot.recoveryStage, Hist.states, Plot.normalForces, ...
                  timeImpact,impactSwitchRecorder,numImpacts}; 
         
@@ -211,6 +211,6 @@ end
 %%
 % close all
 % % % for iter=1
-        animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',400, NumImpactTimeline);
+%         animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',400, NumImpactTimeline);
 % end
 % plot(Plot.times,abs(Plot.propRpms))
