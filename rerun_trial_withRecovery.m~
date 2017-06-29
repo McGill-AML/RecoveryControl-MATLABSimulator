@@ -7,7 +7,7 @@ VxImpact = 2.0;
 yawImpact = 0.0;
 rollImpact = 0.0;
 poleRadius = 0.1; 
-SimParams.useRecovery = 0;
+SimParams.useRecovery = 1;
 Batch = [];
 record = [];
 NumImpactTimeline=[];
@@ -18,7 +18,7 @@ numPitch = 46;
 elapsedTime = 0;
 
 
-for iPitch = 1%1:numPitch
+for iPitch = 1:numPitch
     pitchImpact = 1 - iPitch;
     yawImpact = 0.0;
     rollImpact = 0.0;
@@ -39,8 +39,8 @@ for iPitch = 1%1:numPitch
         ImpactParams.wallLoc = 0.0;
         ImpactParams.wallPlane = 'YZ';
         ImpactParams.timeDes = 0.5; 
-        ImpactParams.frictionModel.muSliding =0;%0.3;
-        ImpactParams.frictionModel.velocitySliding =0;%1e-4; %m/s
+        ImpactParams.frictionModel.muSliding =0.3;
+        ImpactParams.frictionModel.velocitySliding =1e-4; %m/s
         timeImpact = 10000;
         timeStabilized = 10000;
         IC = initIC;
@@ -77,12 +77,9 @@ for iPitch = 1%1:numPitch
         tempGlobalFlag=[0;0;0;0];  % added for to check number of collisions
         for iSim = SimParams.timeInit:tStep:SimParams.timeFinal-tStep   
             
-%             disp(iSim)
             [ImpactInfo, ImpactIdentification] = detectimpact(iSim, tStep, ImpactInfo, ImpactIdentification,...
                                                               Hist.sensors,Hist.poses,PREIMPACT_ATT_CALCSTEPFWD, stateDeriv,state);
-%             [FuzzyInfo] = fuzzylogicprocess(iSim, ImpactInfo, ImpactIdentification,...
-%                                             Sensor, Hist.poses(end), SimParams, Control, FuzzyInfo);
-
+                                                          
             if (ImpactInfo.firstImpactDetected && Control.accelRefCalculated == 0)
                     
                 
@@ -90,13 +87,14 @@ for iPitch = 1%1:numPitch
                 ActualAcc=[Twist.worldAcc(1);Twist.worldAcc(2);0]/norm([Twist.worldAcc(1);Twist.worldAcc(2);0]);
                 line = [ImpactIdentification.wallNormalWorldCorrected2(1:2); ...
                         -sum(ImpactIdentification.wallNormalWorldCorrected2(1:2).*state(7:8))];
-                before_Ref = [Hist.states(7:8,1);1];
+                before_Ref = [Hist.states(7:8,1);1]
                 after_Ref  = [0;0;0];
                 after_Ref(1)  = before_Ref(1) - (2*line(1)/norm(line(1:2))^2)*(dot(line,before_Ref));
                 after_Ref(2)  = before_Ref(2) - (2*line(2)/norm(line(1:2))^2)*(dot(line,before_Ref));
                 after_Ref = after_Ref+[state(7:8);0];
+                after_Ref = after_Ref/norm(after_Ref) ...
+                    +[ 2*abs(ImpactIdentification.wallNormalWorldCorrected2(2));0;0];   % provide recoil component in IC velocity Direction
                 after_Ref = after_Ref/norm(after_Ref);
-                
                 Control.accelRef = 4.8*after_Ref;
                 Control.accelRefCalculated = 1;                  
             end
@@ -184,12 +182,11 @@ for iPitch = 1%1:numPitch
                 errQuaternion = real([cos(Theta/2)         ; nBody(1)*sin(Theta/2); ...
                                       nBody(2)*sin(Theta/2); nBody(3)*sin(Theta/2)]);
             end
-
-            SWITCH = abs(sin(Theta/2))<= 0.25 ... % 30 degree bound wrt the 
+            worldVelocity=rotMat*(Twist.linVel);
+            SWITCH = abs(sin(Theta/2))<= 0.25 ... % 30 degree bound wrt the IC
                            && abs(Twist.attEulerRate(1)) < 2.0  ...
                            && abs(Twist.attEulerRate(2)) < 2.0  ...
-                           && Twist.linVel(3) < 0.1             ... 
-%                            && (IC.posn(3)-state(9)<=4)
+                           && abs(worldVelocity(3)) < 0.2             ... 
             if SWITCH 
                 recoverySuccessful = 1;
             end
@@ -207,10 +204,10 @@ for iPitch = 1%1:numPitch
 end
 
 
-% save('June 21 _With Recovery Controller_flag incorporated','Batch');
+save('June 29 _With Recovery Controller_flag incorporated','Batch');
 %%
 % close all
 % % % for iter=1
-%         animate(0,1,Hist,'XY',ImpactParams,timeImpact,'NA',400, NumImpactTimeline);
+%         animate(1,1,Hist,'XY',ImpactParams,timeImpact,'without',200, NumImpactTimeline);
 % end
 % plot(Plot.times,abs(Plot.propRpms))

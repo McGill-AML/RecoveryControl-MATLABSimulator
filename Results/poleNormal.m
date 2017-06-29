@@ -13,7 +13,7 @@ map=[];
 
 for iPitch = 1%:8:numPitch     
     for iOffset = 1:71
-        for i=4:2:6
+        for i=4:5
             trial = 71*(iPitch-1)+iOffset;
             disp(trial);
             offset = cell2mat(Batch(trial,1));
@@ -49,7 +49,7 @@ for iOffset = 1:numOffset     % poleNormal plot for 15 degree Pitch
     NORMAL2=[];
     PITCH=[];
     for iPitch = 1%:8:numPitch
-        for i=4:2:6
+        for i=4:5
             trial = 71*(iPitch-1)+iOffset;
             disp(trial);
             offset = cell2mat(Batch(trial,1));
