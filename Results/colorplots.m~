@@ -50,7 +50,7 @@ for iPitch = 1:numPitch
         success = cell2mat(Batch(trial,3));
         positions = cell2mat(Batch(trial,7));  
         heightLoss =[heightLoss, positions(3,1)-min(positions(3,:))];
-        if (success==1)%&&(heightLoss(end)<=2)
+        if (success==1)&&(heightLoss(end)<=2)
              h1=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor','b','MarkerEdgeColor','b');
         else
             failures = failures+1;

@@ -85,16 +85,15 @@ for iPitch = 1:numPitch
                 
                 ImpactIdentification.wallNormalWorldCorrected2;
                 ActualAcc=[Twist.worldAcc(1);Twist.worldAcc(2);0]/norm([Twist.worldAcc(1);Twist.worldAcc(2);0]);
-                line = [ImpactIdentification.wallNormalWorldCorrected2(1:2); ...
-                        -sum(ImpactIdentification.wallNormalWorldCorrected2(1:2).*state(7:8))];
-                before_Ref = [Hist.states(7:8,1);1]
+                line = [ImpactIdentification.wallNormalWorldCorrected2(2)/ImpactIdentification.wallNormalWorldCorrected2(1);-1; 0];%...
+                        %-sum(ImpactIdentification.wallNormalWorldCorrected2(1:2).*state(7:8))];
+                before_Ref = [Hist.states(7:8,1);1]-[state(7:8);0];
                 after_Ref  = [0;0;0];
                 after_Ref(1)  = before_Ref(1) - (2*line(1)/norm(line(1:2))^2)*(dot(line,before_Ref));
                 after_Ref(2)  = before_Ref(2) - (2*line(2)/norm(line(1:2))^2)*(dot(line,before_Ref));
                 after_Ref = after_Ref+[state(7:8);0];
-                after_Ref = after_Ref/norm(after_Ref) ...
-                    +[ 2*abs(ImpactIdentification.wallNormalWorldCorrected2(2));0;0];   % provide recoil component in IC velocity Direction
-                after_Ref = after_Ref/norm(after_Ref);
+                after_Ref = after_Ref/norm(after_Ref);% ...
+                    %+[ 2*abs(ImpactIdentification.wallNormalWorldCorrected2(2));0;0];   % provide recoil component in IC velocity Direction
                 Control.accelRef = 4.8*after_Ref;
                 Control.accelRefCalculated = 1;                  
             end
@@ -186,7 +185,7 @@ for iPitch = 1:numPitch
             SWITCH = abs(sin(Theta/2))<= 0.25 ... % 30 degree bound wrt the IC
                            && abs(Twist.attEulerRate(1)) < 2.0  ...
                            && abs(Twist.attEulerRate(2)) < 2.0  ...
-                           && abs(worldVelocity(3)) < 0.2             ... 
+                           && abs(worldVelocity(3)) < 0.2;
             if SWITCH 
                 recoverySuccessful = 1;
             end
@@ -204,7 +203,7 @@ for iPitch = 1:numPitch
 end
 
 
-save('June 29 _With Recovery Controller','Batch');
+save('July 4 _With Recovery Controller_ModificationRecoil_2ndSet','Batch');
 %%
 % close all
 % % % for iter=1
