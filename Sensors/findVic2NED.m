@@ -18,7 +18,7 @@ end
 % at a given timestep
 for ii = 1:num_of_pts_2_use
     [q_NED, rotMatNED] = initOrientExpData(Accel(:,ii), Mag(:,ii), mag_decl);
-%     debug2 = quatmultiply(  Vicon(:,ii), quatinv(q_NED));
+%     debug2 = quatinv(quatmultiply(  Vicon(:,ii), quatinv(q_NED)));
     rotMatV = quat2rotmat(Vicon(:,ii));
     delta_q(:,ii) = rotmat2quat(rotMatNED*rotMatV');
 %     if ii == 10
@@ -36,7 +36,7 @@ for ii = 1:num_of_pts_2_use
     M = M + delta_q(:,ii)*delta_q(:,ii)';
 end
 
-K = 4*M-eye(4);
+K = 4*M-num_of_pts_2_use*eye(4);
 
 [eigVecs, eigVals] = eig(K);
 

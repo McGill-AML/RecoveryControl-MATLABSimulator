@@ -8,8 +8,8 @@
 %    
 % fvtool(hpFilt)
    
-hpFilt = designfilt('highpassfir','StopbandFrequency',0.1, ...
-         'PassbandFrequency',0.15,'PassbandRipple',0.1, ...
+hpFilt = designfilt('highpassfir','StopbandFrequency',0.05, ...
+         'PassbandFrequency',0.1,'PassbandRipple',0.1, ...
          'StopbandAttenuation',100,'DesignMethod','kaiserwin');   
 
 fvtool(hpFilt)
@@ -27,10 +27,10 @@ out_mag_x = filter(hpFilt,IMU_MagX(1:index_end));
 out_mag_y = filter(hpFilt,IMU_MagY(1:index_end));
 out_mag_z = filter(hpFilt,IMU_MagZ(1:index_end));
 
-
+out_bar = filter(hpFilt,SENS_BaroAlt(1:index_end));
 
 figure;plot(TIME, [IMU_AccX, IMU_AccY, IMU_AccZ]); grid on;
-title('Accelerometer no foil 1'); legend('X', 'Y', 'Z');
+title('Accelerometer'); legend('X', 'Y', 'Z');
 hdt = datacursormode;
 set(hdt,'UpdateFcn',@datatipWithSubscript);
 
@@ -46,13 +46,28 @@ figure;plot(TIME(1:index_end),[out_gyr_x, out_gyr_y, out_gyr_z],'Linewidth',line
 xlabel('Time [s]','fontsize',font_size); ylabel('Angular Velocity [rad/s]','fontsize',font_size);
 title('HP filtered Gyroscope'); 
 
-figure;plot(TIME(1:index_end),[out_acc_x, out_acc_y, out_acc_z],'Linewidth',line_width); grid on;
+figure;plot(TIME(1:index_end),[out_acc_z, out_acc_y, out_acc_z],'Linewidth',line_width); grid on;
 xlabel('Time [s]','fontsize',font_size); ylabel('Acceleration [m/s^2]','fontsize',font_size);
 title('HP filtered accelerometer'); 
 
 figure;plot(TIME(1:index_end),[out_mag_x, out_mag_y, out_mag_z],'Linewidth',line_width); grid on;
 xlabel('Time [s]','fontsize',font_size); ylabel('Magnetic Field Strength [Gauss]','fontsize',font_size);
 title('HP filtered magnetometer'); 
+
+vertline1 = ones(2,1);
+vertline1(1,1) = 300;
+vertline1(2,1) = -300;
+vertline2 = vertline1;
+
+timeline1 = [7.09, 7.09];
+timeline2 = [6.82, 6.82];
+
+hold on;
+plot(timeline1, vertline1, 'r:', 'Linewidth',line_width);
+plot(timeline2, vertline2, 'r:', 'Linewidth',line_width);
+
+plot(5.5,0, '-o');
+
 
 title('');
 

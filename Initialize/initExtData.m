@@ -1,6 +1,6 @@
 % script to import data
 % try 38
-fileNo = 55
+ fileNo = 60;
 
 if fileNo < 10;
     px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\Spring 2017\March 8th Indoors Zero Reference Acceleration\px4logs\csv\q0',num2str(fileNo),'.csv']);
@@ -17,12 +17,24 @@ end
 % else
 %     px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\Spring 2017\April 7th Indoors - Same as Field Trial Conditions\csv\s',num2str(fileNo),'.csv']);
 % end
-% 
-% % if fileNo < 10;
-% %     px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\Spring 2017\May 16th EKF attitude estimate\csv\a0',num2str(fileNo),'.csv']);
-% % else
-% %     px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\Spring 2017\May 16th EKF attitude estimate\csv\a',num2str(fileNo),'.csv']);
-% % end
+% % 
+% if fileNo < 10;
+%     px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\Spring 2017\May 16th EKF attitude estimate\csv\a0',num2str(fileNo),'.csv']);
+% else
+%     px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\Spring 2017\May 16th EKF attitude estimate\csv\a',num2str(fileNo),'.csv']);
+% end
+
+% if fileNo < 10;
+%     px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\Spring 2017\June 1st AHINF attitude estimate\csv\b0',num2str(fileNo),'.csv']);
+% else
+%     px4Data = importdata(['D:\Dropbox\Spiri Collision Recovery\Experiments\Spring 2017\June 1st AHINF attitude estimate\csv\b',num2str(fileNo),'.csv']);
+% end
+
+% if fileNo < 10;
+%     px4Data = importdata(['D:\Dropbox\Navi_crash_data\VII\px4logs\CSVs\crash_g0',num2str(fileNo),'.csv']);
+% else
+%     px4Data = importdata(['D:\Dropbox\Navi_crash_data\VII\px4logs\CSVs\crash_g',num2str(fileNo),'.csv']);
+% end
 
 
 % remove only data I want from the .csv file
@@ -58,7 +70,7 @@ for ii = 1:length(px4Data.colheaders)
 end
 
 % set time to be actual time
-TIME = TIME_StartTime - TIME_StartTime(1);
+TIME = TIME_StartTime - TIME_StartTime(2);
 TIME = TIME/1000000;
 
 clearvars remove_index
@@ -93,15 +105,15 @@ ATT_qz(remove_index) = [];
 % MOCP_X(remove_index) = [];
 % MOCP_Y(remove_index) = [];
 % MOCP_Z(remove_index) = [];
-VISN_QuatW(remove_index) = [];
-VISN_QuatX(remove_index) = [];
-VISN_QuatY(remove_index) = [];
-VISN_QuatZ(remove_index) = [];
-VISN_X(remove_index) = [];
-VISN_Y(remove_index) = [];
-VISN_Z(remove_index) = [];
-BATT_Curr(remove_index) = [];
-ATTC_Thrust(remove_index) = [];
+% VISN_QuatW(remove_index) = [];
+% VISN_QuatX(remove_index) = [];
+% VISN_QuatY(remove_index) = [];
+% VISN_QuatZ(remove_index) = [];
+% VISN_X(remove_index) = [];
+% VISN_Y(remove_index) = [];
+% VISN_Z(remove_index) = [];
+% BATT_Curr(remove_index) = [];
+% ATTC_Thrust(remove_index) = [];
 % IRST_RS(remove_index) = [];
 
 

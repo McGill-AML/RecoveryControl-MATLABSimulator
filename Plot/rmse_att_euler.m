@@ -38,6 +38,8 @@ else
     end
 end
 
+ViconDropBuff = 5;
+
 %% rmse of euler angles during a crash
 %set indices to use
 if useExtData == 0
@@ -48,7 +50,7 @@ else
     crash_ind = 1:length(Plot.quaternions)- vicDelay;
     crash_ind([1:crash_start-1,crash_end+1:length(Plot.quaternions)- vicDelay]) = 0;
     for ii = 1:length(useViconDrop)/2
-        crash_ind(useViconDrop(ii*2-1):useViconDrop(ii*2)) = 0;
+        crash_ind(useViconDrop(ii*2-1)-ViconDropBuff:useViconDrop(ii*2)+ViconDropBuff) = 0;
     end
     crash_ind(crash_ind == 0) = [];
 end
@@ -127,7 +129,7 @@ else
     pre_crash_ind = 1:length(Plot.quaternions)- vicDelay;
     pre_crash_ind(crash_start+1:length(Plot.quaternions)- vicDelay) = 0;
     for ii = 1:length(useViconDrop)/2
-        pre_crash_ind(useViconDrop(ii*2-1):useViconDrop(ii*2)) = 0;
+        pre_crash_ind(useViconDrop(ii*2-1)-ViconDropBuff:useViconDrop(ii*2)+ViconDropBuff) = 0;
     end
     pre_crash_ind(pre_crash_ind == 0) = [];
 end
@@ -205,7 +207,7 @@ else
     post_crash_ind = 1:length(Plot.quaternions)- vicDelay;
     post_crash_ind(1:crash_end-1) = 0;
     for ii = 1:length(useViconDrop)/2
-        post_crash_ind(useViconDrop(ii*2-1):useViconDrop(ii*2)) = 0;
+        post_crash_ind(useViconDrop(ii*2-1)-ViconDropBuff:useViconDrop(ii*2)+ViconDropBuff) = 0;
     end
     post_crash_ind(post_crash_ind == 0) = [];
 end
@@ -282,7 +284,7 @@ else
     total_ind = 1:length(Plot.quaternions)- vicDelay;
     
     for ii = 1:length(useViconDrop)/2
-        total_ind(useViconDrop(ii*2-1):useViconDrop(ii*2)) = 0;
+        total_ind(useViconDrop(ii*2-1)-ViconDropBuff:useViconDrop(ii*2)+ViconDropBuff) = 0;
     end
     total_ind(total_ind == 0) = [];
 end
