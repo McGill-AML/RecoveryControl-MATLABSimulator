@@ -46,9 +46,7 @@
 % tempt =  mean(rmseEUL.total.COMP_eul,2)';
 % rpy_data(1,:) = [tempt(1), tempc(1), tempt(2), tempc(2), tempt(3), tempc(3)];
 % tempc = mean(rmseEUL.crash.EKF_att_eul,2)'; 
-% tempc(1) = 1.84; tempc(2) = 0.88; tempc(3) = 0.76;
 % tempt =  mean(rmseEUL.total.EKF_att_eul,2)';
-% tempt(1) = 2.11; tempt(2) = 0.60; tempt(3) = 0.37;
 % rpy_data(2,:) = [tempt(1), tempc(1), tempt(2), tempc(2), tempt(3), tempc(3)];
 % tempc = mean(rmseEUL.crash.HINF_eul,2)'; 
 % tempt =  mean(rmseEUL.total.HINF_eul,2)';
@@ -60,9 +58,7 @@
 % tempt =  mean(rmseEUL.total.SPKF_eul,2)';
 % rpy_data(5,:) = [tempt(1), tempc(1), tempt(2), tempc(2), tempt(3), tempc(3)];
 % tempc = mean(rmseEUL.crash.ASPKF_eul,2)'; 
-% tempc(1) = 1.37; tempc(2) = 0.68; tempc(3) = 0.66;
 % tempt =  mean(rmseEUL.total.ASPKF_eul,2)';
-% tempt(1) = 1.91; tempt(2) = 0.51; tempt(3) = 0.33;
 % rpy_data(6,:) = [tempt(1), tempc(1), tempt(2), tempc(2), tempt(3), tempc(3)];
 % tempc = mean(rmseEUL.crash.ASPKF_opt_eul,2)'; 
 % tempt =  mean(rmseEUL.total.ASPKF_opt_eul,2)';
@@ -72,9 +68,7 @@
 % tempt =  mean(rmse.total.COMP_quat,2)';
 % rpy_data(1,:) = [tempt(1), tempc(1), 0];
 % tempc = mean(rmse.crash.EKF_att_quat,2)'; 
-% tempc(1) = 2.23;
 % tempt =  mean(rmse.total.EKF_att_quat,2)';
-% tempt(1) = 2.22;
 % rpy_data(2,:) = [tempt(1), tempc(1), 0];
 % tempc = mean(rmse.crash.HINF_quat,2)'; 
 % tempt =  mean(rmse.total.HINF_quat,2)';
@@ -86,9 +80,7 @@
 % tempt =  mean(rmse.total.SPKF_quat,2)';
 % rpy_data(5,:) = [tempt(1), tempc(1), 0];
 % tempc = mean(rmse.crash.ASPKF_quat,2)'; 
-% tempc(1) = 1.69;
 % tempt =  mean(rmse.total.ASPKF_quat,2)';
-% tempt(1) = 1.99;
 % rpy_data(6,:) = [tempt(1), tempc(1), 0];
 % tempc = mean(rmse.crash.ASPKF_opt_quat,2)'; 
 % tempt =  mean(rmse.total.ASPKF_opt_quat,2)';
