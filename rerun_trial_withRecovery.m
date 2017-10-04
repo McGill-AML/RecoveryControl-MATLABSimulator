@@ -18,11 +18,11 @@ numPitch = 46;
 elapsedTime = 0;
 
 
-for iPitch = 1:numPitch
+for iPitch = 33:10:43%1:numPitch
     pitchImpact = 1 - iPitch;
     yawImpact = 0.0;
     rollImpact = 0.0;
-    for iOffset=1:numOffset
+    for iOffset=36%1:numOffset
         before_Ref=[];
         FirstNormalExpected=zeros(4,3);
         NumImpactTimeline =[];
@@ -39,7 +39,7 @@ for iPitch = 1:numPitch
         ImpactParams.wallLoc = 0.0;
         ImpactParams.wallPlane = 'YZ';
         ImpactParams.timeDes = 0.5; 
-        ImpactParams.frictionModel.muSliding =0.3;
+        ImpactParams.frictionModel.muSliding =0.3;%0.3
         ImpactParams.frictionModel.velocitySliding =1e-4; %m/s
         timeImpact = 10000;
         timeStabilized = 10000;
@@ -85,16 +85,16 @@ for iPitch = 1:numPitch
                 
                 ImpactIdentification.wallNormalWorldCorrected2;
                 ActualAcc=[Twist.worldAcc(1);Twist.worldAcc(2);0]/norm([Twist.worldAcc(1);Twist.worldAcc(2);0]);
-                line = [ImpactIdentification.wallNormalWorldCorrected2(2)/ImpactIdentification.wallNormalWorldCorrected2(1);-1; 0];%...
-                        %-sum(ImpactIdentification.wallNormalWorldCorrected2(1:2).*state(7:8))];
-                before_Ref = [Hist.states(7:8,1);1]-[state(7:8);0];
-                after_Ref  = [0;0;0];
-                after_Ref(1)  = before_Ref(1) - (2*line(1)/norm(line(1:2))^2)*(dot(line,before_Ref));
-                after_Ref(2)  = before_Ref(2) - (2*line(2)/norm(line(1:2))^2)*(dot(line,before_Ref));
-                after_Ref = after_Ref+[state(7:8);0];
-                after_Ref = after_Ref/norm(after_Ref);% ...
-                    %+[ 2*abs(ImpactIdentification.wallNormalWorldCorrected2(2));0;0];   % provide recoil component in IC velocity Direction
-                Control.accelRef = 4.8*after_Ref;
+%                 line = [ImpactIdentification.wallNormalWorldCorrected2(2)/ImpactIdentification.wallNormalWorldCorrected2(1);-1; 0];%...
+%                         %-sum(ImpactIdentification.wallNormalWorldCorrected2(1:2).*state(7:8))];
+%                 before_Ref = [Hist.states(7:8,1);1]-[state(7:8);0];
+%                 after_Ref  = [0;0;0];
+%                 after_Ref(1)  = before_Ref(1) - (2*line(1)/norm(line(1:2))^2)*(dot(line,before_Ref));
+%                 after_Ref(2)  = before_Ref(2) - (2*line(2)/norm(line(1:2))^2)*(dot(line,before_Ref));
+%                 after_Ref = after_Ref+[state(7:8);0];
+%                 after_Ref = after_Ref/norm(after_Ref);% ...
+%                     %+[ 2*abs(ImpactIdentification.wallNormalWorldCorrected2(2));0;0];   % provide recoil component in IC velocity Direction
+                Control.accelRef = 4.8*ImpactIdentification.wallNormalWorldCorrected2;
                 Control.accelRefCalculated = 1;                  
             end
 
@@ -194,19 +194,23 @@ for iPitch = 1:numPitch
         Trial = {offset, pitchImpact, ...
                  recoverySuccessful, ImpactIdentification.wallNormalWorldCorrected2, ...
                  sum(FirstNormalExpected)/norm(sum(FirstNormalExpected)),ActualAcc, Plot.times, Plot.posns, Plot.defls, ...
-                 Plot.recoveryStage, Hist.states, Plot.normalForces, ...
+                 Plot.recoveryStage, Hist.states,Plot.eulerAngles, Plot.normalForces, ...
                  timeImpact,impactSwitchRecorder,numImpacts}; 
         
         elapsedTime = toc + elapsedTime
-        Batch = [Batch; Trial];
+        Batch= [Batch; Trial];
     end
+%     animate(1,1,Hist,'NA',ImpactParams,timeImpact,strcat('Pitch=',num2str(-pitchImpact),'_3d'),280, NumImpactTimeline);
+%     animate(1,1,Hist,'XY',ImpactParams,timeImpact,strcat('Pitch=',num2str(-pitchImpact),'_TopView'),280, NumImpactTimeline);
+%     animate(1,1,Hist,'XZ',ImpactParams,timeImpact,strcat('Pitch=',num2str(-pitchImpact),'_SideView'),280, NumImpactTimeline);
+
 end
 
 
-save('July 4 _With Recovery Controller_ModificationRecoil_2ndSet','Batch');
+% save('July 6th _High resolution Yaw data','Batch');
 %%
 % close all
 % % % for iter=1
-%         animate(1,1,Hist,'XY',ImpactParams,timeImpact,'without',200, NumImpactTimeline);
+%         animate(1,1,Hist,'YZ',ImpactParams,timeImpact,'Pitch=39 Offset=0 With Recovery Controller',200, NumImpactTimeline);
 % end
 % plot(Plot.times,abs(Plot.propRpms))

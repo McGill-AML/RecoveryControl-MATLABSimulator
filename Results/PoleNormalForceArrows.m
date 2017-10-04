@@ -24,7 +24,7 @@ for iPitch = 1%:numPitch     % poleNormal plot for 15 degree Pitch
 %     	deflections = cell2mat(Batch(trial,7));
 %     	recoveryStages = cell2mat(Batch(trial,8));
 %         states = cell2mat(Batch(trial,9));
-       normalForces = cell2mat(Batch(trial,11));
+       normalForces = cell2mat(Batch(trial,12));
        ImpactBumper = cell2mat(Batch(trial,13));
 %        ImpactBumperFirst = min([find(ImpactBumper(:,1),1),find(ImpactBumper(:,2),1),find(ImpactBumper(:,3),1),find(ImpactBumper(:,4),1)]);
         hold on;

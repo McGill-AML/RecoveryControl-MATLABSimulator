@@ -21,16 +21,17 @@ for iPitch = 1:numPitch
         positions = cell2mat(Batch(trial,6));
         deflections = cell2mat(Batch(trial,7));
         recoveryStages = cell2mat(Batch(trial,8));
-        states = cell2mat(Batch(trial,9));
-        normalForces = cell2mat(Batch(trial,10));
-        timeImpact = cell2mat(Batch(trial,11));
+        states = cell2mat(Batch(trial,11));
+        EulerAngles = cell2mat(Batch(trial,12));
+%         normalForces = cell2mat(Batch(trial,10));
+%         timeImpact = cell2mat(Batch(trial,11));
         
-        newHeightLoss = (2.0 - positions(3,end));
-
-        if (newHeightLoss < -10)
-            weirdTrials = [weirdTrials; offset pitch newHeightLoss];
-        end
-        heightLosses = [heightLosses; newHeightLoss];
+%         newHeightLoss = (2.0 - positions(3,end));
+% 
+%         if (newHeightLoss < -10)
+%             weirdTrials = [weirdTrials; offset pitch newHeightLoss];
+%         end
+%         heightLosses = [heightLosses; newHeightLoss];
         
 %         color = [abs(normal(1)) abs(normal(2)) 0.0];
 %         scatter(normal(1),normal(2),'MarkerFaceColor',[(offset+1)/2 0 0],'MarkerEdgeColor',[(offset+1)/2 0 0]);

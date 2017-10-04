@@ -2,13 +2,13 @@ close all
 hold on
 grid on
 numPitch = 46;
-numOffset = 71;
+numOffset = 1001;
 % xlim([-1 0]);
 % ylim([-1 1]);
 % pbaspect([1 2 1]);
 % map=[];
 SET=[];
-for iPitch = 16%:numPitch     % poleNormal plot for 15 degree Pitch
+for iPitch = 1%:numPitch     % poleNormal plot for 15 degree Pitch
     for iOffset = 1:numOffset
         trial = numOffset*(iPitch-1)+iOffset;
         disp(trial);
@@ -20,10 +20,10 @@ for iPitch = 16%:numPitch     % poleNormal plot for 15 degree Pitch
 %         positions = cell2mat(Batch(trial,6));
 %         deflections = cell2mat(Batch(trial,7));
 %         recoveryStages = cell2mat(Batch(trial,8));
-        states = cell2mat(Batch(trial,10));
+        states = cell2mat(Batch(trial,11));
 %         normalForces = cell2mat(Batch(trial,10));
-        timeImpact = cell2mat(Batch(trial,11));
-        Impacts = cell2mat(Batch(trial,14));
+        timeImpact = cell2mat(Batch(trial,12));
+        Impacts = cell2mat(Batch(trial,15));
         maxYaw=max(abs(states(6,1:210)));
         if Impacts == 1
             h1 = scatter(offset,maxYaw,'MarkerEdgeColor','b');

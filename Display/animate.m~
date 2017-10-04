@@ -142,11 +142,10 @@ for iFrame = 1:frameStep:endFrame %size(t,1) %set step to 1 for recording
     set(ylhand,'fontsize',14);
     set(zlhand,'fontsize',14);
     
-    if stateHist(iFrame,9)>=-1               % hardcoded for height loss of 2m
+    if stateHist(iFrame,9)<=-1
         title(strcat('t = ',num2str(t(iFrame),'%.2f'),' s','   Impacts = ', num2str(NumImpactTimeline(round(t(iFrame)*200)+1))));
     else
-        title(strcat('t = ',num2str(t(iFrame),'%.2f'),' s','   Impacts = ', num2str(NumImpactTimeline(round(t(iFrame)*200)+1)), '  ##CRASHED##'));
-    end
+        
     
     setsimulationview(sideview);
    
