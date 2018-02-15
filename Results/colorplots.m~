@@ -98,10 +98,10 @@ for iPitch = 1:numPitch
         positions = cell2mat(Batch(trial,8));  
         heightLoss =[heightLoss, positions(3,1)-min(positions(3,:))];
         if (success==1)&&(heightLoss(end)<=2)
-             h1=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor',[.65;.65;1],'MarkerEdgeColor',[.75;.75;1]);
+             h1=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor',[.85;.85;1],'MarkerEdgeColor','b');
         else
             failures = failures+1;
-            h2=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor',[1;.65;.65],'MarkerEdgeColor',[1;.75;.75]);
+            h2=scatter(iPitch-1,-1+2*((iOffset-1)/(numOffset-1)),'MarkerFaceColor',[1;.85;.85],'MarkerEdgeColor','r');
         end        
    end
 end
@@ -113,18 +113,15 @@ expRecoveryFlag=table2array(expmatlabdata(:,4));
 for i=1:57
         hold on;
         if expRecoveryFlag(i)==1
-            h3=scatter(ceil(-expPitch(i)),expOffset(i),'x','b','LineWidth',1);
-            %h3=scatter(ceil(-expPitch(i)),-expOffset(i),'x','b','LineWidth',1);
+            h3=scatter(-expPitch(i),expOffset(i),'x','g',0.75);
         else
-            h4=scatter(ceil(-expPitch(i)),expOffset(i),'x','r','LineWidth',1);  
-            %h4=scatter(ceil(-expPitch(i)),-expOffset(i),'x','r','LineWidth',1); 
-
+            h4=scatter(-expPitch(i),expOffset(i),'x','k',0.75);       
         end   
     
 end
 
 legend([h1 h2 h3 h4],'Successful Recovery(Simulation)','Failed Recovery(Simulation)','Successful Recovery(Experiment)','Failed Recovery(Experiments)');
-title(strcat('Simulations vs Experiments','     Failure = ', num2str(failures),'/',num2str(trial)));
+title(strcat('With Recovery Controller (Normal Direction)','     Failure = ', num2str(failures),'/',num2str(trial)));
 xlabel('Pitch (degrees)');
 ylabel('Offset (normalized)');
 
